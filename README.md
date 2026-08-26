@@ -12,7 +12,7 @@ El objetivo del proyecto es fortalecer los procesos de prevención, detección e
 |---|---|
 | Mariana Arbelaez | [@MariArbe](#) |
 | Esteban Álvarez  | [@EstebanchoAV](#) |
-| Daniel Lopez | [@](#) |
+| Daniel Lopez | [@dani1309](#) |
 
 ---
 
