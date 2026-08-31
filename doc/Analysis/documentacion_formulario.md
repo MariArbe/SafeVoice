@@ -1,8 +1,6 @@
 # Documentación: Formulario de Reporte Anónimo (HU-01)
 
-**Proyecto:** SafeVoiceTIC  
-**Módulo:** Interfaz de Estudiante y Estructura de Datos Inicial  
-**Responsable:** Equipo de Desarrollo (IA, Backend, Frontend)
+
 
 ---
 
