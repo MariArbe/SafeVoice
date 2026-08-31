@@ -1,6 +1,8 @@
 # Documentación: Formulario de Reporte Anónimo (HU-01)
 
-
+**Proyecto:** SafeVoiceTIC  
+**Módulo:** Interfaz de Estudiante y Estructura de Datos Inicial  
+**Responsable:** Equipo de Desarrollo (IA, Backend, Frontend)
 
 ---
 
@@ -33,40 +35,18 @@ Este documento detalla la estructura del formulario de captura de datos para los
 ### C. Tipos de Agresión (Selección Múltiple)
 *Traduce acciones cotidianas a clasificaciones técnicas de bullying.*
 **Pregunta:** ¿Qué fue lo que pasó? (Puedes marcar varias opciones)
-* [ ] Me pegaron, me empujaron o me lastimaron. *(Mapeo interno: FISICO)*
-* [ ] Me quitaron, escondieron o dañaron mis cosas. *(Mapeo interno: MATERIAL)*
-* [ ] Me insultaron, me gritaron o me pusieron apodos ofensivos. *(Mapeo interno: VERBAL)*
-* [ ] Inventaron chismes, me amenazaron o me dejaron por fuera del grupo a propósito. *(Mapeo interno: PSICOLOGICO)*
-* [ ] Me enviaron mensajes amenazantes, publicaron fotos mías sin permiso o me acosaron por internet. *(Mapeo interno: CIBERBULLYING)*
+* [ ] Me pegaron, me empujaron o me lastimaron. *(Mapeo interno: Físico)*
+* [ ] Me quitaron, escondieron o dañaron mis cosas. *(Mapeo interno: Físico/Material)*
+* [ ] Me insultaron, me gritaron o me pusieron apodos ofensivos. *(Mapeo interno: Verbal)*
+* [ ] Inventaron chismes, me amenazaron o me dejaron por fuera del grupo a propósito. *(Mapeo interno: Psicológico/Social)*
+* [ ] Me enviaron mensajes amenazantes, publicaron fotos mías sin permiso o me acosaron por internet. *(Mapeo interno: Ciberbullying)*
 
-### D. Involucrados (Selección Única - Opcional)
-*Permite dimensionar el caso.*
-**Pregunta:** ¿Quién o quiénes están involucrados?
-* [ ] Una sola persona.
-* [ ] Un grupo de personas.
-* [ ] No estoy seguro/a.
-
-**Pregunta:** ¿Son de tu mismo salón o grado?
-* [ ] Sí, de mi mismo salón.
-* [ ] De otro salón del mismo grado.
-* [ ] De un grado mayor.
-* [ ] De un grado menor.
-* [ ] No lo sé.
-
-### E. Grado Escolar (Selección Única - Opcional)
-*Identifica focos por grado escolar sin exponer identidad.*
-**Pregunta:** ¿En qué grado estás? *(Ej. 6°, 7°, 8°...)*
-
-### F. Descripción Abierta (Campo de Texto - Insumo Principal IA)
+### D. Descripción Abierta (Campo de Texto - Insumo Principal IA)
 *Texto libre que se enviará al servicio de inferencia para el análisis de Procesamiento de Lenguaje Natural (NLP).*
 **Pregunta:** Cuéntanos con tus propias palabras qué pasó:
 *(Placeholder sugerido: "Escribe aquí lo que pasó sin decir tu nombre. Por ejemplo: Ayer en el recreo me acorralaron y me dijeron que...")*
 
-### G. Evidencia (Archivo - Opcional)
-*Especialmente relevante para Ciberbullying.*
-**Pregunta:** (Opcional) Si tienes una foto o captura de pantalla de lo que pasó, puedes subirla aquí.
-
-### H. Garantía de Anonimato
+### E. Garantía de Anonimato
 *Mensaje estático obligatorio en la interfaz.*
 **Nota de seguridad:** "Este reporte es 100% anónimo. Nadie sabrá quién eres, no guardaremos tus datos y la información solo se usará para protegerte."
 
@@ -74,56 +54,43 @@ Este documento detalla la estructura del formulario de captura de datos para los
 
 ## 3. Estructura de Intercambio de Datos (JSON Payload)
 
-Este es el formato estructurado que el Frontend enviará al endpoint `POST /reportes` del Backend. Se utilizan enums para estandarizar la entrada:
+Este es el formato estructurado que el Frontend enviará al endpoint `POST /reportes` del Backend:
 
 ```json
 {
-  "ubicacion": "BANOS",
-  "frecuencia": "SEMANAS",
+  "ubicacion": "en los banos",
+  "frecuencia": "lleva pasando algunas semanas",
   "tipos_agresion": [
-    "FISICO",
-    "VERBAL"
+    "fisico",
+    "verbal"
   ],
-  "involucrados_tipo": "GRUPO",
-  "involucrados_grado": "MISMO_SALON",
-  "grado_victima": "7",
-  "evidencia_url": "https://bucket.s3.../file.jpg",
   "descripcion_abierta": "Ayer en el descanso me acorralaron y me dijeron que si no les daba mi plata me iban a pegar a la salida, además me empujaron duro contra la pared."
 }
 ```
 
 ---
 
-## 4. Esquema de Base de Datos (PostgreSQL)
+## 4. Esquema de Base de Datos (SQL Server / T-SQL)
 
-Script SQL para la creación de la tabla principal de reportes. Cumple con los requisitos de la historia de usuario para no guardar información personal (IP, nombres, correos) y utiliza UUID para generar tickets de seguimiento anónimos.
+Script para la creación de la tabla principal de reportes en Microsoft SQL Server. Cumple con los requisitos de la historia de usuario para no guardar información personal (IP, nombres, correos) y utiliza `NEWID()` para generar tickets de seguimiento anónimos.
 
 ```sql
--- Habilitar la extensión para generar identificadores alfanuméricos únicos
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TABLE reportes (
-    -- Genera el código de seguimiento anónimo
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    -- Genera el código de seguimiento anónimo automáticamente
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     
     -- Relación con la institución
     institucion_id INT NOT NULL, 
     
     -- Variables categóricas extraídas del formulario
-    ubicacion VARCHAR(50) NOT NULL,
-    frecuencia VARCHAR(50) NOT NULL,
-    involucrados_tipo VARCHAR(50),
-    involucrados_grado VARCHAR(50),
-    grado_victima VARCHAR(10),
+    ubicacion VARCHAR(100) NOT NULL,
+    frecuencia VARCHAR(100) NOT NULL,
     
-    -- Almacena las selecciones múltiples del JSON como un arreglo nativo
-    tipo_incidente TEXT[] NOT NULL, 
+    -- SQL Server no tiene tipo ARRAY nativo. Se recomienda almacenar el arreglo JSON como texto
+    tipo_incidente VARCHAR(MAX) NOT NULL, 
     
-    -- El texto libre que procesará el modelo de IA
-    descripcion TEXT,
-    
-    -- Evidencias (URL o path del archivo)
-    evidencia_url VARCHAR(255),
+    -- El texto libre que procesará el modelo de IA (VARCHAR(MAX) reemplaza al antiguo TEXT)
+    descripcion VARCHAR(MAX),
     
     -- Clasificación predictiva asignada por el modelo de NLP
     nivel_riesgo VARCHAR(20), 
@@ -132,6 +99,7 @@ CREATE TABLE reportes (
     estado VARCHAR(20) DEFAULT 'nuevo',
     
     -- Marca de tiempo de registro para métricas y gráficas
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_registro DATETIME DEFAULT GETDATE()
 );
 ```
+
