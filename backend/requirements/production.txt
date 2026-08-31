@@ -1,0 +1,10 @@
+# ──────────────────────────────────────────────
+# SafeVoice — Dependencias de producción
+# ──────────────────────────────────────────────
+-r base.txt
+
+# Servidor WSGI de producción
+gunicorn==23.0.0
+
+# Logging estructurado
+python-json-logger==2.0.7
