@@ -105,10 +105,10 @@ Usuarios administrativos con acceso al panel (Directivos y Orientadores).
 | `id` | `INT` (PK) | No | Identificador del usuario. |
 | `institucion_id` | `INT` (FK) | No | Institución a la que pertenece el usuario. |
 | `email` | `VARCHAR(150)` | No | Correo institucional (único, se usa para login). |
-| `password_hash` | `VARCHAR(255)` | No | Hash seguro de la contraseña (Django Auth). |
+| `password_hash` | `VARCHAR(255)` | **Sí** | Hash seguro de la contraseña. Es opcional (`NULL`) para los Estudiantes, pero obligatorio para los demás roles. |
 | `nombre` | `VARCHAR(100)` | No | Nombre del usuario. |
 | `apellido` | `VARCHAR(100)` | No | Apellido del usuario. |
-| `rol` | `VARCHAR(20)` | No | Enum: `'DIRECTIVO'` o `'ORIENTADOR'`. |
+| `rol` | `VARCHAR(20)` | No | Enum: `'DIRECTIVO'`, `'ORIENTADOR'`, `'DOCENTE'`, `'ESTUDIANTE'`. |
 | `activo` | `BOOLEAN` | No | Estado de la cuenta (`TRUE` / `FALSE`). |
 
 ---
@@ -192,10 +192,10 @@ CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     institucion_id INT NOT NULL REFERENCES instituciones(id) ON DELETE CASCADE,
     email VARCHAR(150) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NULL,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
-    rol VARCHAR(20) NOT NULL CHECK (rol IN ('DIRECTIVO', 'ORIENTADOR')),
+    rol VARCHAR(20) NOT NULL CHECK (rol IN ('DIRECTIVO', 'ORIENTADOR', 'DOCENTE', 'ESTUDIANTE')),
     activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
