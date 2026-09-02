@@ -172,7 +172,7 @@ Bitácora de atención creada por el orientador para documentar entrevistas, com
 
 ---
 
-## 4. Script DDL SQL (PostgreSQL / SQL Server)
+## 4. Script  SQL 
 
 ```sql
 -- Habilitar extensión para UUIDs (PostgreSQL)
