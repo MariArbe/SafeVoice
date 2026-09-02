@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: safevoice_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: safevoice_db
+      MYSQL_USER: safevoice_user
+      MYSQL_PASSWORD: safevoice_password
+      MYSQL_ROOT_PASSWORD: root_password_segura
+    ports:
+      - "3306:3306"
+    volumes:
+      - safevoice_mysql_data:/var/lib/mysql
+      # Descomenta la siguiente línea si quieres ejecutar un script SQL inicial:
+      # - ./docs/design/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  safevoice_mysql_data:
