@@ -1,9 +1,5 @@
 # Diseño de Base de Datos — SafeVoice
 
-> **Proyecto:** SafeVoice (Prevención, detección y gestión inteligente del acoso escolar)  
-> **Curso:** Proyecto Aplicado en TIC (2026-2) - UPB  
-> **Versión:** 1.0  
-
 ---
 
 ## 1. Principios de Arquitectura de Datos
