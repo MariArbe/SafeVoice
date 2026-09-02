@@ -2,20 +2,17 @@ version: '3.8'
 
 services:
   db:
-    image: mysql:8.0
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: safevoice_db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: safevoice_db
-      MYSQL_USER: safevoice_user
-      MYSQL_PASSWORD: safevoice_password
-      MYSQL_ROOT_PASSWORD: root_password_segura
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=SafeVoice_Admin123!
+      - MSSQL_PID=Developer
     ports:
-      - "3306:3306"
+      - "1433:1433"
     volumes:
-      - safevoice_mysql_data:/var/lib/mysql
-      # Descomenta la siguiente línea si quieres ejecutar un script SQL inicial:
-      # - ./docs/design/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - safevoice_mssql_data:/var/opt/mssql
 
 volumes:
-  safevoice_mysql_data:
+  safevoice_mssql_data:
