@@ -42,9 +42,16 @@ Este documento detalla la estructura del formulario de captura de datos para los
 **Pregunta:** Cuéntanos con tus propias palabras qué pasó:
 *(Placeholder sugerido: "Escribe aquí lo que pasó sin decir tu nombre. Por ejemplo: Ayer en el recreo me acorralaron y me dijeron que...")*
 
-### E. Garantía de Anonimato
-*Mensaje estático obligatorio en la interfaz.*
+### E. Garantía de Anonimato y Revelación Voluntaria (NUEVO)
+*Mensaje estático en la interfaz, con la nueva opción para casos graves.*
 **Nota de seguridad:** "Este reporte es 100% anónimo. Nadie sabrá quién eres, no guardaremos tus datos y la información solo se usará para protegerte."
+
+**(Opcional) Casilla de Verificación:**
+* [ ] "Por la gravedad de mi caso, acepto revelar mi identidad a la institución para recibir ayuda directa."
+
+*(Si el estudiante marca la casilla, se despliegan condicionalmente estos dos campos):*
+* **Nombre completo:** [ _________________________ ]
+* **Medio de contacto (Correo o celular):** [ _________________________ ]
 
 ---
 
@@ -60,7 +67,10 @@ Este es el formato estructurado que el Frontend enviará al endpoint `POST /repo
     "fisico",
     "verbal"
   ],
-  "descripcion_abierta": "Ayer en el descanso me acorralaron y me dijeron que si no les daba mi plata me iban a pegar a la salida, además me empujaron duro contra la pared."
+  "descripcion_abierta": "Ayer en el descanso me acorralaron y me dijeron que si no les daba mi plata me iban a pegar a la salida, además me empujaron duro contra la pared.",
+  "acepta_revelar_identidad": true,
+  "nombre_contacto_victima": "Juan Pérez",
+  "medio_contacto_victima": "juan.perez@estudiante.upb.edu.co"
 }
 ```
 
@@ -87,6 +97,11 @@ CREATE TABLE reportes (
     
     -- El texto libre que procesará el modelo de IA (VARCHAR(MAX) reemplaza al antiguo TEXT)
     descripcion VARCHAR(MAX),
+    
+    -- Manejo opcional de identidad para casos graves (HU actualizada)
+    acepta_revelar_identidad BIT DEFAULT 0,
+    nombre_contacto_victima VARCHAR(150),
+    medio_contacto_victima VARCHAR(150),
     
     -- Clasificación predictiva asignada por el modelo de NLP
     nivel_riesgo VARCHAR(20), 

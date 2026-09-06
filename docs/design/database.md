@@ -128,6 +128,9 @@ Registros anónimos creados por estudiantes (Víctimas o Testigos).
 | `involucrados_grado` | `VARCHAR(30)` | Sí | `MISMO_SALON`, `MISMO_GRADO`, `OTRO_GRADO`. |
 | `descripcion` | `TEXT` | No | Narrativa libre (Insumo principal para el modelo de IA). |
 | `evidencia_url` | `VARCHAR(255)` | Sí | Enlace o path a imagen/captura de pantalla. |
+| `acepta_revelar_identidad` | `BOOLEAN` | No | Flag: indica si la víctima permitió compartir sus datos. `DEFAULT FALSE`. |
+| `nombre_contacto_victima` | `VARCHAR(150)` | Sí | Opcional: Nombre del remitente si aceptó revelar su identidad. |
+| `medio_contacto_victima` | `VARCHAR(150)` | Sí | Opcional: Medio de contacto del remitente (email, teléfono, salón). |
 | `nivel_riesgo_predicho`| `VARCHAR(20)` | Sí | Resultado de IA NLP: `BAJO`, `MEDIO`, `ALTO`, `CRITICO`. |
 | `nivel_riesgo_confirmado`| `VARCHAR(20)`| Sí | Nivel verificado manualmente por el orientador. |
 | `estado` | `VARCHAR(20)` | No | Estado del ciclo de vida: `NUEVO`, `EN_REVISION`, `EN_SEGUIMIENTO`, `CERRADO`, `DESCARTADO`. |
@@ -216,7 +219,7 @@ INSERT INTO tipos_agresion (codigo, nombre) VALUES
 ('CIBERBULLYING', 'Ciberacoso / Ciberbullying'),
 ('MATERIAL', 'Daño o Robo de Pertrenencias');
 
--- 4. Tabla Reportes (Totalmente anónima)
+-- 4. Tabla Reportes (Totalmente anónima o confidencial voluntaria)
 CREATE TABLE reportes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     institucion_id INT NOT NULL REFERENCES instituciones(id) ON DELETE CASCADE,
@@ -228,6 +231,9 @@ CREATE TABLE reportes (
     involucrados_grado VARCHAR(30),
     descripcion TEXT NOT NULL,
     evidencia_url VARCHAR(255),
+    acepta_revelar_identidad BOOLEAN DEFAULT FALSE,
+    nombre_contacto_victima VARCHAR(150),
+    medio_contacto_victima VARCHAR(150),
     nivel_riesgo_predicho VARCHAR(20) CHECK (nivel_riesgo_predicho IN ('BAJO', 'MEDIO', 'ALTO', 'CRITICO')),
     nivel_riesgo_confirmado VARCHAR(20) CHECK (nivel_riesgo_confirmado IN ('BAJO', 'MEDIO', 'ALTO', 'CRITICO')),
     estado VARCHAR(20) DEFAULT 'NUEVO' CHECK (estado IN ('NUEVO', 'EN_REVISION', 'EN_SEGUIMIENTO', 'CERRADO', 'DESCARTADO')),
