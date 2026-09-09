@@ -16,15 +16,15 @@ class UsuarioAdmin(UserAdmin):
     """
 
     # Columnas visibles en el listado
-    list_display = ("email", "first_name", "last_name", "rol", "is_active", "date_joined")
-    list_filter = ("rol", "is_active")
+    list_display = ("email", "first_name", "last_name", "rol", "institution", "is_active", "date_joined")
+    list_filter = ("rol", "is_active", "institution")
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email",)
 
-    # Añadir 'rol' a los fieldsets del formulario de edición
+    # Añadir 'rol' e 'institution' a los fieldsets del formulario de edición
     fieldsets = UserAdmin.fieldsets + (
-        ("Rol SafeVoice", {"fields": ("rol",)}),
+        ("Rol SafeVoice", {"fields": ("rol", "institution")}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        ("Rol SafeVoice", {"fields": ("rol",)}),
+        ("Rol SafeVoice", {"fields": ("rol", "institution")}),
     )

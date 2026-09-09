@@ -15,7 +15,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.permissions import EsDirectivoOOrientador
+from core.permissions import EsDirectivo, EsDirectivoOOrientador
 
 from .serializers import (
     ConsultarReporteSerializer,
@@ -82,3 +82,38 @@ class ListarReportesView(APIView):
         reportes = _service.listar_reportes()
         serializer = ReporteLecturaSerializer(reportes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class StatisticsOverviewView(APIView):
+    """Contrato de estadísticas para HU-13; la lógica real queda fuera de este sprint."""
+
+    permission_classes = [EsDirectivo]
+
+    def get(self, request: Request) -> Response:
+        return Response(
+            {
+                "total_reports": None,
+                "by_status": {},
+                "by_risk_level": {},
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class HeatmapView(APIView):
+    """Contrato de mapa de calor para HU-14; la lógica real queda fuera de este sprint."""
+
+    permission_classes = [EsDirectivo]
+
+    def get(self, request: Request) -> Response:
+        return Response(
+            {
+                "points": [],
+                "dimensions": {
+                    "latitude": None,
+                    "longitude": None,
+                    "intensity": None,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )

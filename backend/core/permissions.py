@@ -10,7 +10,7 @@ from rest_framework.permissions import BasePermission
 from apps.users.models import Usuario
 
 
-class EsDirectivo(BasePermission):
+class IsDirectivo(BasePermission):
     """
     Permite el acceso únicamente a usuarios autenticados con rol DIRECTIVO.
     """
@@ -23,6 +23,10 @@ class EsDirectivo(BasePermission):
             and request.user.is_authenticated
             and request.user.rol == Usuario.RolUsuario.DIRECTIVO
         )
+
+
+# Alias en español para mantener compatibilidad con las views existentes.
+EsDirectivo = IsDirectivo
 
 
 class EsOrientador(BasePermission):

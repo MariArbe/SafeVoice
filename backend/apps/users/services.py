@@ -3,15 +3,12 @@ apps/users/services.py — Capa de lógica de negocio del dominio de usuarios.
 
 REGLA: Las views NO acceden al ORM directamente.
        Todo acceso a datos pasa por este service.
-
-En esta primera etapa el service está estructurado pero vacío de lógica;
-los métodos lanzarán NotImplementedError hasta que se implementen en etapas
-posteriores.
 """
 
 import logging
 
 from django.contrib.auth import authenticate
+from django.db import models as django_models
 
 from .exceptions import CredencialesInvalidasError, UsuarioInactivoError
 from .models import Usuario
@@ -25,7 +22,7 @@ class UsuarioService:
     con creación, autenticación y gestión de usuarios.
 
     Diseñado para ser stateless: no almacena estado entre llamadas.
-    Las views instancian este service en cada request.
+    Las views instancian este service al inicio (módulo-nivel), no por request.
     """
 
     # ── Autenticación ──────────────────────────────────────────────────────
@@ -59,18 +56,39 @@ class UsuarioService:
         Crea un nuevo usuario a partir de datos ya validados por el serializer.
 
         Args:
-            datos_validados: dict con los campos del CrearUsuarioSerializer ya
-                             validados (sin password en texto plano tras el save).
+            datos_validados: dict con los campos ya validados. Puede incluir
+                             la clave 'institution' (objeto Institution) para
+                             asignar la FK directamente.
 
         Returns:
             Instancia del Usuario recién creado.
 
         Note:
-            El hasheo de la contraseña lo realiza el serializer vía set_password().
-            Este método solo orquesta la creación.
+            Este método espera datos ya validados (sin password_confirmacion).
+            El hasheo de la contraseña se realiza aquí vía set_password().
         """
-        # TODO: Implementar en Etapa 2 (endpoints funcionales)
-        raise NotImplementedError("crear_usuario se implementará en Etapa 2.")
+        # Extraer institution antes de crear (no es un campo del modelo directamente)
+        institution = datos_validados.pop("institution", None)
+        password = datos_validados.pop("password")
+
+        email = datos_validados.get("email", "")
+        datos_validados.setdefault("username", email)
+
+        usuario = Usuario(**datos_validados)
+        usuario.set_password(password)
+
+        if institution is not None:
+            usuario.institution = institution
+
+        usuario.save()
+
+        logger.info(
+            "Usuario creado: %s (rol=%s, institution=%s)",
+            usuario.email,
+            usuario.rol,
+            getattr(institution, "id", None),
+        )
+        return usuario
 
     # ── Consulta ───────────────────────────────────────────────────────────
 
@@ -81,15 +99,31 @@ class UsuarioService:
         Raises:
             Usuario.DoesNotExist: Si no existe un usuario con ese ID.
         """
-        # TODO: Implementar en Etapa 2
-        raise NotImplementedError("obtener_por_id se implementará en Etapa 2.")
+        return Usuario.objects.select_related("institution").get(pk=usuario_id)
 
-    def listar_por_rol(self, rol: str) -> "QuerySet[Usuario]":
+    def listar_por_rol(self, rol: str) -> "django_models.QuerySet[Usuario]":
         """
         Retorna todos los usuarios activos con el rol indicado.
 
         Args:
             rol: Valor de Usuario.RolUsuario (ej. 'DIRECTIVO').
         """
-        # TODO: Implementar en Etapa 2
-        raise NotImplementedError("listar_por_rol se implementará en Etapa 2.")
+        return (
+            Usuario.objects.select_related("institution")
+            .filter(rol=rol, is_active=True)
+            .order_by("email")
+        )
+
+    def listar_por_institucion(self, institution_id: int) -> "django_models.QuerySet[Usuario]":
+        """
+        Retorna todos los usuarios activos de una institución específica.
+        Útil para que el directivo vea los orientadores de su institución.
+
+        Args:
+            institution_id: ID primario de la institución.
+        """
+        return (
+            Usuario.objects.select_related("institution")
+            .filter(institution_id=institution_id, is_active=True)
+            .order_by("rol", "email")
+        )

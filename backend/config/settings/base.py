@@ -46,11 +46,13 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",  # Requerido por BLACKLIST_AFTER_ROTATION=True
     "corsheaders",
 ]
 
 LOCAL_APPS = [
     "apps.users",
+    "apps.institutions",
     "apps.reports",
 ]
 
@@ -127,7 +129,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     # Solo usuarios autenticados pueden acceder por defecto;
-    # las vistas públicas (reportes anónimos) lo sobreescriben explícitamente.
+    # las vistas púbricas (reportes anónimos, registro de institución) lo sobreescriben.
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
@@ -136,6 +138,16 @@ REST_FRAMEWORK = {
     # Paginación por defecto
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    # Rate limiting — mitigación de fuerza bruta en endpoints públicos (HU-09/10)
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/min",      # Límite global para peticiones no autenticadas
+        "login": "10/min",    # Scope específico: endpoint de login (HU-09/10)
+        "registro": "5/min",  # Scope específico: registro de instituciones (HU-11)
+    },
 }
 
 

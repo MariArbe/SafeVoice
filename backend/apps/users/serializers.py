@@ -20,6 +20,9 @@ class UsuarioLecturaSerializer(serializers.ModelSerializer):
     """
 
     rol_display = serializers.CharField(source="get_rol_display", read_only=True)
+    institution_nombre = serializers.CharField(
+        source="institution.nombre", read_only=True, default=None
+    )
 
     class Meta:
         model = Usuario
@@ -30,6 +33,8 @@ class UsuarioLecturaSerializer(serializers.ModelSerializer):
             "last_name",
             "rol",
             "rol_display",
+            "institution_id",
+            "institution_nombre",
             "is_active",
             "date_joined",
         ]

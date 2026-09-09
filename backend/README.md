@@ -193,6 +193,25 @@ El servidor queda disponible en `http://127.0.0.1:8000/`
 | `GET` | `/api/v1/reports/consultar/?codigo=<uuid>` | **Ninguna** | Consultar estado por código |
 | `GET` | `/api/v1/reports/listar/` | Bearer (Directivo/Orientador) | Listar todos los reportes |
 
+Los endpoints `/api/v1/reports/statistics/` y `/api/v1/reports/heatmap/` son
+contratos de HU-10. Responden `200` con placeholders y no implementan lógica
+de negocio; HU-13/HU-14 deben reemplazar únicamente la lógica interna.
+
+Estadísticas:
+
+```json
+{"total_reports": null, "by_status": {}, "by_risk_level": {}}
+```
+
+Mapa de calor:
+
+```json
+{
+  "points": [],
+  "dimensions": {"latitude": null, "longitude": null, "intensity": null}
+}
+```
+
 ### Formato de respuesta de error
 
 Todas las respuestas de error siguen el esquema:

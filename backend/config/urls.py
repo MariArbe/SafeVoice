@@ -16,6 +16,9 @@ urlpatterns = [
     # Rutas de la app users (autenticación, gestión de usuarios)
     path("api/v1/users/", include("apps.users.urls")),
 
+    # Rutas de la app institutions (registro de institución — HU-11)
+    path("api/v1/institutions/", include("apps.institutions.urls")),
+
     # Rutas de la app reports (reportes anónimos)
     path("api/v1/reports/", include("apps.reports.urls")),
 ]

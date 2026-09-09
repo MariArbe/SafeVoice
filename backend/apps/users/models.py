@@ -14,6 +14,7 @@ from django.db import models
 
 
 class Usuario(AbstractUser):
+
     """
     Modelo de usuario del sistema SafeVoice.
 
@@ -47,6 +48,17 @@ class Usuario(AbstractUser):
         choices=RolUsuario.choices,
         verbose_name="rol",
         help_text="Define el nivel de acceso del usuario dentro del sistema.",
+    )
+
+    institution = models.ForeignKey(
+        # String reference para evitar import circular (institutions importa Usuario)
+        "institutions.Institution",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="usuarios",
+        verbose_name="institución",
+        help_text="Institución educativa a la que pertenece el usuario.",
     )
 
     # Campos de AbstractUser que se mantienen pero no son el identificador
