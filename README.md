@@ -19,9 +19,12 @@ El objetivo del proyecto es fortalecer los procesos de prevención, detección e
 ## Tabla de navegación
 
 - README.md ← Usted está aquí
-- 📂 Doc
+- 📂 Docs
     - [index.md (Documentación del proyecto)](./doc/index.md)
     - 📂 Analysis
         - [📄 index.md (Tabla de navegación de Analysis)](./doc/analysis/index.md)
-        - [📄 requirements-fn.md (Requisitos Funcionales)](./doc/analysis/requirements-fn.md)
-        - [📄 requirements-nfn.md (Requisitos No Funcionales)](./doc/analysis/requirements-nfn.md)
+        - [📄 Historias_de_Usuario_SafeVoice.md (Todas las HU)](./docs/Analysis/Historias_de_Usuario_SafeVoice.md)
+        - [📄 documentacion_formulario.md (Preguntas que se haran en el formulario)](.docs\Analysis\documentacion_formulario.md)
+- 📂 backend 
+- 📂 frontend 
+- 📂 model
