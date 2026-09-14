@@ -1,0 +1,15 @@
+# ──────────────────────────────────────────────
+# SafeVoice — Dependencias de testing
+# ──────────────────────────────────────────────
+-r base.txt
+
+# Framework de testing
+pytest==8.3.3
+pytest-django==4.9.0
+pytest-cov==6.0.0
+
+# Fábrica de objetos de prueba
+factory-boy==3.3.1
+
+# BD en memoria para CI (sin SQL Server)
+# Los tests se ejecutan con SQLite por defecto
