@@ -1,7 +1,7 @@
 export default function App() {
   return (
-    <div className="flex h-screen items-center justify-center bg-blue-600">
-      <h1 className="text-4xl font-bold text-white">¡Tailwind funcionando en SafeVoice!</h1>
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center">
+      <h1 className="text-3xl font-bold">SafeVoice Frontend - Base Limpia</h1>
     </div>
   )
 }
