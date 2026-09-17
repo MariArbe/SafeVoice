@@ -3,6 +3,7 @@ import Header from "../../components/ui/Header";
 import Footer from "../../components/ui/Footer";
 import Campo from "../../components/ui/Campo";
 import Boton from "../../components/ui/Boton";
+import reporteService from "../../services/reporteService";
 
 export default function Reporte() {
   const [aceptaRevelar, setAceptaRevelar] = useState(false);
@@ -57,21 +58,10 @@ export default function Reporte() {
         // institucion: null // Dejamos en null porque el input es texto y el backend requiere ID
       };
 
-      const response = await fetch("http://localhost:8000/api/v1/reports/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Error al enviar el reporte. Por favor, intenta de nuevo.");
-      }
-
-      const data = await response.json();
-      setSuccessCode(data.codigo_seguimiento);
+      const response = await reporteService.crearReporte(payload);
+      setSuccessCode(response.codigo_seguimiento);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.detail || "Error al enviar el reporte. Por favor, intenta de nuevo.");
     } finally {
       setLoading(false);
     }
