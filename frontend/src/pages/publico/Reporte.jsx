@@ -6,6 +6,108 @@ import Boton from "../../components/ui/Boton";
 
 export default function Reporte() {
   const [aceptaRevelar, setAceptaRevelar] = useState(false);
+  
+  // Estado del formulario
+  const [formData, setFormData] = useState({
+    institucion: "",
+    rol_reportante: "",
+    grado: "",
+    ubicacion: "",
+    frecuencia: "",
+    tipo_agresion: [],
+    descripcion: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successCode, setSuccessCode] = useState(null);
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (type === "checkbox" && name === "tipo_agresion") {
+      setFormData(prev => {
+        if (checked) return { ...prev, tipo_agresion: [...prev.tipo_agresion, value] };
+        return { ...prev, tipo_agresion: prev.tipo_agresion.filter(t => t !== value) };
+      });
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    // Validación básica requerida en HU-01
+    if (!formData.descripcion || formData.descripcion.length < 10) {
+      setError("La descripción debe tener al menos 10 caracteres.");
+      return;
+    }
+    if (formData.tipo_agresion.length === 0) {
+      setError("Debes seleccionar al menos un tipo de situación.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        tipo_incidente: formData.tipo_agresion.join(", "),
+        descripcion: `Rol: ${formData.rol_reportante} | Grado: ${formData.grado} | Ubicacion: ${formData.ubicacion} | Frecuencia: ${formData.frecuencia} \n\n${formData.descripcion}`,
+        // institucion: null // Dejamos en null porque el input es texto y el backend requiere ID
+      };
+
+      const response = await fetch("http://localhost:8000/api/v1/reports/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Error al enviar el reporte. Por favor, intenta de nuevo.");
+      }
+
+      const data = await response.json();
+      setSuccessCode(data.codigo_seguimiento);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (successCode) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        <Header />
+        <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-10 flex flex-col items-center justify-center text-center">
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 max-w-xl">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-extrabold text-[#2C5F57] mb-4">¡Reporte Enviado con Éxito!</h1>
+            <p className="text-slate-600 mb-6">
+              Gracias por tu valentía. Tu reporte ha sido guardado de forma 100% anónima.
+            </p>
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
+              <p className="text-sm text-slate-500 font-semibold mb-2">Tu código de seguimiento es:</p>
+              <p className="text-xl font-mono font-bold text-slate-800 break-all">{successCode}</p>
+            </div>
+            <p className="text-sm text-slate-500 mb-8">
+              Guarda este código en un lugar seguro. Con él podrás consultar el estado de tu reporte más adelante sin revelar tu identidad.
+            </p>
+            <Boton variant="primary" onClick={() => window.location.href = '/'} fullWidth className="py-3">
+              Volver al Inicio
+            </Boton>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -21,7 +123,13 @@ export default function Reporte() {
           </p>
         </div>
 
-        <form className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-8">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-8">
           
           {/* A. Institución Educativa */}
           <section className="space-y-4">
@@ -31,6 +139,8 @@ export default function Reporte() {
                 label="¿A cuál colegio o institución perteneces?" 
                 name="institucion"
                 placeholder="Busca tu colegio..."
+                value={formData.institucion}
+                onChange={handleInputChange}
                 required 
               />
             </div>
@@ -42,11 +152,11 @@ export default function Reporte() {
             <p className="text-sm text-slate-600">¿Esta situación te está pasando a ti o la estás presenciando en otra persona?</p>
             <div className="flex flex-col gap-3">
               <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-slate-50">
-                <input type="radio" name="rol_reportante" className="w-5 h-5 accent-[#2C5F57]" value="victima" />
+                <input type="radio" name="rol_reportante" className="w-5 h-5 accent-[#2C5F57]" value="victima" onChange={handleInputChange} required />
                 <span className="text-slate-700">Me está pasando a mí (Soy la víctima)</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-slate-50">
-                <input type="radio" name="rol_reportante" className="w-5 h-5 accent-[#2C5F57]" value="testigo" />
+                <input type="radio" name="rol_reportante" className="w-5 h-5 accent-[#2C5F57]" value="testigo" onChange={handleInputChange} required />
                 <span className="text-slate-700">Lo vi / le pasa a un compañero(a) (Soy testigo)</span>
               </label>
             </div>
@@ -60,6 +170,8 @@ export default function Reporte() {
                 label="¿En qué grado o curso está la persona afectada?" 
                 name="grado"
                 placeholder="Ej. 8°, Noveno, 11A..."
+                value={formData.grado}
+                onChange={handleInputChange}
                 required 
               />
             </div>
@@ -72,7 +184,7 @@ export default function Reporte() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {['Salón de clases', 'Pasillos o escaleras', 'Baños', 'Descanso / zonas deportivas', 'Salida del colegio', 'Internet / Redes sociales'].map((lugar) => (
                 <label key={lugar} className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-slate-50">
-                  <input type="radio" name="ubicacion" className="w-5 h-5 accent-[#2C5F57]" value={lugar} />
+                  <input type="radio" name="ubicacion" className="w-5 h-5 accent-[#2C5F57]" value={lugar} onChange={handleInputChange} required />
                   <span className="text-slate-700">{lugar}</span>
                 </label>
               ))}
@@ -86,7 +198,7 @@ export default function Reporte() {
             <div className="flex flex-col gap-3">
               {['Pasó hoy o es la primera vez', 'Lleva pasando algunas semanas', 'Lleva pasando varios meses'].map((frecuencia) => (
                 <label key={frecuencia} className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-slate-50">
-                  <input type="radio" name="frecuencia" className="w-5 h-5 accent-[#2C5F57]" value={frecuencia} />
+                  <input type="radio" name="frecuencia" className="w-5 h-5 accent-[#2C5F57]" value={frecuencia} onChange={handleInputChange} required />
                   <span className="text-slate-700">{frecuencia}</span>
                 </label>
               ))}
@@ -106,7 +218,7 @@ export default function Reporte() {
                 'Ciberacoso (Mensajes, fotos sin permiso, redes sociales)'
               ].map((tipo) => (
                 <label key={tipo} className="flex items-center gap-3 cursor-pointer p-3 border rounded-xl hover:bg-slate-50">
-                  <input type="checkbox" name="tipo_agresion" className="w-5 h-5 accent-[#2C5F57] rounded-sm" value={tipo} />
+                  <input type="checkbox" name="tipo_agresion" className="w-5 h-5 accent-[#2C5F57] rounded-sm" value={tipo} onChange={handleInputChange} />
                   <span className="text-slate-700">{tipo}</span>
                 </label>
               ))}
@@ -121,24 +233,36 @@ export default function Reporte() {
               rows={5}
               name="descripcion"
               placeholder="Escribe aquí lo que pasó sin decir tu nombre. Por ejemplo: Ayer en el recreo acorralaron a mi amigo y le dijeron que..."
+              value={formData.descripcion}
+              onChange={handleInputChange}
               required 
             />
           </section>
 
-          {/* H. Evidencia (Opcional) */}
+          {/* H. Evidencia */}
           <section className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-800 border-b pb-2">H. Evidencia (Opcional)</h2>
-            <p className="text-sm text-slate-600">Si tienes fotos o capturas de pantalla, súbelas aquí.</p>
-            <input type="file" className="block w-full text-sm text-slate-500
-              file:mr-4 file:py-2.5 file:px-4
-              file:rounded-xl file:border-0
-              file:text-sm file:font-semibold
-              file:bg-[#EBF3FA] file:text-[#2C5F57]
-              hover:file:bg-[#dceaf7]"
-            />
+            <h2 className="text-lg font-bold text-slate-800 border-b pb-2">H. Evidencia (opcional)</h2>
+            <p className="text-sm text-slate-600">
+              Si tienes capturas de pantalla, mensajes u otra evidencia, puedes tenerla a la mano para compartirla con el orientador.
+            </p>
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+              <label htmlFor="evidencia" className="block text-sm font-medium text-slate-700">
+                Seleccionar archivo
+              </label>
+              <input
+                id="evidencia"
+                name="evidencia"
+                type="file"
+                accept="image/*,.pdf,.doc,.docx"
+                className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-[#2C5F57] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#234c45]"
+              />
+              <p className="mt-2 text-xs text-slate-500">
+                Formatos permitidos: imágenes, PDF y documentos de Word.
+              </p>
+            </div>
           </section>
 
-          {/* I. Revelación Voluntaria */}
+          {/* I. Revelación Voluntaria (NO SE TOCA, NO SE ENVÍA) */}
           <section className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200 mt-8">
             <div className="flex gap-4 items-start">
               <div className="mt-1">
@@ -171,8 +295,8 @@ export default function Reporte() {
           </section>
 
           <div className="pt-6">
-            <Boton variant="primary" fullWidth className="py-3 text-base shadow-md !bg-[#2C5F57] hover:!bg-[#234c45]">
-              Enviar Reporte Seguro
+            <Boton variant="primary" type="submit" fullWidth disabled={loading} className="py-3 text-base shadow-md !bg-[#2C5F57] hover:!bg-[#234c45] disabled:opacity-50">
+              {loading ? "Enviando de forma segura..." : "Enviar Reporte Seguro"}
             </Boton>
           </div>
         </form>

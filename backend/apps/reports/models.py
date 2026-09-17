@@ -54,10 +54,40 @@ class Reporte(models.Model):
         verbose_name="última actualización",
     )
 
-    # ── Campos de contenido (esqueleto — se completarán en Etapa 2) ─────────
-    # Los campos de descripción, tipo de bullying, nivel de urgencia, etc.
-    # se añadirán junto con las migraciones de Etapa 2.
-
+    # ── Campos de contenido (HU-01) ─────────
+    institucion = models.ForeignKey(
+        "institutions.Institution",
+        on_delete=models.PROTECT,
+        related_name="reportes",
+        verbose_name="institución",
+        null=True,
+        blank=True
+    )
+    
+    tipo_incidente = models.CharField(
+        max_length=255,
+        verbose_name="tipo de incidente",
+        null=True,
+        blank=True
+    )
+    
+    descripcion = models.TextField(
+        verbose_name="descripción",
+        null=True,
+        blank=True
+    )
+    
+    estado = models.CharField(
+        max_length=50,
+        verbose_name="estado",
+        default="PENDIENTE"
+    )
+    
+    nivel_riesgo = models.CharField(
+        max_length=50,
+        verbose_name="nivel de riesgo",
+        default="NO_EVALUADO"
+    )
     class Meta:
         db_table = "reportes"
         verbose_name = "reporte"

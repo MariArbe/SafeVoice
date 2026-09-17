@@ -25,13 +25,25 @@ Flujo de llamadas:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
+import base64
 import logging
 import uuid
+
+from cryptography.fernet import Fernet
+from django.conf import settings
 
 from .exceptions import ReporteCampoNoPermitidoError, ReporteNoEncontradoError
 from .models import Reporte
 
 logger = logging.getLogger(__name__)
+
+
+def _get_fernet_cipher() -> Fernet:
+    """Devuelve un objeto Fernet usando la SECRET_KEY de Django derivada."""
+    key = settings.SECRET_KEY.encode("utf-8")
+    key = key.ljust(32, b"0")[:32]
+    fernet_key = base64.urlsafe_b64encode(key)
+    return Fernet(fernet_key)
 
 
 class ReporteRepositoryProxy:
@@ -47,16 +59,18 @@ class ReporteRepositoryProxy:
     # NUNCA añadir: usuario_id, ip, sesion, user_agent, email, nombre, etc.
     ALLOWED_FIELDS: frozenset[str] = frozenset(
         {
-            # Campos del modelo base (Etapa 1)
             "codigo_seguimiento",
-            # Campos de contenido que se añadirán en Etapa 2:
-            # "descripcion",
-            # "tipo_bullying",
-            # "nivel_urgencia",
-            # "lugar",
-            # "fecha_incidente",
+            "institucion_id",
+            "institucion",
+            "tipo_incidente",
+            "descripcion",
+            "estado",
+            "nivel_riesgo",
         }
     )
+
+    # ── Campos que deben ser encriptados antes de guardarse en BD ──────────
+    ENCRYPTED_FIELDS: frozenset[str] = frozenset({"descripcion"})
 
     # ── Campos que el ORM gestiona automáticamente (no se validan) ─────────
     _CAMPOS_AUTOMATICOS: frozenset[str] = frozenset(
@@ -83,6 +97,37 @@ class ReporteRepositoryProxy:
                 campos_prohibidos=list(campos_prohibidos)
             )
 
+    def _encriptar_sensibles(self, datos: dict) -> dict:
+        """
+        Toma los datos, y si existen campos de ENCRYPTED_FIELDS,
+        los encripta usando la llave del sistema (AES/Fernet)
+        antes de pasarlos al ORM.
+        """
+        datos_seguros = datos.copy()
+        cipher = _get_fernet_cipher()
+        for campo in self.ENCRYPTED_FIELDS:
+            if campo in datos_seguros and datos_seguros[campo]:
+                texto_plano = str(datos_seguros[campo]).encode("utf-8")
+                texto_cifrado = cipher.encrypt(texto_plano).decode("utf-8")
+                datos_seguros[campo] = texto_cifrado
+        return datos_seguros
+        
+    def _desencriptar_sensibles(self, reporte: Reporte) -> Reporte:
+        """
+        Toma un reporte del ORM y desencripta sus campos sensibles para que
+        puedan ser leídos en memoria si es necesario (ej: en el serializer o vistas).
+        """
+        cipher = _get_fernet_cipher()
+        for campo in self.ENCRYPTED_FIELDS:
+            valor = getattr(reporte, campo, None)
+            if valor:
+                try:
+                    texto_plano = cipher.decrypt(valor.encode("utf-8")).decode("utf-8")
+                    setattr(reporte, campo, texto_plano)
+                except Exception as e:
+                    logger.error(f"Error al desencriptar el campo {campo} del reporte {reporte.codigo_seguimiento}: {e}")
+        return reporte
+
     # ── Operaciones de escritura ───────────────────────────────────────────
 
     def crear(self, datos: dict) -> Reporte:
@@ -94,13 +139,22 @@ class ReporteRepositoryProxy:
                    los campos definidos en ALLOWED_FIELDS.
 
         Returns:
-            Instancia del Reporte recién creado.
+            Instancia del Reporte recién creado (con los datos en claro en memoria).
 
         Raises:
             ReporteCampoNoPermitidoError: Si `datos` contiene campos no permitidos.
         """
         self._validar_campos(datos)
-        reporte = Reporte.objects.create(**datos)
+        datos_seguros = self._encriptar_sensibles(datos)
+        reporte = Reporte.objects.create(**datos_seguros)
+        
+        # Devolvemos el reporte con los campos en texto plano en memoria
+        # (ya que acabamos de recibir los datos en claro de todas formas, 
+        # actualizamos el objeto en memoria para que el serializer pueda leerlo si quisiera).
+        for campo in self.ENCRYPTED_FIELDS:
+            if campo in datos:
+                setattr(reporte, campo, datos[campo])
+                
         logger.info(
             "Reporte creado exitosamente: codigo_seguimiento=%s",
             reporte.codigo_seguimiento,
@@ -123,7 +177,8 @@ class ReporteRepositoryProxy:
             ReporteNoEncontradoError: Si no existe un reporte con ese código.
         """
         try:
-            return Reporte.objects.get(codigo_seguimiento=codigo)
+            reporte = Reporte.objects.get(codigo_seguimiento=codigo)
+            return self._desencriptar_sensibles(reporte)
         except Reporte.DoesNotExist:
             raise ReporteNoEncontradoError()
 
@@ -133,6 +188,12 @@ class ReporteRepositoryProxy:
         Solo accesible por usuarios autenticados (Directivo/Orientador).
 
         Returns:
-            QuerySet de Reporte.
+            Lista de Reportes desencriptados.
         """
-        return Reporte.objects.all()
+        qs = Reporte.objects.all()
+        # En una app real, esto podría ser costoso si hay muchos registros.
+        # Como es una prueba de concepto, desencriptamos en memoria la lista.
+        reportes_lista = []
+        for r in qs:
+            reportes_lista.append(self._desencriptar_sensibles(r))
+        return reportes_lista

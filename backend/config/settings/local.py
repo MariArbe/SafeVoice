@@ -17,17 +17,8 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 # Ver .env.example para las variables necesarias.
 DATABASES = {
     "default": {
-        "ENGINE": "mssql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST", default="localhost"),
-        "PORT": env("DB_PORT", default="1433"),
-        "OPTIONS": {
-            "driver": env("DB_DRIVER", default="ODBC Driver 18 for SQL Server"),
-            # Deshabilita la encriptación forzada en conexiones locales
-            "extra_params": "Encrypt=no;TrustServerCertificate=yes;",
-        },
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -53,9 +44,15 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "anonymize_ip": {
+            "()": "core.logging_filters.AnonymizeIPFilter",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "filters": ["anonymize_ip"],
         },
     },
     "root": {

@@ -23,8 +23,11 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
             "codigo_seguimiento",
             "fecha_creacion",
             "fecha_actualizacion",
-            # Los campos de contenido (descripcion, tipo_bullying, etc.)
-            # se añadirán en Etapa 2.
+            "estado",
+            "nivel_riesgo",
+            "tipo_incidente",
+            "descripcion",
+            "institucion_id",
         ]
         read_only_fields = fields
 
@@ -41,8 +44,9 @@ class CrearReporteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reporte
         fields: list[str] = [
-            # Los campos de contenido se añadirán en Etapa 2.
-            # Por ahora, crear un Reporte genera solo el codigo_seguimiento.
+            "institucion",
+            "tipo_incidente",
+            "descripcion",
         ]
 
     def create(self, validated_data: dict) -> Reporte:

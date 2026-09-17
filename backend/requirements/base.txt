@@ -24,3 +24,4 @@ password-validator==1.0
 
 # Utilidades
 pytz==2024.1
+cryptography==42.0.5
