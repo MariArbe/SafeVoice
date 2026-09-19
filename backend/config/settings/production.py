@@ -43,6 +43,11 @@ DATABASES = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "anonymize_ip": {
+            "()": "core.logging_filters.AnonymizeIPFilter",
+        },
+    },
     "formatters": {
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
@@ -53,6 +58,7 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "json",
+            "filters": ["anonymize_ip"],
         },
     },
     "root": {
