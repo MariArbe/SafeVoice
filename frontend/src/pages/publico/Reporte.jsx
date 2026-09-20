@@ -19,6 +19,7 @@ export default function Reporte() {
     descripcion: "",
     nombre_contacto_victima: "",
     medio_contacto_victima: "",
+    involucrados_grado: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -69,6 +70,7 @@ export default function Reporte() {
         frecuencia: formData.frecuencia,
         grado_victima: formData.grado,
         involucrados_tipo: formData.rol_reportante,
+        involucrados_grado: formData.involucrados_grado,
         descripcion: formData.descripcion,
         tipos_agresion: formData.tipo_agresion.map(t => agressionMap[t]).filter(Boolean),
         acepta_revelar_identidad: aceptaRevelar,
@@ -170,15 +172,23 @@ export default function Reporte() {
             </div>
           </section>
 
-          {/* C. Grado o Nivel */}
+          {/* C. Grados o Cursos */}
           <section className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-800 border-b pb-2">C. Grado Escolar</h2>
-            <div className="max-w-md">
+            <h2 className="text-lg font-bold text-slate-800 border-b pb-2">C. Grados o Cursos</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Campo 
                 label="¿En qué grado o curso está la persona afectada?" 
                 name="grado"
                 placeholder="Ej. 8°, Noveno, 11A..."
                 value={formData.grado}
+                onChange={handleInputChange}
+                required 
+              />
+              <Campo 
+                label="¿De qué grado son las personas que agreden?" 
+                name="involucrados_grado"
+                placeholder="Ej. Mismo grado, 10°, No sé..."
+                value={formData.involucrados_grado}
                 onChange={handleInputChange}
                 required 
               />
