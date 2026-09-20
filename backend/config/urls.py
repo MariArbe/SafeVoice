@@ -21,4 +21,7 @@ urlpatterns = [
 
     # Rutas de la app reports (reportes anónimos)
     path("api/v1/reports/", include("apps.reports.urls")),
+
+    # Rutas de la app resources (recursos de ayuda)
+    path("api/v1/resources/", include("apps.resources.urls")),
 ]

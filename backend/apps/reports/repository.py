@@ -39,11 +39,18 @@ logger = logging.getLogger(__name__)
 
 
 def _get_fernet_cipher() -> Fernet:
-    """Devuelve un objeto Fernet usando la SECRET_KEY de Django derivada."""
-    key = settings.SECRET_KEY.encode("utf-8")
-    key = key.ljust(32, b"0")[:32]
-    fernet_key = base64.urlsafe_b64encode(key)
-    return Fernet(fernet_key)
+    """Devuelve un objeto Fernet usando una llave dedicada para reportes.
+
+    La llave NO se deriva de SECRET_KEY. Debe configurarse por variable de entorno
+    REPORTS_FERNET_KEY con un valor Fernet válido (ver .env.example).
+    """
+    key = getattr(settings, "REPORTS_FERNET_KEY", "") or ""
+    if not key:
+        raise RuntimeError(
+            "REPORTS_FERNET_KEY no está configurada. Define una llave Fernet dedicada "
+            "para datos sensibles de reportes."
+        )
+    return Fernet(key.encode("utf-8"))
 
 
 class ReporteRepositoryProxy:
@@ -72,7 +79,10 @@ class ReporteRepositoryProxy:
             "tipos_agresion",
             "nivel_riesgo_predicho",
             "nivel_riesgo_confirmado",
+            "nivel_riesgo",
             "estado",
+            "rol_reportante",
+            "fecha_aproximada",
             "acepta_revelar_identidad",
             "nombre_contacto_victima",
             "medio_contacto_victima",
@@ -110,7 +120,7 @@ class ReporteRepositoryProxy:
     def _encriptar_sensibles(self, datos: dict) -> dict:
         """
         Toma los datos, y si existen campos de ENCRYPTED_FIELDS,
-        los encripta usando la llave del sistema (AES/Fernet)
+        los encripta con Fernet usando la llave dedicada del sistema
         antes de pasarlos al ORM.
         """
         datos_seguros = datos.copy()

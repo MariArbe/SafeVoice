@@ -29,6 +29,10 @@ environ.Env.read_env(BASE_DIR / ".env")
 
 # ─── Seguridad ─────────────────────────────────────────────────────────────
 SECRET_KEY = env("SECRET_KEY")
+REPORTS_FERNET_KEY = env(
+    "REPORTS_FERNET_KEY",
+    default="w9eM2tZdkon8mhrRTDLNIexAVZ6IxwoNPU6fzN-PIZk=",
+)
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
@@ -54,6 +58,7 @@ LOCAL_APPS = [
     "apps.users",
     "apps.institutions",
     "apps.reports",
+    "apps.resources",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

@@ -54,14 +54,21 @@ backend/
 │   │   ├── permissions.py   ← Control de acceso por rol
 │   │   └── exceptions.py    ← Excepciones del dominio
 │   │
-│   └── reports/             ← Dominio de reportes anónimos
-│       ├── models.py        ← Modelo Reporte (sin FK a Usuario)
-│       ├── repository.py    ← ReporteRepositoryProxy (Patrón Proxy)
-│       ├── serializers.py   ← DTOs de entrada/salida
-│       ├── services.py      ← Lógica de negocio
-│       ├── views.py         ← Controladores HTTP
-│       ├── permissions.py   ← AllowAny (crear) / EsDirectivoOOrientador (gestión)
-│       └── exceptions.py    ← Excepciones del dominio
+│   ├── reports/             ← Dominio de reportes anónimos
+│   │   ├── models.py        ← Modelo Reporte (sin FK a Usuario)
+│   │   ├── repository.py    ← ReporteRepositoryProxy (Patrón Proxy)
+│   │   ├── serializers.py   ← DTOs de entrada/salida
+│   │   ├── services.py      ← Lógica de negocio
+│   │   ├── views.py         ← Controladores HTTP
+│   │   ├── permissions.py   ← AllowAny (crear) / EsDirectivoOOrientador (gestión)
+│   │   └── exceptions.py    ← Excepciones del dominio
+│   │
+│   └── resources/           ← Dominio de recursos de ayuda (HU-03)
+│       ├── models.py        ← Modelo Recurso con categorías
+│       ├── serializers.py   ← DTOs de lectura/administración
+│       ├── views.py         ← Endpoints públicos y admin
+│       ├── urls.py          ← Rutas /api/v1/resources/
+│       └── apps.py          ← Config del módulo
 │
 ├── core/
 │   ├── exceptions.py        ← Exception handler global de DRF

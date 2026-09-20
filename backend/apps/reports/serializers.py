@@ -6,6 +6,8 @@ El ReporteRepositoryProxy actúa como segunda capa (lista blanca en BD).
 Ambas capas son independientes para garantizar anonimato en profundidad.
 """
 
+from datetime import date
+
 from rest_framework import serializers
 
 from .models import Reporte
@@ -45,6 +47,10 @@ class CrearReporteSerializer(serializers.ModelSerializer):
     No requiere autenticación (la vista define AllowAny).
     """
 
+    tipo_incidente = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    rol_reportante = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    fecha_aproximada = serializers.DateField(required=False, allow_null=True)
+
     class Meta:
         model = Reporte
         fields: list[str] = [
@@ -60,6 +66,9 @@ class CrearReporteSerializer(serializers.ModelSerializer):
             "acepta_revelar_identidad",
             "nombre_contacto_victima",
             "medio_contacto_victima",
+            "tipo_incidente",
+            "rol_reportante",
+            "fecha_aproximada",
         ]
 
     def create(self, validated_data: dict) -> Reporte:
@@ -68,6 +77,10 @@ class CrearReporteSerializer(serializers.ModelSerializer):
         El service llama a este método via serializer.save().
         """
         from .repository import ReporteRepositoryProxy
+
+        if "rol_reportante" in validated_data and not validated_data.get("involucrados_tipo"):
+            validated_data["involucrados_tipo"] = validated_data["rol_reportante"]
+
         proxy = ReporteRepositoryProxy()
         return proxy.crear(validated_data)
 
