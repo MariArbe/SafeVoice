@@ -48,10 +48,24 @@ class ReporteService:
         """
         # TODO (Etapa 2): Añadir lógica de negocio (validación de contenido,
         #                 notificaciones, etc.) antes de delegar al proxy.
+        
+        # --- NUEVO: Integración del modelo de IA ---
+        from .ml_service import predecir_nivel_riesgo
+        
+        riesgo = predecir_nivel_riesgo(
+            descripcion=datos_validados.get("descripcion", ""),
+            frecuencia=datos_validados.get("frecuencia", ""),
+            ubicacion=datos_validados.get("ubicacion", ""),
+            involucrados_tipo=datos_validados.get("involucrados_tipo", "")
+        )
+        datos_validados["nivel_riesgo_predicho"] = riesgo
+        # -------------------------------------------
+
         reporte = _proxy.crear(datos_validados)
         logger.info(
-            "Reporte creado vía service: codigo=%s",
+            "Reporte creado vía service: codigo=%s | riesgo=%s",
             reporte.codigo_seguimiento,
+            riesgo
         )
         return reporte
 

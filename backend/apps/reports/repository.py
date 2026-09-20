@@ -62,10 +62,20 @@ class ReporteRepositoryProxy:
             "codigo_seguimiento",
             "institucion_id",
             "institucion",
-            "tipo_incidente",
+            "ubicacion",
+            "frecuencia",
+            "grado_victima",
+            "involucrados_tipo",
+            "involucrados_grado",
             "descripcion",
+            "evidencia_url",
+            "tipos_agresion",
+            "nivel_riesgo_predicho",
+            "nivel_riesgo_confirmado",
             "estado",
-            "nivel_riesgo",
+            "acepta_revelar_identidad",
+            "nombre_contacto_victima",
+            "medio_contacto_victima",
         }
     )
 
@@ -144,9 +154,12 @@ class ReporteRepositoryProxy:
         Raises:
             ReporteCampoNoPermitidoError: Si `datos` contiene campos no permitidos.
         """
+        tipos_agresion = datos.pop("tipos_agresion", None)
         self._validar_campos(datos)
         datos_seguros = self._encriptar_sensibles(datos)
         reporte = Reporte.objects.create(**datos_seguros)
+        if tipos_agresion:
+            reporte.tipos_agresion.set(tipos_agresion)
         
         # Devolvemos el reporte con los campos en texto plano en memoria
         # (ya que acabamos de recibir los datos en claro de todas formas, 

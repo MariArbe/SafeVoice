@@ -1,6 +1,7 @@
-En este directorio va lo de los requisitos y las Historias de Usuario, el index es para decir eso, pero se debe hacer un documento para requisitosfuncionales y
-un documento para requisitosnofuncionales
-(La idea es q quede d este estilo y segun el requisito en un documento u otro)-> importante xd
+En este directorio va lo de los requisitos y las:
+- [Historias_de_Usuario_SafeVoice.md](./Historias_de_Usuario_SafeVoice.md): Todas las historias de usuario del proyecto.
+- [documentacion_formulario.md](./documentacion_formulario.md): Preguntas que se harán en el formulario y su justificación.
+- [criterios_clasificacion_riesgo.md](./criterios_clasificacion_riesgo.md): **(NUEVO)** Criterios y ejemplos de los niveles de riesgo usados por el Modelo de IA (HU-12).
 
 # Requisitos Funcionales
 > Proyecto: **SafeVoice** – Plataforma digital de Reporte anonimo del acoso.

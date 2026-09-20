@@ -9,7 +9,7 @@ from .base import env, BASE_DIR
 # ─── Debug ─────────────────────────────────────────────────────────────────
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 
 # ─── Base de datos (SQL Server local) ──────────────────────────────────────
@@ -17,8 +17,16 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 # Ver .env.example para las variables necesarias.
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "mssql",
+        "NAME": env("DB_NAME", default="safevoice_db"),
+        "USER": env("DB_USER", default="sa"),
+        "PASSWORD": env("DB_PASSWORD", default="SafeVoice_Admin123!"),
+        "HOST": env("DB_HOST", default="localhost"),
+        "PORT": env("DB_PORT", default="1433"),
+        "OPTIONS": {
+            "driver": env("DB_DRIVER", default="ODBC Driver 18 for SQL Server"),
+            "extra_params": "Encrypt=no;TrustServerCertificate=yes;",
+        },
     }
 }
 

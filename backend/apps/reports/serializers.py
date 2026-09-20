@@ -24,10 +24,17 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
             "fecha_creacion",
             "fecha_actualizacion",
             "estado",
-            "nivel_riesgo",
-            "tipo_incidente",
+            "nivel_riesgo_predicho",
+            "nivel_riesgo_confirmado",
+            "ubicacion",
+            "frecuencia",
+            "grado_victima",
+            "involucrados_tipo",
             "descripcion",
             "institucion_id",
+            "acepta_revelar_identidad",
+            "nombre_contacto_victima",
+            "medio_contacto_victima",
         ]
         read_only_fields = fields
 
@@ -36,17 +43,23 @@ class CrearReporteSerializer(serializers.ModelSerializer):
     """
     Serializer de escritura para la creación de reportes anónimos.
     No requiere autenticación (la vista define AllowAny).
-
-    GARANTÍA: Este serializer NUNCA debe incluir campos identificables.
-    La segunda garantía es el ReporteRepositoryProxy (lista blanca ALLOWED_FIELDS).
     """
 
     class Meta:
         model = Reporte
         fields: list[str] = [
             "institucion",
-            "tipo_incidente",
+            "ubicacion",
+            "frecuencia",
+            "grado_victima",
+            "involucrados_tipo",
+            "involucrados_grado",
             "descripcion",
+            "evidencia_url",
+            "tipos_agresion",
+            "acepta_revelar_identidad",
+            "nombre_contacto_victima",
+            "medio_contacto_victima",
         ]
 
     def create(self, validated_data: dict) -> Reporte:

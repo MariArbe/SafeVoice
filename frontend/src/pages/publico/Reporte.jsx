@@ -17,6 +17,8 @@ export default function Reporte() {
     frecuencia: "",
     tipo_agresion: [],
     descripcion: "",
+    nombre_contacto_victima: "",
+    medio_contacto_victima: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -52,10 +54,26 @@ export default function Reporte() {
 
     setLoading(true);
     try {
+      // Map tipos_agresion strings to IDs matching the DB seed
+      const agressionMap = {
+        'Me pegaron, empujaron o lastimaron (o a mi compañero/a)': 1,
+        'Me quitaron, escondieron o dañaron cosas': 2,
+        'Insultos, gritos o apodos ofensivos': 3,
+        'Inventaron chismes, amenazaron o me excluyeron del grupo': 4,
+        'Ciberacoso (Mensajes, fotos sin permiso, redes sociales)': 5
+      };
+
       const payload = {
-        tipo_incidente: formData.tipo_agresion.join(", "),
-        descripcion: `Rol: ${formData.rol_reportante} | Grado: ${formData.grado} | Ubicacion: ${formData.ubicacion} | Frecuencia: ${formData.frecuencia} \n\n${formData.descripcion}`,
-        // institucion: null // Dejamos en null porque el input es texto y el backend requiere ID
+        institucion: 1, // Por ahora forzamos la institución 1 (UPB) que está en la base de datos
+        ubicacion: formData.ubicacion,
+        frecuencia: formData.frecuencia,
+        grado_victima: formData.grado,
+        involucrados_tipo: formData.rol_reportante,
+        descripcion: formData.descripcion,
+        tipos_agresion: formData.tipo_agresion.map(t => agressionMap[t]).filter(Boolean),
+        acepta_revelar_identidad: aceptaRevelar,
+        nombre_contacto_victima: aceptaRevelar ? formData.nombre_contacto_victima : null,
+        medio_contacto_victima: aceptaRevelar ? formData.medio_contacto_victima : null,
       };
 
       const response = await reporteService.crearReporte(payload);
@@ -278,8 +296,20 @@ export default function Reporte() {
 
             {aceptaRevelar && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-200">
-                <Campo label="Nombre completo" placeholder="Ej. Juan Pérez" />
-                <Campo label="Medio de contacto" placeholder="Correo o número de celular" />
+                <Campo 
+                  label="Nombre completo" 
+                  placeholder="Ej. Juan Pérez" 
+                  name="nombre_contacto_victima"
+                  value={formData.nombre_contacto_victima}
+                  onChange={handleInputChange}
+                />
+                <Campo 
+                  label="Medio de contacto" 
+                  placeholder="Correo o número de celular" 
+                  name="medio_contacto_victima"
+                  value={formData.medio_contacto_victima}
+                  onChange={handleInputChange}
+                />
               </div>
             )}
           </section>
