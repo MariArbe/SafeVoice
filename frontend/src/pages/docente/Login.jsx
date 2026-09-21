@@ -25,16 +25,16 @@ export default function LoginDocente() {
           </div>
 
           <div className="text-center space-y-1">
-            <h1 className="text-2xl font-bold text-slate-900">Log in to your account</h1>
-            <p className="text-sm text-slate-500">Welcome back! Please enter your details.</p>
+            <h1 className="text-2xl font-bold text-slate-900">Inicia sesión en tu cuenta</h1>
+            <p className="text-sm text-slate-500">¡Bienvenido de nuevo! Por favor ingresa tus datos.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 pt-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Usuario</label>
               <input
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Ingresa tu usuario"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC] focus:border-transparent"
@@ -43,7 +43,7 @@ export default function LoginDocente() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -62,10 +62,10 @@ export default function LoginDocente() {
                   onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
                   className="rounded border-slate-300 text-[#0088CC] focus:ring-[#0088CC]"
                 />
-                Remember Me
+                Recordarme
               </label>
               <a href="#" className="text-[#0088CC] font-medium hover:underline">
-                Forgot password
+                ¿Olvidaste tu contraseña?
               </a>
             </div>
 
@@ -73,14 +73,14 @@ export default function LoginDocente() {
               type="submit"
               className="w-full bg-[#0088CC] hover:bg-[#0077B5] text-white font-medium py-2.5 rounded-lg text-sm transition-colors mt-2"
             >
-              Sign in
+              Iniciar sesión
             </button>
           </form>
 
           <p className="text-center text-xs text-slate-500 pt-2">
-            Don’t have an account?{" "}
+            ¿No tienes una cuenta?{" "}
             <Link to="/docente/registro" className="text-[#0088CC] font-semibold hover:underline">
-              Sign up
+              Regístrate
             </Link>
           </p>
         </div>
@@ -90,7 +90,7 @@ export default function LoginDocente() {
       <div className="w-full md:w-1/2 bg-[#DCEAF7] flex flex-col items-center justify-center p-8 md:p-12 relative">
         <div className="text-center space-y-2 mb-8">
           <h2 className="text-2xl font-bold text-[#1B5E9E]">
-            Welcome to <span className="text-slate-800">Teacher’s Portal</span>
+            Bienvenido al <span className="text-slate-800">Portal Docente</span>
           </h2>
           <p className="text-sm font-semibold text-[#2C5F57]">SafeVoice</p>
         </div>
