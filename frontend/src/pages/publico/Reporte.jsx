@@ -81,7 +81,15 @@ export default function Reporte() {
       const response = await reporteService.crearReporte(payload);
       setSuccessCode(response.codigo_seguimiento);
     } catch (err) {
-      setError(err.response?.data?.detail || "Error al enviar el reporte. Por favor, intenta de nuevo.");
+      console.error("Detalle del error:", err);
+      if (err.message === "Network Error") {
+        setError("Error de conexión: El servidor (backend) no parece estar en ejecución.");
+      } else if (err.response?.data) {
+        // Mostrar el JSON crudo para ver la estructura exacta del error devuelto por Django
+        setError(`Error del servidor: ${JSON.stringify(err.response.data)}`);
+      } else {
+        setError("Error al enviar el reporte. Revisa los datos e intenta de nuevo.");
+      }
     } finally {
       setLoading(false);
     }
@@ -132,12 +140,6 @@ export default function Reporte() {
             Este espacio es 100% seguro y confidencial. Nadie sabrá quién eres, a menos que decidas lo contrario.
           </p>
         </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-8">
           
@@ -323,6 +325,12 @@ export default function Reporte() {
               </div>
             )}
           </section>
+
+          {error && (
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl font-medium text-center">
+              {error}
+            </div>
+          )}
 
           <div className="pt-6">
             <Boton variant="primary" type="submit" fullWidth disabled={loading} className="py-3 text-base shadow-md !bg-[#2C5F57] hover:!bg-[#234c45] disabled:opacity-50">

@@ -15,6 +15,19 @@ const reporteService = {
       throw error;
     }
   },
+
+  /**
+   * Obtiene la lista de reportes para el docente/orientador (paginado y filtrado).
+   */
+  listarReportes: async (params = {}) => {
+    try {
+      const response = await api.get("/reports/listar/", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error al listar reportes:", error);
+      throw error;
+    }
+  },
 };
 
 export default reporteService;

@@ -62,6 +62,37 @@ class ReporteService:
         # -------------------------------------------
 
         reporte = _proxy.crear(datos_validados)
+        
+        # --- NUEVO: Notificación de nuevo reporte (HU-06) ---
+        from django.core.mail import send_mail
+        from django.conf import settings
+        import threading
+        
+        def enviar_alerta_correo():
+            try:
+                mensaje = (
+                    f"Se ha recibido un nuevo reporte anónimo en el sistema.\n"
+                    f"Nivel de Riesgo Inicial: {riesgo}\n"
+                    f"Ubicación: {reporte.ubicacion}\n\n"
+                    f"Por favor ingrese a la bandeja de reportes de SafeVoice para revisarlo."
+                )
+                # En un entorno real, el destinatario sería dinámico según la institución
+                destinatario = "orientador@colegio.edu.co" 
+                
+                send_mail(
+                    subject=f"[SafeVoice] Alerta: Nuevo Reporte ({riesgo})",
+                    message=mensaje,
+                    from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else "alertas@safevoice.com",
+                    recipient_list=[destinatario],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                logger.error(f"Fallo al enviar notificación por correo: {e}")
+                
+        # Ejecutar en un hilo en segundo plano para no bloquear la respuesta HTTP
+        threading.Thread(target=enviar_alerta_correo).start()
+        # ----------------------------------------------------
+
         logger.info(
             "Reporte creado vía service: codigo=%s | riesgo=%s",
             reporte.codigo_seguimiento,
@@ -89,13 +120,15 @@ class ReporteService:
 
     # ── Consulta para personal autorizado ─────────────────────────────────
 
-    def listar_reportes(self):
+    def listar_reportes(self, filtros: dict = None):
         """
-        Lista todos los reportes. Solo accesible por Directivo/Orientador.
-        La view es responsable de aplicar los permisos antes de llamar este método.
+        Lista todos los reportes aplicando filtros opcionales.
+        Solo accesible por Directivo/Orientador.
+
+        Args:
+            filtros: Diccionario con filtros opcionales (estado, nivel_riesgo, institucion_id, fecha_inicio, fecha_fin).
 
         Returns:
             QuerySet de Reporte ordenado por fecha descendente.
         """
-        # TODO (Etapa 2): Añadir filtros, paginación, etc.
-        return _proxy.listar_todos()
+        return _proxy.listar_todos(filtros)

@@ -205,16 +205,26 @@ class ReporteRepositoryProxy:
         except Reporte.DoesNotExist:
             raise ReporteNoEncontradoError()
 
-    def listar_todos(self):
+    def listar_todos(self, filtros: dict = None):
         """
-        Retorna todos los reportes ordenados por fecha de creación descendente.
+        Retorna todos los reportes ordenados por fecha de creación descendente,
+        aplicando filtros si existen.
         Solo accesible por usuarios autenticados (Directivo/Orientador).
-
-        Returns:
-            Lista de Reportes desencriptados.
         """
-        qs = Reporte.objects.all()
-        # En una app real, esto podría ser costoso si hay muchos registros.
+        qs = Reporte.objects.all().order_by("-fecha_creacion")
+        
+        if filtros:
+            if "institucion_id" in filtros:
+                qs = qs.filter(institucion_id=filtros["institucion_id"])
+            if "estado" in filtros:
+                qs = qs.filter(estado=filtros["estado"])
+            if "nivel_riesgo_predicho" in filtros:
+                qs = qs.filter(nivel_riesgo_predicho=filtros["nivel_riesgo_predicho"])
+            if "fecha_inicio" in filtros:
+                qs = qs.filter(fecha_creacion__gte=filtros["fecha_inicio"])
+            if "fecha_fin" in filtros:
+                qs = qs.filter(fecha_creacion__lte=filtros["fecha_fin"])
+                
         # Como es una prueba de concepto, desencriptamos en memoria la lista.
         reportes_lista = []
         for r in qs:
