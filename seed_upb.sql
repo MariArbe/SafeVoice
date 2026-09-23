@@ -15,12 +15,13 @@ DELETE FROM instituciones WHERE codigo_dane = '105001001234' OR nombre LIKE '%UP
 GO
 
 -- 2. Insertar Institución: UPB
-INSERT INTO instituciones (nombre, codigo_dane, ciudad, fecha_creacion)
+INSERT INTO instituciones (nombre, codigo_dane, ciudad, fecha_creacion, is_active)
 VALUES (
     N'Universidad Pontificia Bolivariana - Colegio UPB',
-    N'105001001234',
+    '105001001801',
     N'Medellín',
-    SYSDATETIMEOFFSET()
+    SYSDATETIMEOFFSET(),
+    1
 );
 
 DECLARE @InstId BIGINT = SCOPE_IDENTITY();

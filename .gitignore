@@ -52,6 +52,8 @@ yarn-error.log*
 
 .env
 .env.*
+cloud.env
+*.env
 !.env.example
 
 

@@ -6,6 +6,8 @@ El ReporteRepositoryProxy actúa como segunda capa (lista blanca en BD).
 Ambas capas son independientes para garantizar anonimato en profundidad.
 """
 
+from datetime import date
+
 from rest_framework import serializers
 
 from .models import Reporte
@@ -23,8 +25,18 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
             "codigo_seguimiento",
             "fecha_creacion",
             "fecha_actualizacion",
-            # Los campos de contenido (descripcion, tipo_bullying, etc.)
-            # se añadirán en Etapa 2.
+            "estado",
+            "nivel_riesgo_predicho",
+            "nivel_riesgo_confirmado",
+            "ubicacion",
+            "frecuencia",
+            "grado_victima",
+            "involucrados_tipo",
+            "descripcion",
+            "institucion_id",
+            "acepta_revelar_identidad",
+            "nombre_contacto_victima",
+            "medio_contacto_victima",
         ]
         read_only_fields = fields
 
@@ -33,16 +45,30 @@ class CrearReporteSerializer(serializers.ModelSerializer):
     """
     Serializer de escritura para la creación de reportes anónimos.
     No requiere autenticación (la vista define AllowAny).
-
-    GARANTÍA: Este serializer NUNCA debe incluir campos identificables.
-    La segunda garantía es el ReporteRepositoryProxy (lista blanca ALLOWED_FIELDS).
     """
+
+    tipo_incidente = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    rol_reportante = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    fecha_aproximada = serializers.DateField(required=False, allow_null=True)
 
     class Meta:
         model = Reporte
         fields: list[str] = [
-            # Los campos de contenido se añadirán en Etapa 2.
-            # Por ahora, crear un Reporte genera solo el codigo_seguimiento.
+            "institucion",
+            "ubicacion",
+            "frecuencia",
+            "grado_victima",
+            "involucrados_tipo",
+            "involucrados_grado",
+            "descripcion",
+            "evidencia_url",
+            "tipos_agresion",
+            "acepta_revelar_identidad",
+            "nombre_contacto_victima",
+            "medio_contacto_victima",
+            "tipo_incidente",
+            "rol_reportante",
+            "fecha_aproximada",
         ]
 
     def create(self, validated_data: dict) -> Reporte:
@@ -51,6 +77,10 @@ class CrearReporteSerializer(serializers.ModelSerializer):
         El service llama a este método via serializer.save().
         """
         from .repository import ReporteRepositoryProxy
+
+        if "rol_reportante" in validated_data and not validated_data.get("involucrados_tipo"):
+            validated_data["involucrados_tipo"] = validated_data["rol_reportante"]
+
         proxy = ReporteRepositoryProxy()
         return proxy.crear(validated_data)
 

@@ -1,0 +1,501 @@
+descripcion,frecuencia,ubicacion,involucrados_tipo,nivel_riesgo
+La verdad es que Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Qué rabia.,SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+La verdad es que No me quisieron incluir en el grupo de trabajo de sociales. Ya no aguanto.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Hola, Me miraron mal al entrar al baño y me dijeron que me fuera. Tengo mucho miedo.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Estoy cansado, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. No sé qué hacer.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Estoy cansado, Me pusieron un apodo feo hoy en el salón y se rieron.",PRIMERA_VEZ,SALON,DESCONOCIDO,BAJO
+Me tiran papeles y basura en el salón casi todos los días. Tengo mucho miedo.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+Por favor lean esto. Llevan meses golpeándome en el baño cuando no hay profesores.,SEMANAS,BANOS,GRUPO,ALTO
+Un pelao de otro grado me dijo gordo. Ayúdenme.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Por favor lean esto. Me llamaron ñero en la salida del colegio. Qué rabia.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+La verdad es que Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Qué rabia.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Ayúdenme.",SEMANAS,PASILLOS,GRUPO,MEDIO
+Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Qué rabia.,MESES,SALIDA,GRUPO,ALTO
+"Estoy cansado, Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Ayúdenme.",SEMANAS,DESCANSO,GRUPO,ALTO
+"Estoy cansado, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ayúdenme.",SEMANAS,BANOS,GRUPO,MEDIO
+"La verdad es que Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda.",MESES,SALON,GRUPO,CRITICO
+"Ayuda, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Tengo mucho miedo.",SEMANAS,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Me dañaron el cuaderno de matemáticas y me rayaron la maleta.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+"Ayuda, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ya no aguanto.",SEMANAS,SALON,GRUPO,MEDIO
+"Hola, Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Ya no aguanto.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Hola, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. Ayúdenme.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+La verdad es que Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ayúdenme.,SEMANAS,SALON,GRUPO,MEDIO
+"Hola, Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda.",MESES,SALON,GRUPO,CRITICO
+"Ayuda, Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Qué rabia.",PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+"Ayuda, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. No sé qué hacer.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+La verdad es que Me tiran papeles y basura en el salón casi todos los días. Tengo mucho miedo.,SEMANAS,SALON,GRUPO,MEDIO
+"Estoy cansado, Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor. Tengo mucho miedo.",PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+"Hola, Un pelao de otro grado me dijo gordo. No sé qué hacer.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Estoy cansado, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+Por favor lean esto. Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Qué rabia.,SEMANAS,SALON,GRUPO,MEDIO
+No me quisieron incluir en el grupo de trabajo de sociales.,SEMANAS,SALON,GRUPO,BAJO
+La verdad es que Me miraron mal al entrar al baño y me dijeron que me fuera. Tengo mucho miedo.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+La verdad es que Me miraron mal al entrar al baño y me dijeron que me fuera. Qué rabia.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+Por favor lean esto. Me llamaron ñero en la salida del colegio. Tengo mucho miedo.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+Por favor lean esto. Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. No sé qué hacer.,PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+"Hola, Me llamaron ñero en la salida del colegio. Ya no aguanto.",PRIMERA_VEZ,PASILLOS,INDIVIDUAL,BAJO
+Por favor lean esto. Me golpearon tan fuerte que perdí el conocimiento y terminé en el hospital. Tienen un cuchillo. Qué rabia.,PRIMERA_VEZ,SALIDA,GRUPO,CRITICO
+Por favor lean esto. Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. No sé qué hacer.,SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+Me empujan disimuladamente en los pasillos todos los días.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Tengo mucho miedo.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+La verdad es que Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones.,PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Tengo mucho miedo.,SEMANAS,DESCANSO,GRUPO,MEDIO
+"Ayuda, Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Tengo mucho miedo.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Un pelao de otro grado me dijo gordo.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Por favor lean esto. Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Qué rabia.,SEMANAS,INTERNET,DESCONOCIDO,ALTO
+Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase.,SEMANAS,SALON,GRUPO,MEDIO
+Todos los días me esperan en la salida para golpearme y humillarme delante de todos.,MESES,SALIDA,GRUPO,ALTO
+"Estoy cansado, Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Tengo mucho miedo.",SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+Un pelao de otro grado me dijo gordo. Ya no aguanto.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera.",PRIMERA_VEZ,BANOS,INDIVIDUAL,BAJO
+"Estoy cansado, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Qué rabia.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Por favor lean esto. Un pelao de otro grado me dijo gordo. Ayúdenme.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Todos los días me esperan en la salida para golpearme y humillarme delante de todos.,MESES,SALIDA,GRUPO,ALTO
+Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones.,PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Estoy cansado, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Tengo mucho miedo.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Ayuda, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. No sé qué hacer.",MESES,SALON,GRUPO,MEDIO
+Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Tengo mucho miedo.,SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+"Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. No sé qué hacer.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Hola, No me quisieron incluir en el grupo de trabajo de sociales. Ya no aguanto.",PRIMERA_VEZ,SALON,DESCONOCIDO,BAJO
+"Estoy cansado, Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Tengo mucho miedo.",PRIMERA_VEZ,DESCANSO,GRUPO,ALTO
+La verdad es que Me pusieron un apodo feo hoy en el salón y se rieron.,PRIMERA_VEZ,SALON,DESCONOCIDO,BAJO
+"Estoy cansado, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase.",SEMANAS,SALON,GRUPO,MEDIO
+La verdad es que Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Ayúdenme.,SEMANAS,DESCANSO,GRUPO,ALTO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Ya no aguanto.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Hola, Un pelao de otro grado me dijo gordo. Ya no aguanto.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Ayuda, Un pelao de otro grado me dijo gordo.",PRIMERA_VEZ,SALIDA,DESCONOCIDO,BAJO
+"Estoy cansado, No me quisieron incluir en el grupo de trabajo de sociales.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Estoy cansado, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Tengo mucho miedo.",SEMANAS,SALON,GRUPO,MEDIO
+"Ayuda, Me exigen fotos íntimas y si no se las mando dicen que me van a matar.",SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+Me pusieron un apodo feo hoy en el salón y se rieron. No sé qué hacer.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Tengo mucho miedo.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+"Por favor lean esto. Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. No sé qué hacer.",MESES,SALON,GRUPO,MEDIO
+La verdad es que Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor. Tengo mucho miedo.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+Por favor lean esto. Llevan meses golpeándome en el baño cuando no hay profesores. Qué rabia.,PRIMERA_VEZ,BANOS,GRUPO,ALTO
+"Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Qué rabia.",SEMANAS,SALIDA,GRUPO,ALTO
+"Estoy cansado, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Tengo mucho miedo.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Hola, Me tiran papeles y basura en el salón casi todos los días. No sé qué hacer.",SEMANAS,SALON,DESCONOCIDO,MEDIO
+"Estoy cansado, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. No sé qué hacer.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Estoy cansado, Me llamaron ñero en la salida del colegio. Qué rabia.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda. Tengo mucho miedo.",MESES,SALON,GRUPO,CRITICO
+Por favor lean esto. Me empujan disimuladamente en los pasillos todos los días. No sé qué hacer.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+Me tiran papeles y basura en el salón casi todos los días. Ya no aguanto.,PRIMERA_VEZ,SALON,INDIVIDUAL,MEDIO
+La verdad es que Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Ayúdenme.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+Por favor lean esto. Me miraron mal al entrar al baño y me dijeron que me fuera.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Estoy cansado, Un pelao de otro grado me dijo gordo.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Estoy cansado, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Tengo mucho miedo.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+Por favor lean esto. Me exigen fotos íntimas y si no se las mando dicen que me van a matar. Tengo mucho miedo.,SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+Me dañaron el cuaderno de matemáticas y me rayaron la maleta. No sé qué hacer.,PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera. Ayúdenme.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Hola, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Qué rabia.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Estoy cansado, Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Tengo mucho miedo.",MESES,SALIDA,GRUPO,ALTO
+Por favor lean esto. Me pusieron un apodo feo hoy en el salón y se rieron. Tengo mucho miedo.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Ya no aguanto.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+La verdad es que Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Tengo mucho miedo.,SEMANAS,DESCANSO,GRUPO,MEDIO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales. Tengo mucho miedo.,PRIMERA_VEZ,DESCANSO,GRUPO,BAJO
+"Estoy cansado, Me llamaron ñero en la salida del colegio. No sé qué hacer.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Estoy cansado, Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Ya no aguanto.",SEMANAS,DESCANSO,GRUPO,ALTO
+Un pelao de otro grado me dijo gordo. Qué rabia.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Me tiran papeles y basura en el salón casi todos los días. Tengo mucho miedo.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Hola, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Ayúdenme.",MESES,SALON,GRUPO,MEDIO
+"Ayuda, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+"Estoy cansado, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ya no aguanto.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+No me quisieron incluir en el grupo de trabajo de sociales. Ya no aguanto.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+No me quisieron incluir en el grupo de trabajo de sociales. Tengo mucho miedo.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Ayuda, Me miraron mal al entrar al baño y me dijeron que me fuera. Ya no aguanto.",PRIMERA_VEZ,INTERNET,GRUPO,BAJO
+Por favor lean esto. Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+Un pelao de otro grado me dijo gordo. Tengo mucho miedo.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales. Qué rabia.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+No me quisieron incluir en el grupo de trabajo de sociales. Qué rabia.,MESES,SALON,GRUPO,BAJO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Ayúdenme.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+Por favor lean esto. Un pelao de otro grado me dijo gordo. Tengo mucho miedo.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Ayuda, Todos los días me esperan en la salida para golpearme y humillarme delante de todos.",MESES,SALIDA,GRUPO,ALTO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Hola, Me exigen fotos íntimas y si no se las mando dicen que me van a matar. Ayúdenme.",SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+"Estoy cansado, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. No sé qué hacer.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Tengo mucho miedo.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+Por favor lean esto. Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ya no aguanto.,SEMANAS,SALON,GRUPO,MEDIO
+La verdad es que Me pusieron un apodo feo hoy en el salón y se rieron. Ya no aguanto.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Ya no aguanto.,SEMANAS,DESCANSO,GRUPO,ALTO
+"Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ayúdenme.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Llevan meses golpeándome en el baño cuando no hay profesores.,MESES,BANOS,GRUPO,ALTO
+"Hola, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Ya no aguanto.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+La verdad es que Me exigen fotos íntimas y si no se las mando dicen que me van a matar. No sé qué hacer.,PRIMERA_VEZ,INTERNET,INDIVIDUAL,CRITICO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Tengo mucho miedo.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Hola, Un pelao de otro grado me dijo gordo. Qué rabia.",PRIMERA_VEZ,DESCANSO,DESCONOCIDO,BAJO
+"Hola, Me golpearon tan fuerte que perdí el conocimiento y terminé en el hospital. Tienen un cuchillo. No sé qué hacer.",PRIMERA_VEZ,SALIDA,GRUPO,CRITICO
+"Ayuda, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. No sé qué hacer.",PRIMERA_VEZ,DESCANSO,GRUPO,MEDIO
+La verdad es que Me tiran papeles y basura en el salón casi todos los días. Qué rabia.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+Por favor lean esto. Me llamaron ñero en la salida del colegio. No sé qué hacer.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+La verdad es que Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. No sé qué hacer.,SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera.",MESES,BANOS,GRUPO,BAJO
+La verdad es que Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Ya no aguanto.,PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+"Hola, Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban.",PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+Por favor lean esto. Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Qué rabia.,PRIMERA_VEZ,DESCANSO,GRUPO,ALTO
+"Estoy cansado, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón.",MESES,SALON,GRUPO,MEDIO
+La verdad es que Me miraron mal al entrar al baño y me dijeron que me fuera. Ya no aguanto.,PRIMERA_VEZ,BANOS,INDIVIDUAL,BAJO
+"Ayuda, Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda.",MESES,SALON,GRUPO,CRITICO
+Llevan meses golpeándome en el baño cuando no hay profesores. Ayúdenme.,MESES,BANOS,GRUPO,ALTO
+"Ayuda, Me llamaron ñero en la salida del colegio. Tengo mucho miedo.",SEMANAS,SALIDA,INDIVIDUAL,BAJO
+La verdad es que Un pelao de otro grado me dijo gordo. Ayúdenme.,MESES,PASILLOS,DESCONOCIDO,BAJO
+La verdad es que Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Estoy cansado, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Tengo mucho miedo.",SEMANAS,SALON,GRUPO,MEDIO
+La verdad es que Me pusieron un apodo feo hoy en el salón y se rieron. No sé qué hacer.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Un pelao de otro grado me dijo gordo. Ayúdenme.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+La verdad es que Me pusieron un apodo feo hoy en el salón y se rieron. Ya no aguanto.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Hola, Me llamaron ñero en la salida del colegio. Qué rabia.",PRIMERA_VEZ,INTERNET,INDIVIDUAL,BAJO
+Un pelao de otro grado me dijo gordo. Qué rabia.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Ya no aguanto.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+La verdad es que Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+Me llamaron ñero en la salida del colegio. Tengo mucho miedo.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Ayuda, Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. No sé qué hacer.",SEMANAS,DESCANSO,DESCONOCIDO,ALTO
+"Hola, Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Ya no aguanto.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+Me golpearon tan fuerte que perdí el conocimiento y terminé en el hospital. Tienen un cuchillo. No sé qué hacer.,PRIMERA_VEZ,SALIDA,GRUPO,CRITICO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Estoy cansado, No me quisieron incluir en el grupo de trabajo de sociales. No sé qué hacer.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. No sé qué hacer.",MESES,PASILLOS,INDIVIDUAL,MEDIO
+"Estoy cansado, Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Qué rabia.",SEMANAS,DESCANSO,GRUPO,ALTO
+Por favor lean esto. Me miraron mal al entrar al baño y me dijeron que me fuera.,PRIMERA_VEZ,BANOS,DESCONOCIDO,BAJO
+La verdad es que Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+La verdad es que Llevan meses golpeándome en el baño cuando no hay profesores. Tengo mucho miedo.,MESES,BANOS,INDIVIDUAL,ALTO
+"Hola, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. No sé qué hacer.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+La verdad es que Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ya no aguanto.,SEMANAS,SALON,GRUPO,MEDIO
+"Hola, Me miraron mal al entrar al baño y me dijeron que me fuera. Ya no aguanto.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Ayuda, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+La verdad es que Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ayúdenme.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Estoy cansado, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Ya no aguanto.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Ayuda, Me miraron mal al entrar al baño y me dijeron que me fuera. Tengo mucho miedo.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Estoy cansado, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Tengo mucho miedo.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+Me empujan disimuladamente en los pasillos todos los días. Qué rabia.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+La verdad es que Llevan meses golpeándome en el baño cuando no hay profesores. Qué rabia.,MESES,BANOS,GRUPO,ALTO
+La verdad es que Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Ya no aguanto.,MESES,SALIDA,GRUPO,ALTO
+La verdad es que Me llamaron ñero en la salida del colegio.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Ayuda, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Hola, Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Por favor lean esto. Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Qué rabia.",PRIMERA_VEZ,SALIDA,DESCONOCIDO,ALTO
+"Estoy cansado, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón.",MESES,SALON,GRUPO,MEDIO
+"Estoy cansado, Me pusieron un apodo feo hoy en el salón y se rieron. Tengo mucho miedo.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Ya no aguanto.,SEMANAS,DESCANSO,GRUPO,MEDIO
+"La verdad es que Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Ya no aguanto.",MESES,SALON,GRUPO,MEDIO
+Me empujan disimuladamente en los pasillos todos los días. No sé qué hacer.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Estoy cansado, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. No sé qué hacer.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, No me quisieron incluir en el grupo de trabajo de sociales.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Estoy cansado, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Tengo mucho miedo.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Ya no aguanto.",MESES,SALON,GRUPO,MEDIO
+"Hola, Me llamaron ñero en la salida del colegio. Ya no aguanto.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Por favor lean esto. Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Tengo mucho miedo.",MESES,DESCANSO,GRUPO,MEDIO
+La verdad es que Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase.,SEMANAS,INTERNET,GRUPO,MEDIO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Qué rabia.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+La verdad es que Me tiran papeles y basura en el salón casi todos los días. Qué rabia.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Qué rabia.,MESES,BANOS,INDIVIDUAL,CRITICO
+La verdad es que Me empujan disimuladamente en los pasillos todos los días. Qué rabia.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Estoy cansado, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Hola, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Ya no aguanto.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+La verdad es que Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. No sé qué hacer.,MESES,SALIDA,GRUPO,ALTO
+Por favor lean esto. Me empujan disimuladamente en los pasillos todos los días. No sé qué hacer.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Hola, Me llamaron ñero en la salida del colegio. Tengo mucho miedo.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Hola, Un pelao de otro grado me dijo gordo. Tengo mucho miedo.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Hola, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Ayuda, Me pusieron un apodo feo hoy en el salón y se rieron. Ayúdenme.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Por favor lean esto. Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ya no aguanto.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. No sé qué hacer.,SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Hola, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Ayúdenme.",PRIMERA_VEZ,SALON,GRUPO,MEDIO
+Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Tengo mucho miedo.,SEMANAS,INTERNET,DESCONOCIDO,ALTO
+La verdad es que Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Ya no aguanto.,PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Ayuda, Me pusieron un apodo feo hoy en el salón y se rieron.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+La verdad es que Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ya no aguanto.,SEMANAS,SALON,GRUPO,MEDIO
+Un pelao de otro grado me dijo gordo. Tengo mucho miedo.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+No me quisieron incluir en el grupo de trabajo de sociales. Qué rabia.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Por favor lean esto. Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. No sé qué hacer.,PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Ayuda, No me quisieron incluir en el grupo de trabajo de sociales. Qué rabia.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Estoy cansado, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Ayúdenme.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+"Hola, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Qué rabia.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+Me miraron mal al entrar al baño y me dijeron que me fuera.,SEMANAS,BANOS,GRUPO,BAJO
+"Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda.",PRIMERA_VEZ,SALON,GRUPO,CRITICO
+Por favor lean esto. Un niño me escondió la cartuchera en el recreo como broma pero no me gustó.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Por favor lean esto. Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. No sé qué hacer.",MESES,PASILLOS,GRUPO,MEDIO
+"Estoy cansado, Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Ya no aguanto.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,CRITICO
+Un pelao de otro grado me dijo gordo. Qué rabia.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Ya no aguanto.,SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+Me llamaron ñero en la salida del colegio. No sé qué hacer.,SEMANAS,SALIDA,INDIVIDUAL,BAJO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Ayuda, Me llamaron ñero en la salida del colegio.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+Me pusieron un apodo feo hoy en el salón y se rieron. Ya no aguanto.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. No sé qué hacer.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Estoy cansado, Un pelao de otro grado me dijo gordo.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor.,PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+"Ayuda, Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Qué rabia.",MESES,SALIDA,GRUPO,ALTO
+"Hola, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. No sé qué hacer.",PRIMERA_VEZ,SALON,GRUPO,MEDIO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales. Qué rabia.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+La verdad es que Llevan meses golpeándome en el baño cuando no hay profesores. Ayúdenme.,MESES,BANOS,GRUPO,ALTO
+Por favor lean esto. Me pusieron un apodo feo hoy en el salón y se rieron. Tengo mucho miedo.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Hola, Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Tengo mucho miedo.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+La verdad es que No me quisieron incluir en el grupo de trabajo de sociales. Ayúdenme.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Hola, Llevan meses golpeándome en el baño cuando no hay profesores. Tengo mucho miedo.",MESES,BANOS,GRUPO,ALTO
+"Hola, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Qué rabia.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+"Hola, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Ayúdenme.",SEMANAS,INTERNET,GRUPO,ALTO
+"Estoy cansado, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Qué rabia.,MESES,DESCANSO,GRUPO,ALTO
+Por favor lean esto. Me tiran papeles y basura en el salón casi todos los días.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Hola, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Ayúdenme.",SEMANAS,DESCANSO,GRUPO,MEDIO
+Me llamaron ñero en la salida del colegio. Ya no aguanto.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+Por favor lean esto. Me miraron mal al entrar al baño y me dijeron que me fuera. Ayúdenme.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Ayuda, Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Ayúdenme.",SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Ayuda, Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Tengo mucho miedo.",MESES,SALIDA,GRUPO,ALTO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera. Tengo mucho miedo.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+Por favor lean esto. Me llamaron ñero en la salida del colegio. Qué rabia.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+Me empujan disimuladamente en los pasillos todos los días. Tengo mucho miedo.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Hola, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. No sé qué hacer.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Ayuda, Llevan meses golpeándome en el baño cuando no hay profesores. Qué rabia.",MESES,BANOS,GRUPO,ALTO
+"Hola, Un pelao de otro grado me dijo gordo. Ayúdenme.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"La verdad es que Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón.",MESES,SALON,GRUPO,MEDIO
+Por favor lean esto. Llevan meses golpeándome en el baño cuando no hay profesores. Ya no aguanto.,MESES,BANOS,GRUPO,ALTO
+"Ayuda, Me miraron mal al entrar al baño y me dijeron que me fuera. Ayúdenme.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+La verdad es que Me pusieron un apodo feo hoy en el salón y se rieron. Qué rabia.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Por favor lean esto. Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Tengo mucho miedo.,SEMANAS,DESCANSO,GRUPO,MEDIO
+Por favor lean esto. Me empujan disimuladamente en los pasillos todos los días.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Estoy cansado, Un pelao de otro grado me dijo gordo. No sé qué hacer.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Un niño me escondió la cartuchera en el recreo como broma pero no me gustó.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Ayuda, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Ya no aguanto.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Ayuda, Me empujan disimuladamente en los pasillos todos los días. Tengo mucho miedo.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+"Hola, Me pusieron un apodo feo hoy en el salón y se rieron. Ya no aguanto.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+La verdad es que Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Ya no aguanto.,SEMANAS,DESCANSO,GRUPO,MEDIO
+"Hola, Me tiran papeles y basura en el salón casi todos los días. Tengo mucho miedo.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+Me llamaron ñero en la salida del colegio. Tengo mucho miedo.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+Me llamaron ñero en la salida del colegio. Ya no aguanto.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Hola, Me exigen fotos íntimas y si no se las mando dicen que me van a matar. No sé qué hacer.",SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+"Estoy cansado, Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda. Ya no aguanto.",MESES,SALON,GRUPO,CRITICO
+Me pusieron un apodo feo hoy en el salón y se rieron.,PRIMERA_VEZ,BANOS,INDIVIDUAL,BAJO
+Por favor lean esto. Un niño me escondió la cartuchera en el recreo como broma pero no me gustó.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Hola, Me pusieron un apodo feo hoy en el salón y se rieron. No sé qué hacer.",MESES,SALON,INDIVIDUAL,BAJO
+Por favor lean esto. Me miraron mal al entrar al baño y me dijeron que me fuera.,PRIMERA_VEZ,BANOS,DESCONOCIDO,BAJO
+"Ayuda, No me quisieron incluir en el grupo de trabajo de sociales.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Estoy cansado, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. Ayúdenme.",SEMANAS,INTERNET,GRUPO,ALTO
+"Hola, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Tengo mucho miedo.",MESES,SALON,GRUPO,MEDIO
+"Ayuda, Llevan meses golpeándome en el baño cuando no hay profesores. Ayúdenme.",MESES,BANOS,GRUPO,ALTO
+Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Qué rabia.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Estoy cansado, Me pusieron un apodo feo hoy en el salón y se rieron. Ayúdenme.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Hola, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan.",SEMANAS,INTERNET,GRUPO,MEDIO
+Por favor lean esto. Me pusieron un apodo feo hoy en el salón y se rieron. No sé qué hacer.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Me empujan disimuladamente en los pasillos todos los días. Ayúdenme.",PRIMERA_VEZ,BANOS,INDIVIDUAL,MEDIO
+No me quisieron incluir en el grupo de trabajo de sociales. No sé qué hacer.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Hola, Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Ya no aguanto.",PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+Por favor lean esto. Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Tengo mucho miedo.,SEMANAS,DESCANSO,DESCONOCIDO,ALTO
+"Ayuda, Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Ya no aguanto.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Hola, Me tiran papeles y basura en el salón casi todos los días.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Ayuda, Un pelao de otro grado me dijo gordo. Ya no aguanto.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+La verdad es que Llevan meses golpeándome en el baño cuando no hay profesores. Qué rabia.,MESES,BANOS,GRUPO,ALTO
+La verdad es que Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ayúdenme.,SEMANAS,SALON,GRUPO,MEDIO
+Por favor lean esto. Me miraron mal al entrar al baño y me dijeron que me fuera. Tengo mucho miedo.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+La verdad es que Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. No sé qué hacer.,SEMANAS,DESCANSO,GRUPO,ALTO
+"Por favor lean esto. Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Tengo mucho miedo.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+"Estoy cansado, Todos los días me esperan en la salida para golpearme y humillarme delante de todos.",MESES,SALIDA,GRUPO,ALTO
+"Estoy cansado, No me quisieron incluir en el grupo de trabajo de sociales. Ayúdenme.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+La verdad es que Me pusieron un apodo feo hoy en el salón y se rieron. Tengo mucho miedo.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Por favor lean esto. Llevan meses golpeándome en el baño cuando no hay profesores. No sé qué hacer.,MESES,BANOS,GRUPO,ALTO
+Me empujan disimuladamente en los pasillos todos los días. Tengo mucho miedo.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+La verdad es que Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.,PRIMERA_VEZ,SALIDA,GRUPO,BAJO
+Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. No sé qué hacer.,SEMANAS,INTERNET,GRUPO,ALTO
+Por favor lean esto. Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Ayúdenme.,SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera. Ayúdenme.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Ayuda, Me miraron mal al entrar al baño y me dijeron que me fuera. Ya no aguanto.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+La verdad es que Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.,PRIMERA_VEZ,BANOS,INDIVIDUAL,BAJO
+Me pusieron un apodo feo hoy en el salón y se rieron.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Llevan meses golpeándome en el baño cuando no hay profesores. Ya no aguanto.",MESES,BANOS,GRUPO,ALTO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+La verdad es que Llevan meses golpeándome en el baño cuando no hay profesores. Tengo mucho miedo.,MESES,BANOS,GRUPO,ALTO
+"Estoy cansado, Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Tengo mucho miedo.",PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+Llevan meses golpeándome en el baño cuando no hay profesores. Ayúdenme.,MESES,BANOS,GRUPO,ALTO
+"Ayuda, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso.",SEMANAS,BANOS,GRUPO,MEDIO
+Por favor lean esto. Me pusieron un apodo feo hoy en el salón y se rieron. Ya no aguanto.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Me exigen fotos íntimas y si no se las mando dicen que me van a matar. Ayúdenme.",SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+"Estoy cansado, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Ya no aguanto.,PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+"Hola, Me pusieron un apodo feo hoy en el salón y se rieron. Qué rabia.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Hola, Me miraron mal al entrar al baño y me dijeron que me fuera.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+Por favor lean esto. Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. No sé qué hacer.,SEMANAS,SALON,GRUPO,MEDIO
+"Hola, No me quisieron incluir en el grupo de trabajo de sociales. No sé qué hacer.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+Por favor lean esto. Un pelao de otro grado me dijo gordo. No sé qué hacer.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,BAJO
+"Estoy cansado, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. No sé qué hacer.",SEMANAS,BANOS,DESCONOCIDO,ALTO
+"Ayuda, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. No sé qué hacer.",PRIMERA_VEZ,SALON,INDIVIDUAL,MEDIO
+"Ayuda, Me golpearon tan fuerte que perdí el conocimiento y terminé en el hospital. Tienen un cuchillo. Qué rabia.",PRIMERA_VEZ,SALIDA,GRUPO,CRITICO
+"Ayuda, Me miraron mal al entrar al baño y me dijeron que me fuera.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+Por favor lean esto. Me pusieron un apodo feo hoy en el salón y se rieron.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Me empujan disimuladamente en los pasillos todos los días.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase.,SEMANAS,SALON,GRUPO,MEDIO
+Me pusieron un apodo feo hoy en el salón y se rieron. Tengo mucho miedo.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Estoy cansado, Me empujan disimuladamente en los pasillos todos los días. Tengo mucho miedo.",SEMANAS,BANOS,INDIVIDUAL,MEDIO
+"La verdad es que Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Qué rabia.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+"Por favor lean esto. Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Tengo mucho miedo.",MESES,SALON,GRUPO,MEDIO
+Por favor lean esto. Me exigen fotos íntimas y si no se las mando dicen que me van a matar. Tengo mucho miedo.,SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+"La verdad es que Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Ayúdenme.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Ayúdenme.",SEMANAS,BANOS,INDIVIDUAL,MEDIO
+Por favor lean esto. Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+Por favor lean esto. Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Ayúdenme.,SEMANAS,DESCANSO,GRUPO,ALTO
+Un pelao de otro grado me dijo gordo. Qué rabia.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+Por favor lean esto. Me llamaron ñero en la salida del colegio. No sé qué hacer.,PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Estoy cansado, Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Tengo mucho miedo.",MESES,SALIDA,DESCONOCIDO,ALTO
+Por favor lean esto. Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Qué rabia.,MESES,BANOS,GRUPO,CRITICO
+"Estoy cansado, Me pusieron un apodo feo hoy en el salón y se rieron. Qué rabia.",MESES,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Llevan meses golpeándome en el baño cuando no hay profesores. Ayúdenme.",MESES,BANOS,GRUPO,ALTO
+La verdad es que Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. No sé qué hacer.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,BAJO
+"Hola, Un pelao de otro grado me dijo gordo.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Hola, Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. Tengo mucho miedo.",PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+"Ayuda, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. No sé qué hacer.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. No sé qué hacer.,SEMANAS,DESCANSO,GRUPO,MEDIO
+Por favor lean esto. Llevan meses golpeándome en el baño cuando no hay profesores. Ayúdenme.,MESES,BANOS,GRUPO,ALTO
+Por favor lean esto. Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso.,SEMANAS,DESCANSO,GRUPO,MEDIO
+"Hola, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Qué rabia.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+Por favor lean esto. Un pelao de otro grado me dijo gordo.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Por favor lean esto. Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ayúdenme.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Por favor lean esto. Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ya no aguanto.,SEMANAS,SALON,GRUPO,MEDIO
+"Estoy cansado, Me llamaron ñero en la salida del colegio. Qué rabia.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+La verdad es que Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Tengo mucho miedo.,MESES,SALIDA,GRUPO,ALTO
+"Estoy cansado, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Ya no aguanto.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Ayuda, Me tiran papeles y basura en el salón casi todos los días. Ya no aguanto.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Ayuda, Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+La verdad es que Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Qué rabia.,SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Ayuda, Me pusieron un apodo feo hoy en el salón y se rieron. Qué rabia.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Me llamaron ñero en la salida del colegio. Qué rabia.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Ayuda, Me pusieron un apodo feo hoy en el salón y se rieron. No sé qué hacer.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Hola, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón.",MESES,BANOS,GRUPO,MEDIO
+Por favor lean esto. Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Qué rabia.,PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Por favor lean esto. Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan.",PRIMERA_VEZ,INTERNET,DESCONOCIDO,MEDIO
+Por favor lean esto. Llevan meses golpeándome en el baño cuando no hay profesores.,MESES,BANOS,GRUPO,ALTO
+"Hola, Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Qué rabia.",SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Estoy cansado, Me empujan disimuladamente en los pasillos todos los días. No sé qué hacer.",PRIMERA_VEZ,PASILLOS,INDIVIDUAL,MEDIO
+"Hola, No me quisieron incluir en el grupo de trabajo de sociales.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Ayuda, Me llamaron ñero en la salida del colegio. Tengo mucho miedo.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Ayuda, Me exigen fotos íntimas y si no se las mando dicen que me van a matar. No sé qué hacer.",SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+La verdad es que Un pelao de otro grado me dijo gordo. No sé qué hacer.,PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+La verdad es que Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+Por favor lean esto. Me tiran papeles y basura en el salón casi todos los días. Qué rabia.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales. No sé qué hacer.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+Por favor lean esto. Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. No sé qué hacer.,SEMANAS,SALON,GRUPO,MEDIO
+Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. No sé qué hacer.,SEMANAS,DESCANSO,GRUPO,MEDIO
+Por favor lean esto. Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Ya no aguanto.,PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+La verdad es que Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. No sé qué hacer.,PRIMERA_VEZ,SALON,GRUPO,MEDIO
+"Estoy cansado, No me quisieron incluir en el grupo de trabajo de sociales. Ayúdenme.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Estoy cansado, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. No sé qué hacer.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Por favor lean esto. Me empujan disimuladamente en los pasillos todos los días. Ayúdenme.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,MEDIO
+"Ayuda, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. Tengo mucho miedo.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera. Ya no aguanto.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+La verdad es que Me empujan disimuladamente en los pasillos todos los días. No sé qué hacer.,SEMANAS,PASILLOS,INDIVIDUAL,MEDIO
+Por favor lean esto. Me pusieron un apodo feo hoy en el salón y se rieron. No sé qué hacer.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Ayuda, Me llamaron ñero en la salida del colegio. Qué rabia.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Estoy cansado, Llevan meses golpeándome en el baño cuando no hay profesores. Tengo mucho miedo.",MESES,PASILLOS,GRUPO,ALTO
+"Hola, Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Ya no aguanto.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+La verdad es que Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor. No sé qué hacer.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+Por favor lean esto. No me quisieron incluir en el grupo de trabajo de sociales. Qué rabia.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Ayuda, Me amenazaron con una navaja en el baño y me dijeron que si decía algo me mataban. No sé qué hacer.",PRIMERA_VEZ,BANOS,INDIVIDUAL,CRITICO
+"Estoy cansado, Me pusieron un apodo feo hoy en el salón y se rieron. Ya no aguanto.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Hola, Me pusieron un apodo feo hoy en el salón y se rieron. Qué rabia.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Estoy cansado, No me quisieron incluir en el grupo de trabajo de sociales. Ayúdenme.",PRIMERA_VEZ,SALON,GRUPO,BAJO
+Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+"Hola, Llevan meses golpeándome en el baño cuando no hay profesores.",MESES,BANOS,GRUPO,ALTO
+"Hola, Me miraron mal al entrar al baño y me dijeron que me fuera.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Estoy cansado, Me miraron mal al entrar al baño y me dijeron que me fuera. No sé qué hacer.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Hola, Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor.",PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+"Estoy cansado, Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor. Qué rabia.",PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+"Estoy cansado, Me tiran papeles y basura en el salón casi todos los días. Ayúdenme.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+Por favor lean esto. Me tiran papeles y basura en el salón casi todos los días. No sé qué hacer.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+La verdad es que Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+"Hola, Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Ya no aguanto.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Tengo mucho miedo.,SEMANAS,SALON,GRUPO,MEDIO
+"Por favor lean esto. Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón.",MESES,SALON,GRUPO,MEDIO
+"Estoy cansado, Me golpearon tan fuerte que perdí el conocimiento y terminé en el hospital. Tienen un cuchillo. Qué rabia.",PRIMERA_VEZ,SALIDA,GRUPO,CRITICO
+"Estoy cansado, Un pelao de otro grado me dijo gordo. Ayúdenme.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Hola, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Qué rabia.",SEMANAS,INTERNET,INDIVIDUAL,ALTO
+"Hola, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Ayuda, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ya no aguanto.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+"Ayuda, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Ayúdenme.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ayúdenme.,SEMANAS,SALON,GRUPO,MEDIO
+La verdad es que Me miraron mal al entrar al baño y me dijeron que me fuera. Ayúdenme.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Hola, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Tengo mucho miedo.",MESES,SALON,GRUPO,MEDIO
+"Hola, Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Qué rabia.",MESES,SALON,GRUPO,ALTO
+"Ayuda, Me miraron mal al entrar al baño y me dijeron que me fuera.",PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Ayuda, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. Qué rabia.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+La verdad es que Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo. Ayúdenme.,SEMANAS,INTERNET,GRUPO,ALTO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Ayúdenme.",SEMANAS,PASILLOS,GRUPO,MEDIO
+Por favor lean esto. Me tiran papeles y basura en el salón casi todos los días. Ya no aguanto.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+La verdad es que No me quisieron incluir en el grupo de trabajo de sociales. Ayúdenme.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"Estoy cansado, Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Ya no aguanto.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+Por favor lean esto. Llevan meses golpeándome en el baño cuando no hay profesores. Ayúdenme.,MESES,SALIDA,GRUPO,ALTO
+Me exigen fotos íntimas y si no se las mando dicen que me van a matar. Ayúdenme.,SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+"Estoy cansado, Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. No sé qué hacer.",MESES,SALON,GRUPO,MEDIO
+Por favor lean esto. Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. No sé qué hacer.,SEMANAS,DESCANSO,GRUPO,MEDIO
+"Estoy cansado, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ayúdenme.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+"Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Qué rabia.",SEMANAS,INTERNET,GRUPO,MEDIO
+"Ayuda, Un pelao de otro grado me dijo gordo. Tengo mucho miedo.",PRIMERA_VEZ,PASILLOS,DESCONOCIDO,BAJO
+"Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Tengo mucho miedo.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Me acorralaron y me quitaron el celular a la fuerza, me pegaron un puño en la cara. Qué rabia.",PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+"Hola, Me llamaron ñero en la salida del colegio. No sé qué hacer.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"La verdad es que Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ya no aguanto.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+Me pusieron un apodo feo hoy en el salón y se rieron.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Por favor lean esto. Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Tengo mucho miedo.,SEMANAS,SALON,GRUPO,MEDIO
+"Ayuda, Me dañaron el cuaderno de matemáticas y me rayaron la maleta. Ya no aguanto.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+No me quisieron incluir en el grupo de trabajo de sociales.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+"La verdad es que Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda. Tengo mucho miedo.",MESES,SALON,GRUPO,CRITICO
+"Ayuda, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan. Ya no aguanto.",PRIMERA_VEZ,INTERNET,DESCONOCIDO,MEDIO
+La verdad es que Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Qué rabia.,MESES,SALIDA,DESCONOCIDO,ALTO
+La verdad es que Un niño me escondió la cartuchera en el recreo como broma pero no me gustó.,PRIMERA_VEZ,BANOS,INDIVIDUAL,BAJO
+La verdad es que Me empujan disimuladamente en los pasillos todos los días. No sé qué hacer.,SEMANAS,SALON,INDIVIDUAL,MEDIO
+La verdad es que Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Qué rabia.,SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Estoy cansado, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso. No sé qué hacer.",SEMANAS,DESCANSO,GRUPO,MEDIO
+Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Ayúdenme.,SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+"Ayuda, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Ya no aguanto.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Ayuda, Me pusieron un apodo feo hoy en el salón y se rieron. Tengo mucho miedo.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Hola, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. No sé qué hacer.",SEMANAS,SALON,GRUPO,MEDIO
+"Ayuda, Crearon una cuenta falsa en Instagram solo para subir fotos mías humillándome e insultando. Qué rabia.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Estoy cansado, Me llamaron ñero en la salida del colegio. Qué rabia.",PRIMERA_VEZ,SALIDA,GRUPO,BAJO
+"Ayuda, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. No sé qué hacer.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+"Estoy cansado, Llevan varias semanas riéndose de mis zapatos y mi ropa. Ya no quiero salir al descanso.",SEMANAS,DESCANSO,GRUPO,MEDIO
+"Por favor lean esto. Ya no aguanto más, llevan meses haciéndome la vida imposible, pegándome y humillándome. He pensado en suicidarme porque nadie me ayuda. Ayúdenme.",MESES,SALON,GRUPO,CRITICO
+Por favor lean esto. Todos los días me esperan en la salida para golpearme y humillarme delante de todos. No sé qué hacer.,MESES,SALIDA,GRUPO,ALTO
+La verdad es que Me exigen fotos íntimas y si no se las mando dicen que me van a matar. Ayúdenme.,SEMANAS,INTERNET,INDIVIDUAL,CRITICO
+"Estoy cansado, Me tiran papeles y basura en el salón casi todos los días. Tengo mucho miedo.",SEMANAS,SALON,INDIVIDUAL,MEDIO
+"Ayuda, Me llamaron ñero en la salida del colegio. Ya no aguanto.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+"Ayuda, Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Tengo mucho miedo.",PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+Por favor lean esto. Me golpearon tan fuerte que perdí el conocimiento y terminé en el hospital. Tienen un cuchillo. Ya no aguanto.,PRIMERA_VEZ,SALIDA,GRUPO,CRITICO
+Un niño me escondió la cartuchera en el recreo como broma pero no me gustó. Tengo mucho miedo.,PRIMERA_VEZ,DESCANSO,INDIVIDUAL,BAJO
+La verdad es que Me agarraron entre varios a la salida y me pegaron patadas. Tengo moretones. Tengo mucho miedo.,PRIMERA_VEZ,SALIDA,GRUPO,ALTO
+Me pusieron un apodo feo hoy en el salón y se rieron.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+La verdad es que Me miraron mal al entrar al baño y me dijeron que me fuera. Tengo mucho miedo.,PRIMERA_VEZ,BANOS,GRUPO,BAJO
+"Hola, Me tiran papeles y basura en el salón casi todos los días. Ya no aguanto.",SEMANAS,INTERNET,INDIVIDUAL,MEDIO
+Me pusieron un apodo feo hoy en el salón y se rieron. Qué rabia.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Tengo mucho miedo.",SEMANAS,DESCANSO,INDIVIDUAL,MEDIO
+"Estoy cansado, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ayúdenme.",MESES,SALON,GRUPO,MEDIO
+Por favor lean esto. Me pusieron un apodo feo hoy en el salón y se rieron.,PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia.,SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+"Estoy cansado, Llevan meses golpeándome en el baño cuando no hay profesores. No sé qué hacer.",MESES,BANOS,GRUPO,ALTO
+Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ayúdenme.,SEMANAS,SALON,GRUPO,MEDIO
+"Hola, Me dañaron el cuaderno de matemáticas y me rayaron la maleta.",PRIMERA_VEZ,SALON,DESCONOCIDO,MEDIO
+"Estoy cansado, Llevan meses golpeándome en el baño cuando no hay profesores.",MESES,BANOS,INDIVIDUAL,ALTO
+"Hola, Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Ayúdenme.",MESES,SALIDA,GRUPO,ALTO
+"Llevan un mes ignorándome completamente, es como si fuera invisible para todo el salón. Tengo mucho miedo.",MESES,SALIDA,GRUPO,MEDIO
+"Hola, Me llamaron ñero en la salida del colegio.",PRIMERA_VEZ,SALIDA,INDIVIDUAL,BAJO
+La verdad es que Un niño de once me tocó las partes íntimas a la fuerza en el pasillo y me dijo que si hablaba me iba peor. Tengo mucho miedo.,PRIMERA_VEZ,PASILLOS,INDIVIDUAL,CRITICO
+"Estoy cansado, Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Ya no aguanto.",SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+Por favor lean esto. Me llamaron ñero en la salida del colegio.,PRIMERA_VEZ,INTERNET,INDIVIDUAL,BAJO
+"Hola, Me pusieron un apodo feo hoy en el salón y se rieron. Ya no aguanto.",PRIMERA_VEZ,SALON,INDIVIDUAL,BAJO
+"Estoy cansado, Me excluyen de todos los grupos y me dicen cosas feas cada vez que participo en clase. Ya no aguanto.",SEMANAS,SALON,GRUPO,MEDIO
+"Hola, Hicieron un meme mío y lo compartieron en un grupo de WhatsApp, todos se burlan.",PRIMERA_VEZ,INTERNET,GRUPO,MEDIO
+No me quisieron incluir en el grupo de trabajo de sociales. Qué rabia.,PRIMERA_VEZ,SALON,GRUPO,BAJO
+La verdad es que Todos los días me esperan en la salida para golpearme y humillarme delante de todos. Ayúdenme.,MESES,SALIDA,GRUPO,ALTO
+"Ayuda, Me amenazaron con pegarme a la salida si no les daba la plata del almuerzo.",SEMANAS,DESCANSO,GRUPO,ALTO
+"Ayuda, Me golpearon tan fuerte que perdí el conocimiento y terminé en el hospital. Tienen un cuchillo. Qué rabia.",PRIMERA_VEZ,SALIDA,GRUPO,CRITICO
+"Hola, Un tipo me mandó fotos de un arma y dice que me va a matar a mí y a mi familia. Qué rabia.",SEMANAS,INTERNET,DESCONOCIDO,CRITICO
+"Ayuda, Me están mandando mensajes de texto amenazándome y diciendo que me van a linchar. Qué rabia.",SEMANAS,INTERNET,DESCONOCIDO,ALTO
+"Hola, Me empujan disimuladamente en los pasillos todos los días. Ayúdenme.",SEMANAS,PASILLOS,INDIVIDUAL,MEDIO

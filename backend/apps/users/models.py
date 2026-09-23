@@ -59,6 +59,7 @@ class Usuario(AbstractUser):
         related_name="usuarios",
         verbose_name="institución",
         help_text="Institución educativa a la que pertenece el usuario.",
+        db_column="institucion_id",
     )
 
     # Campos de AbstractUser que se mantienen pero no son el identificador

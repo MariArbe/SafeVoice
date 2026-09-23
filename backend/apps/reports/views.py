@@ -70,16 +70,38 @@ class ConsultarReporteView(APIView):
         return Response(respuesta.data, status=status.HTTP_200_OK)
 
 
+from rest_framework.pagination import PageNumberPagination
+
 class ListarReportesView(APIView):
     """
     GET /api/v1/reports/
     Lista todos los reportes. Solo para Directivo u Orientador autenticado.
+    Soporta filtros y paginación.
     """
 
     permission_classes = [EsDirectivoOOrientador]
 
     def get(self, request: Request) -> Response:
-        reportes = _service.listar_reportes()
+        filtros = {
+            "institucion_id": request.query_params.get("institucion_id"),
+            "estado": request.query_params.get("estado"),
+            "nivel_riesgo_predicho": request.query_params.get("nivel_riesgo_predicho"),
+            "fecha_inicio": request.query_params.get("fecha_inicio"),
+            "fecha_fin": request.query_params.get("fecha_fin"),
+        }
+        # Eliminar valores None
+        filtros = {k: v for k, v in filtros.items() if v is not None}
+
+        reportes = _service.listar_reportes(filtros)
+        
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+        page = paginator.paginate_queryset(reportes, request, view=self)
+        
+        if page is not None:
+            serializer = ReporteLecturaSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
         serializer = ReporteLecturaSerializer(reportes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

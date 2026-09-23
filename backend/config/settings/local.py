@@ -9,7 +9,7 @@ from .base import env, BASE_DIR
 # ─── Debug ─────────────────────────────────────────────────────────────────
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 
 # ─── Base de datos (SQL Server local) ──────────────────────────────────────
@@ -18,14 +18,13 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
+        "NAME": env("DB_NAME", default="safevoice_db"),
+        "USER": env("DB_USER", default="sa"),
+        "PASSWORD": env("DB_PASSWORD", default="SafeVoice_Admin123!"),
         "HOST": env("DB_HOST", default="localhost"),
         "PORT": env("DB_PORT", default="1433"),
         "OPTIONS": {
             "driver": env("DB_DRIVER", default="ODBC Driver 18 for SQL Server"),
-            # Deshabilita la encriptación forzada en conexiones locales
             "extra_params": "Encrypt=no;TrustServerCertificate=yes;",
         },
     }
@@ -53,9 +52,15 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "anonymize_ip": {
+            "()": "core.logging_filters.AnonymizeIPFilter",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "filters": ["anonymize_ip"],
         },
     },
     "root": {
