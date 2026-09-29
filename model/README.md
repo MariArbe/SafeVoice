@@ -27,20 +27,23 @@ El modelo no solo lee texto, sino que se enriquece con el contexto estructurado 
 3.  **`ubicacion` (Categórica):** Lugares sin supervisión (ej. Baños, Salida) aumentan la probabilidad de severidad.
 4.  **`involucrados_tipo` (Categórica):** Agresiones en "Grupo" representan mayor desbalance de poder que las "Individuales".
 
-### 2.2. Algoritmo
-Se utiliza un **Pipeline de Scikit-Learn** que culmina en un clasificador de ensamble **Random Forest** (`RandomForestClassifier(n_estimators=100, random_state=42, class_weight="balanced")`). Ofrece gran robustez, captura relaciones no lineales complejas entre el texto y las variables categóricas, y mantiene tiempos de inferencia en tiempo real (< 15 ms).
+### 2.2. Algoritmo y Técnicas Anti-Sobreajuste
+Se utiliza un **Pipeline de Scikit-Learn** con regularización activa para garantizar que el modelo no memorice plantillas sintéticas y generalice de forma realista:
+* **Eliminación de Stopwords:** Filtra conectores vacíos en español (*de, la, que, el, un, por, me...*) enfocando los árboles en vocabulario con carga semántica (*golpearon, chismes, apodo*).
+* **Poda de Árboles (*Tree Pruning*):** `max_depth=6`, `min_samples_split=6` y `min_samples_leaf=3`, impidiendo que los árboles generen hojas para casos aislados.
+* **Submuestreo y Descorrelación (*Bagging*):** `max_samples=0.75` (cada árbol ve el 75% de los datos) y `max_features='sqrt'` (cada división evalúa un subconjunto aleatorio de palabras).
 
 ### 2.3. Métricas de Evaluación Oficiales (HU-12)
-El modelo fue evaluado en un conjunto de prueba estratificado (20% test split) y verificado con validación cruzada k-fold (*5-Fold Cross Validation*):
+El modelo fue evaluado en un conjunto de prueba independiente (20% test split) y mediante validación cruzada k-fold (*5-Fold Cross Validation*):
 
 | Nivel de Riesgo | Precisión (Precision) | Sensibilidad (Recall) | Puntuación F1 (F1-Score) | Casos de Prueba (Support) |
 | :--- | :---: | :---: | :---: | :---: |
-| 🟢 **BAJO** | 1.00 | 1.00 | 1.00 | 37 |
-| 🟡 **MEDIO** | 1.00 | 1.00 | 1.00 | 31 |
-| 🔴 **ALTO** | 1.00 | 1.00 | 1.00 | 21 |
-| 🚨 **CRITICO** | 1.00 | 1.00 | 1.00 | 11 |
-| **Exactitud Global (Accuracy)** | — | — | **1.00** | **100** |
-| **Validación Cruzada (5-Fold Macro F1)** | — | — | **1.00** | **500** |
+| 🟢 **BAJO** | 0.97 | 1.00 | 0.99 | 37 |
+| 🟡 **MEDIO** | 1.00 | 0.97 | 0.98 | 31 |
+| 🔴 **ALTO** | 1.00 | 0.90 | 0.95 | 21 |
+| 🚨 **CRITICO** | 0.85 | 1.00 | 0.92 | 11 |
+| **Exactitud Global (Accuracy)** | — | — | **0.97 (97%)** | **100** |
+| **Validación Cruzada (5-Fold Macro F1)** | — | — | **0.916 (+/- 0.05)** | **500** |
 
 *Latencia promedio de inferencia:* **~3.5 ms por reporte** una vez el pipeline está cargado en memoria RAM.
 
