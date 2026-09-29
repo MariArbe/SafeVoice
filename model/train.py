@@ -2,7 +2,7 @@ import joblib
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -37,11 +37,11 @@ preprocessor = ColumnTransformer(
     ]
 )
 
-# 2. Definir el modelo (Regresión Logística multinomial balanceada)
+# 2. Definir el modelo (Random Forest balanceado)
 pipeline = Pipeline(
     [
         ("features", preprocessor),
-        ("clf", LogisticRegression(max_iter=1000, class_weight="balanced")),
+        ("clf", RandomForestClassifier(n_estimators=100, random_state=42, class_weight="balanced")),
     ]
 )
 
