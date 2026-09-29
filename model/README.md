@@ -18,7 +18,7 @@ El objetivo del modelo es servir como un **triaje inicial automatizado**. Cuando
 
 ## 2. Arquitectura del Modelo
 
-Dado el contexto de privacidad de datos de menores y las limitantes de un proyecto académico (donde no se cuenta con una base de datos histórica de miles de casos reales), se optó por un enfoque **Clásico + Híbrido** (Regresión Logística con Procesamiento de Lenguaje Natural + Reglas deterministas).
+Dado el contexto de privacidad de datos de menores y las limitantes de un proyecto académico (donde no se cuenta con una base de datos histórica de miles de casos reales), se optó por un enfoque **Híbrido y Robusto** (Random Forest con Procesamiento de Lenguaje Natural + Reglas deterministas).
 
 ### 2.1. Las Variables (Features)
 El modelo no solo lee texto, sino que se enriquece con el contexto estructurado del formulario:
