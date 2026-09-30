@@ -1,11 +1,11 @@
 import { useState } from "react";
-import Header from "../../components/ui/Header";
-import Footer from "../../components/ui/Footer";
+import { Link, useNavigate } from "react-router-dom";
 import Campo from "../../components/ui/Campo";
 import Boton from "../../components/ui/Boton";
 import reporteService from "../../services/reporteService";
 
 export default function Reporte() {
+  const navigate = useNavigate();
   const [aceptaRevelar, setAceptaRevelar] = useState(false);
   
   // Estado del formulario
@@ -97,9 +97,21 @@ export default function Reporte() {
 
   if (successCode) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-        <Header />
-        <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-12 flex flex-col items-center justify-center text-center">
+      <div className="min-h-screen bg-[#DCEAF7] flex flex-col justify-between font-sans text-slate-800">
+        {/* Header Unificado */}
+        <header className="bg-white/90 backdrop-blur-md px-6 md:px-12 py-4 flex items-center justify-between border-b border-slate-200/80 shadow-2xs sticky top-0 z-20">
+          <Link to="/" className="flex items-center gap-3 group cursor-pointer">
+            <div className="w-10 h-10 rounded-2xl bg-[#DCEAF7] flex items-center justify-center group-hover:scale-105 transition-transform">
+              <svg className="w-6 h-6 text-[#1B5E9E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+            </div>
+            <span className="text-xl font-extrabold text-[#1B5E9E] tracking-tight">SafeVoice</span>
+          </Link>
+        </header>
+
+        <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-12 flex flex-col items-center justify-center text-center">
           <div className="bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-emerald-100 max-w-xl w-full">
             <div className="w-20 h-20 bg-emerald-100/80 text-[#2C5F57] rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,32 +131,57 @@ export default function Reporte() {
             <p className="text-xs text-slate-500 mb-8 max-w-md mx-auto">
               Guarda este código en un lugar seguro. Con él podrás consultar el estado de tu reporte más adelante sin revelar tu identidad.
             </p>
-            <Boton variant="primary" onClick={() => window.location.href = '/'} fullWidth className="py-3.5 text-base font-bold shadow-md !bg-[#2C5F57] hover:!bg-[#234c45] rounded-xl">
+            <Boton variant="primary" onClick={() => navigate("/")} fullWidth className="py-3.5 text-base font-bold shadow-md !bg-[#2C5F57] hover:!bg-[#234c45] rounded-xl cursor-pointer">
               Volver al Inicio
             </Boton>
           </div>
         </main>
-        <Footer />
+
+        <footer className="bg-white/80 px-6 sm:px-8 py-3.5 flex flex-col sm:flex-row justify-between items-center text-xs text-[#2C5F57] font-medium border-t border-slate-200/80 gap-2">
+          <span>SafeVoice &bull; Plataforma Anónima de Convivencia Escolar</span>
+          <span>&copy; {new Date().getFullYear()}</span>
+        </footer>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <Header />
+    <div className="min-h-screen bg-[#DCEAF7] flex flex-col justify-between font-sans text-slate-800">
+      {/* Header Unificado */}
+      <header className="bg-white/90 backdrop-blur-md px-6 md:px-12 py-4 flex items-center justify-between border-b border-slate-200/80 shadow-2xs sticky top-0 z-20">
+        <Link to="/" className="flex items-center gap-3 group cursor-pointer">
+          <div className="w-10 h-10 rounded-2xl bg-[#DCEAF7] flex items-center justify-center group-hover:scale-105 transition-transform">
+            <svg className="w-6 h-6 text-[#1B5E9E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+          </div>
+          <span className="text-xl font-extrabold text-[#1B5E9E] tracking-tight">SafeVoice</span>
+        </Link>
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 text-xs font-bold text-[#2C5F57] hover:text-[#1B5E9E] bg-slate-100/80 hover:bg-slate-200/80 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+          title="Volver al inicio"
+        >
+          <span>Inicio</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
+      </header>
       
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-10">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8">
         <div className="mb-8 text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-[#2C5F57] text-xs font-bold tracking-wide uppercase">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#1B5E9E]/20 text-[#1B5E9E] text-xs font-bold tracking-wide uppercase shadow-2xs backdrop-blur-xs">
+            <svg className="w-4 h-4 text-[#2C5F57]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             Espacio 100% Confidencial
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2C5F57]">
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1B5E9E]">
             Crear Reporte Anónimo
           </h1>
-          <p className="text-slate-600 text-base max-w-xl mx-auto">
+          <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
             Este espacio es seguro. Nadie sabrá quién eres a menos que decidas identificarte voluntariamente.
           </p>
         </div>
@@ -374,7 +411,11 @@ export default function Reporte() {
         </form>
       </main>
       
-      <Footer />
+      {/* Footer Unificado */}
+      <footer className="bg-white/80 px-6 sm:px-8 py-3.5 flex flex-col sm:flex-row justify-between items-center text-xs text-[#2C5F57] font-medium border-t border-slate-200/80 gap-2">
+        <span>SafeVoice &bull; Plataforma Anónima de Convivencia Escolar</span>
+        <span>&copy; {new Date().getFullYear()}</span>
+      </footer>
     </div>
   );
 }
