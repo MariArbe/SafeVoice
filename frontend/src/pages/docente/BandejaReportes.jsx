@@ -34,6 +34,9 @@ export default function BandejaReportesDocente() {
       }
     } catch (error) {
       console.error("Error al cargar reportes", error);
+      if (error.response?.status === 401) {
+        navigate("/docente/login");
+      }
     } finally {
       setLoading(false);
     }

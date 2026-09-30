@@ -29,6 +29,7 @@ export default function AppRouter() {
         <Route path="/docente/menu" element={<MenuDocente />} />
         <Route path="/docente/dashboard" element={<Dashboard />} />
         <Route path="/docente/reportes" element={<BandejaReportes />} />
+        <Route path="/docente/bandeja" element={<BandejaReportes />} />
 
         <Route path="*" element={<p>Página no encontrada</p>} />
       </Routes>
