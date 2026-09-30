@@ -1,14 +1,96 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import userService from "../../services/userService";
 
 export default function RegistroDocente() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: "", username: "", password: "" });
 
-  const handleSubmit = (e) => {
+  const [formData, setFormData] = useState({
+    email: "",
+    first_name: "",
+    last_name: "",
+    rol: "ORIENTADOR",
+    password: "",
+    password_confirmacion: "",
+  });
+
+  const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Limpia el error del campo específico si existía
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
+    }
+  };
+
+  const getFieldError = (fieldName) => {
+    if (!errors || !errors[fieldName]) return null;
+    const fieldError = errors[fieldName];
+    if (Array.isArray(fieldError)) {
+      return fieldError.join(" ");
+    }
+    return fieldError;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Tras registrarse, redirige al login
-    navigate("/docente/login");
+    setErrors({});
+    setGeneralError("");
+    setSuccessMessage("");
+
+    // Validación básica del lado del cliente
+    if (formData.password !== formData.password_confirmacion) {
+      setErrors({ password_confirmacion: "Las contraseñas no coinciden." });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await userService.crearUsuario(formData);
+      setSuccessMessage("¡Cuenta registrada con éxito! Redirigiendo al inicio de sesión...");
+      
+      setTimeout(() => {
+        navigate("/docente/login", {
+          state: { message: "Registro exitoso. Inicia sesión con tus credenciales." },
+        });
+      }, 1500);
+    } catch (error) {
+      if (error.response) {
+        const { status, data } = error.response;
+
+        if (status === 400 && data) {
+          if (data.detail && typeof data.detail === "string") {
+            setGeneralError(data.detail);
+          } else if (data.non_field_errors) {
+            setGeneralError(
+              Array.isArray(data.non_field_errors)
+                ? data.non_field_errors.join(" ")
+                : data.non_field_errors
+            );
+          } else {
+            // Errores de validación por campo desde Django REST Framework
+            setErrors(data);
+          }
+        } else if (status >= 500) {
+          setGeneralError("Ocurrió un error interno en el servidor. Por favor, intenta más tarde.");
+        } else {
+          setGeneralError(
+            data?.detail || data?.message || "Ocurrió un error inesperado al procesar el registro."
+          );
+        }
+      } else {
+        setGeneralError("No fue posible conectar con el servidor. Revisa tu conexión a internet.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -41,7 +123,7 @@ export default function RegistroDocente() {
         </div>
 
         {/* Formulario */}
-        <div className="max-w-md w-full mx-auto my-auto py-8 space-y-6">
+        <div className="max-w-md w-full mx-auto my-auto py-6 space-y-5">
           <div className="space-y-1.5 text-center md:text-left">
             <span className="inline-block text-xs font-bold text-[#2C5F57] bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               Gestión Educativa
@@ -52,53 +134,177 @@ export default function RegistroDocente() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Nombre completo*</label>
-              <input
-                type="text"
-                placeholder="Ej. María Arbeláez"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#1B5E9E] focus:border-transparent placeholder:text-slate-400 bg-slate-50/50 focus:bg-white"
-                required
-              />
+          {/* Mensaje global de éxito */}
+          {successMessage && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          {/* Mensaje global de error (500 o general) */}
+          {generalError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{generalError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+            {/* Nombre y Apellidos */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nombre*</label>
+                <input
+                  type="text"
+                  name="first_name"
+                  placeholder="Ej. María"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  className={`w-full border ${
+                    getFieldError("first_name") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
+                  } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent placeholder:text-slate-400 bg-slate-50/50 focus:bg-white`}
+                  required
+                  disabled={isLoading}
+                />
+                {getFieldError("first_name") && (
+                  <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("first_name")}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Apellidos*</label>
+                <input
+                  type="text"
+                  name="last_name"
+                  placeholder="Ej. Arbeláez"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  className={`w-full border ${
+                    getFieldError("last_name") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
+                  } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent placeholder:text-slate-400 bg-slate-50/50 focus:bg-white`}
+                  required
+                  disabled={isLoading}
+                />
+                {getFieldError("last_name") && (
+                  <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("last_name")}</p>
+                )}
+              </div>
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Nombre de usuario*</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Correo electrónico*</label>
               <input
-                type="text"
-                placeholder="Ej. marbelarez"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#1B5E9E] focus:border-transparent placeholder:text-slate-400 bg-slate-50/50 focus:bg-white"
+                type="email"
+                name="email"
+                placeholder="ejemplo@colegio.edu.co"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full border ${
+                  getFieldError("email") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
+                } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent placeholder:text-slate-400 bg-slate-50/50 focus:bg-white`}
                 required
+                disabled={isLoading}
               />
+              {getFieldError("email") && (
+                <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("email")}</p>
+              )}
             </div>
 
+            {/* Rol */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Contraseña*</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#1B5E9E] focus:border-transparent bg-slate-50/50 focus:bg-white"
+              <label className="block text-xs font-bold text-slate-700 mb-1">Rol institucional*</label>
+              <select
+                name="rol"
+                value={formData.rol}
+                onChange={handleChange}
+                className={`w-full border ${
+                  getFieldError("rol") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
+                } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent bg-slate-50/50 focus:bg-white text-slate-700 font-medium`}
                 required
-                minLength={8}
-              />
-              <p className="text-[11px] text-slate-400 mt-1">Mínimo 8 caracteres.</p>
+                disabled={isLoading}
+              >
+                <option value="ORIENTADOR">Orientador(a)</option>
+                <option value="DIRECTIVO">Directivo / Coordinación</option>
+              </select>
+              {getFieldError("rol") && (
+                <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("rol")}</p>
+              )}
             </div>
+
+            {/* Contraseñas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Contraseña*</label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`w-full border ${
+                    getFieldError("password") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
+                  } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent bg-slate-50/50 focus:bg-white`}
+                  required
+                  minLength={8}
+                  disabled={isLoading}
+                />
+                {getFieldError("password") && (
+                  <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("password")}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Confirmar contraseña*</label>
+                <input
+                  type="password"
+                  name="password_confirmacion"
+                  placeholder="••••••••"
+                  value={formData.password_confirmacion}
+                  onChange={handleChange}
+                  className={`w-full border ${
+                    getFieldError("password_confirmacion") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
+                  } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent bg-slate-50/50 focus:bg-white`}
+                  required
+                  minLength={8}
+                  disabled={isLoading}
+                />
+                {getFieldError("password_confirmacion") && (
+                  <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("password_confirmacion")}</p>
+                )}
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-400">La contraseña debe tener al menos 8 caracteres.</p>
 
             <button
               type="submit"
-              className="w-full bg-[#1B5E9E] hover:bg-[#154a7d] active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md hover:shadow-lg mt-4 cursor-pointer flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className={`w-full bg-[#1B5E9E] hover:bg-[#154a7d] active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md hover:shadow-lg mt-3 cursor-pointer flex items-center justify-center gap-2 ${
+                isLoading ? "opacity-75 cursor-not-allowed" : ""
+              }`}
             >
-              <span>Comenzar Registro</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Registrando...</span>
+                </>
+              ) : (
+                <>
+                  <span>Comenzar Registro</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
             </button>
           </form>
 

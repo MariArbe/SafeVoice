@@ -10,6 +10,8 @@ from .base import env, BASE_DIR
 DEBUG = True
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 
 # ─── Base de datos (SQL Server local) ──────────────────────────────────────
