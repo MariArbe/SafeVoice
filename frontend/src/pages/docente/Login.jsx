@@ -1,14 +1,42 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 export default function LoginDocente() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ username: "", password: "", rememberMe: false });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Navegación al panel principal tras autenticarse
-    navigate("/docente/menu");
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await api.post("/users/login/", {
+        email: formData.username.trim(),
+        password: formData.password,
+      });
+
+      if (response.data && response.data.access) {
+        localStorage.setItem("token", response.data.access);
+        if (response.data.refresh) {
+          localStorage.setItem("refresh_token", response.data.refresh);
+        }
+        localStorage.setItem("user", JSON.stringify(response.data));
+        navigate("/docente/reportes");
+      }
+    } catch (err) {
+      console.error("Error en login:", err);
+      const msg =
+        err.response?.data?.error?.message ||
+        err.response?.data?.detail ||
+        "Correo electrónico o contraseña incorrectos.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,12 +80,18 @@ export default function LoginDocente() {
             </p>
           </div>
 
+          {error && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-xs font-semibold">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Usuario</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Correo o Usuario</label>
               <input
                 type="text"
-                placeholder="Ingresa tu usuario"
+                placeholder="Ingresa tu correo o usuario"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#1B5E9E] focus:border-transparent placeholder:text-slate-400 bg-slate-50/50 focus:bg-white"
@@ -94,12 +128,15 @@ export default function LoginDocente() {
 
             <button
               type="submit"
-              className="w-full bg-[#1B5E9E] hover:bg-[#154a7d] active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md hover:shadow-lg mt-2 cursor-pointer flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full bg-[#1B5E9E] hover:bg-[#154a7d] active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md hover:shadow-lg mt-2 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span>Ingresar al Portal</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <span>{loading ? "Iniciando sesión..." : "Ingresar al Portal"}</span>
+              {!loading && (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              )}
             </button>
           </form>
 

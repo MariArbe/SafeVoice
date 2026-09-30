@@ -25,6 +25,7 @@ export default function Reporte() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successCode, setSuccessCode] = useState(null);
+  const [nivelRiesgo, setNivelRiesgo] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -80,6 +81,7 @@ export default function Reporte() {
 
       const response = await reporteService.crearReporte(payload);
       setSuccessCode(response.codigo_seguimiento);
+      setNivelRiesgo(response.nivel_riesgo_predicho);
     } catch (err) {
       console.error("Detalle del error:", err);
       if (err.message === "Network Error") {
@@ -124,9 +126,25 @@ export default function Reporte() {
             </p>
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-6 shadow-xs">
               <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Tu código de seguimiento es:</p>
-              <p className="text-2xl font-mono font-extrabold text-[#1B5E9E] break-all select-all tracking-wider bg-white py-2.5 px-4 rounded-xl border border-slate-200 inline-block shadow-2xs">
+              <p className="text-2xl font-mono font-extrabold text-[#1B5E9E] break-all select-all tracking-wider bg-white py-2.5 px-4 rounded-xl border border-slate-200 inline-block shadow-2xs mb-4">
                 {successCode}
               </p>
+
+              {nivelRiesgo && (
+                <div className="mt-2 pt-4 border-t border-slate-200">
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">
+                    Nivel de Riesgo Clasificado por la IA:
+                  </p>
+                  <span className={`inline-block px-5 py-2 rounded-xl text-sm font-extrabold shadow-xs border ${
+                    nivelRiesgo === 'CRITICO' ? 'bg-red-100 text-red-700 border-red-300' :
+                    nivelRiesgo === 'ALTO' ? 'bg-orange-100 text-orange-700 border-orange-300' :
+                    nivelRiesgo === 'MEDIO' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
+                    'bg-green-100 text-green-700 border-green-300'
+                  }`}>
+                    {nivelRiesgo}
+                  </span>
+                </div>
+              )}
             </div>
             <p className="text-xs text-slate-500 mb-8 max-w-md mx-auto">
               Guarda este código en un lugar seguro. Con él podrás consultar el estado de tu reporte más adelante sin revelar tu identidad.

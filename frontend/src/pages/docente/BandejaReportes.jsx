@@ -35,9 +35,10 @@ export default function BandejaReportesDocente() {
       } else {
         setReportes(data);
         setTotalPages(1);
+      if (error.response?.status === 401) {
+        navigate("/docente/login");
+        return;
       }
-    } catch (error) {
-      console.error("Error al cargar reportes", error);
       // Fallback mock si la API aún no está disponible en desarrollo
       setReportes([
         {
