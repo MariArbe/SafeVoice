@@ -1,235 +1,314 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function DashboardDocente() {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-800">
+    <div className="min-h-screen bg-[#DCEAF7]/40 flex font-sans text-slate-800">
+      
       {/* Sidebar / Navegación Lateral */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 hidden md:flex">
+      <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 hidden md:flex z-10 shadow-xs">
         <div>
           {/* Logo / Encabezado */}
-          <div className="p-6 flex items-center gap-3 border-b border-slate-100">
-            <div className="w-9 h-9 bg-[#1B5E9E] rounded-full flex items-center justify-center text-white font-bold text-xs">
-              SV
+          <div className="p-5 flex items-center gap-3 border-b border-slate-100">
+            <div className="w-9 h-9 rounded-2xl bg-[#DCEAF7] flex items-center justify-center">
+              <svg className="w-5 h-5 text-[#1B5E9E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
             </div>
             <div>
-              <h2 className="font-bold text-slate-800 text-sm leading-tight">SafeVoice</h2>
-              <p className="text-[11px] text-slate-400">Portal Admin</p>
+              <h2 className="font-extrabold text-[#1B5E9E] text-base leading-tight">SafeVoice</h2>
+              <p className="text-[11px] text-[#2C5F57] font-semibold">Panel de Convivencia</p>
             </div>
           </div>
 
           {/* Menú Principal */}
-          <nav className="p-4 space-y-1 text-sm font-medium text-slate-600">
-            <div className="space-y-1">
-              <button className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-blue-600 text-white font-semibold">
-                <span className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                  Dashboard
-                </span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-              </button>
-              <div className="pl-8 space-y-1 text-xs text-slate-500 pt-1">
-                <p className="font-semibold text-slate-800 py-1">Panel Administrador</p>
-                <p className="hover:text-slate-800 py-1 cursor-pointer">Panel Docente</p>
-                <p className="hover:text-slate-800 py-1 cursor-pointer">Panel Estudiante</p>
-              </div>
-            </div>
+          <nav className="p-4 space-y-1 text-xs font-bold text-slate-600">
+            <Link
+              to="/docente/dashboard"
+              className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-[#1B5E9E] text-white shadow-xs transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span>Dashboard de Datos</span>
+            </Link>
 
-            <a href="#" className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-slate-100 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-              Docente
-            </a>
-            <a href="#" className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-slate-100 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /></svg>
-              Estudiante
-            </a>
-            <a href="#" className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-slate-100 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-              Departamentos
-            </a>
+            <Link
+              to="/docente/reportes"
+              className="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-[#2C5F57] transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <span>Bandeja de Reportes</span>
+            </Link>
+
+            <Link
+              to="/informacion"
+              className="flex items-center gap-3 px-3.5 py-3 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-[#1B5E9E] transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <span>Protocolos e Info</span>
+            </Link>
           </nav>
         </div>
 
-        {/* Sección Configuración y Logout */}
-        <div className="p-4 border-t border-slate-100 space-y-1 text-sm font-medium text-slate-600">
-          <Link to="/docente/menu" className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-slate-100 text-slate-700 transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" /></svg>
-            Menú Docente
+        {/* Sección Opciones Inferiores */}
+        <div className="p-4 border-t border-slate-100 space-y-1 text-xs font-bold text-slate-600">
+          <Link
+            to="/docente/menu"
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-100 text-slate-700 transition-colors"
+          >
+            <svg className="w-4 h-4 text-[#2C5F57]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+            </svg>
+            <span>Menú Docente</span>
           </Link>
-          <Link to="/docente/login" className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-rose-50 text-rose-600 transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            Logout
-          </Link>
+
+          <button
+            onClick={() => navigate("/docente/login")}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-rose-50 text-rose-700 transition-colors text-left cursor-pointer"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Cerrar sesión</span>
+          </button>
         </div>
       </aside>
 
       {/* Contenido Principal */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Navbar Superior */}
-        <header className="bg-white border-b border-slate-200 px-8 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1 max-w-md">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Buscar"
-                className="w-full bg-slate-100 rounded-full pl-9 pr-4 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <svg className="w-4 h-4 text-slate-400 absolute left-3 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            </div>
+        
+        {/* Header Superior */}
+        <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <h1 className="text-sm font-extrabold text-[#1B5E9E]">Métricas de Convivencia Escolar</h1>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-slate-300 rounded-full overflow-hidden flex justify-center items-center font-bold text-xs text-slate-700">
-              JS
+            <div className="w-8 h-8 rounded-xl bg-[#DCEAF7] flex items-center justify-center font-bold text-xs text-[#1B5E9E]">
+              CD
             </div>
-            <div className="text-right text-xs">
-              <p className="font-bold text-slate-800">John Smith</p>
-              <p className="text-[10px] text-slate-400">Admin</p>
+            <div className="text-right text-xs hidden sm:block">
+              <p className="font-bold text-slate-800">Comité de Convivencia</p>
+              <p className="text-[10px] text-[#2C5F57] font-semibold">Institución Educativa</p>
             </div>
           </div>
         </header>
 
         {/* Dashboard Content */}
-        <main className="p-8 space-y-6 overflow-y-auto">
-          <h1 className="text-xl font-bold text-slate-800">¡Bienvenido, Administrador!</h1>
+        <main className="p-4 sm:p-8 space-y-6 overflow-y-auto">
+          
+          {/* Encabezado Principal */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-black text-[#1B5E9E]">Resumen Estadístico</h1>
+              <p className="text-xs text-slate-500 mt-0.5">Monitoreo de situaciones de acoso escolar en tiempo real.</p>
+            </div>
 
-          {/* Tarjetas de Estadísticas */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                📅 Periodo 2026-2
+              </span>
+            </div>
+          </div>
+
+          {/* Tarjetas de Métricas Clave SafeVoice */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex items-center justify-between">
+            
+            {/* Total Reportes */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-400 font-medium">Estudiantes</p>
-                <p className="text-xl font-extrabold text-slate-800 mt-1">50055</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Reportes</p>
+                <p className="text-2xl font-black text-slate-800 mt-1">24</p>
+                <span className="text-[11px] text-emerald-600 font-bold">+3 este mes</span>
               </div>
-              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-lg">🎓</div>
+              <div className="w-11 h-11 bg-blue-50 text-[#1B5E9E] rounded-2xl flex items-center justify-center text-xl shadow-2xs">
+                📋
+              </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex items-center justify-between">
+            {/* En Investigación */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-400 font-medium">Egresados</p>
-                <p className="text-xl font-extrabold text-slate-800 mt-1">5k+</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">En Revisión</p>
+                <p className="text-2xl font-black text-amber-600 mt-1">8</p>
+                <span className="text-[11px] text-amber-600 font-bold">Requieren atención</span>
               </div>
-              <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-lg">🥇</div>
+              <div className="w-11 h-11 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-xl shadow-2xs">
+                ⏳
+              </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex items-center justify-between">
+            {/* Casos Resueltos */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-400 font-medium">Departamentos</p>
-                <p className="text-xl font-extrabold text-slate-800 mt-1">30+</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Casos Resueltos</p>
+                <p className="text-2xl font-black text-[#2C5F57] mt-1">16</p>
+                <span className="text-[11px] text-[#2C5F57] font-bold">66.6% efectividad</span>
               </div>
-              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-lg">🏢</div>
+              <div className="w-11 h-11 bg-emerald-50 text-[#2C5F57] rounded-2xl flex items-center justify-center text-xl shadow-2xs">
+                ✅
+              </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex items-center justify-between">
+            {/* Ciberacoso / Agresiones */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-400 font-medium">Total Docentes</p>
-                <p className="text-xl font-extrabold text-slate-800 mt-1">20+</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ciberacoso</p>
+                <p className="text-2xl font-black text-rose-600 mt-1">35%</p>
+                <span className="text-[11px] text-rose-600 font-bold">Predomina en 9° y 10°</span>
               </div>
-              <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-lg">👨‍🏫</div>
+              <div className="w-11 h-11 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-xl shadow-2xs">
+                🌐
+              </div>
             </div>
+
           </div>
 
-          {/* Gráfico y Gráfico Circular */}
+          {/* Gráficos Reales del Proyecto */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Gráfico Rendimiento */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold text-slate-800 text-base">Rendimiento Estudiantil</h2>
-                <div className="flex gap-2">
-                  <span className="text-xs border rounded-lg px-2.5 py-1 text-slate-600 cursor-pointer">📅 Mensual</span>
-                  <span className="text-xs border rounded-lg px-2.5 py-1 text-slate-600 cursor-pointer">🏫 Grado 6</span>
+            
+            {/* Gráfico 1: Reportes por Lugar Ocurrido */}
+            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h2 className="font-extrabold text-slate-800 text-base">Lugares Frecuentes de Conflictos</h2>
+                  <p className="text-xs text-slate-400">Distribución de casos reportados según la ubicación</p>
                 </div>
+                <span className="text-xs font-bold text-[#1B5E9E] bg-[#DCEAF7] px-3 py-1 rounded-xl">
+                  Análisis Frecuencia
+                </span>
               </div>
 
-              {/* Simulación visual del gráfico de barras */}
-              <div className="h-48 border-b border-l border-slate-200 flex items-end justify-between px-4 pt-4">
-                {[...Array(9)].map((_, i) => (
-                  <div key={i} className="flex gap-1 items-end h-full">
-                    <div className="w-2.5 bg-blue-400 rounded-t-xs" style={{ height: `${30 + (i * 7) % 60}%` }} />
-                    <div className="w-2.5 bg-emerald-400 rounded-t-xs" style={{ height: `${20 + (i * 9) % 55}%` }} />
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between text-[11px] text-slate-400 px-2">
-                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span>
-              </div>
-            </div>
-
-            {/* Distribución Estudiantes */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between">
-              <h2 className="font-bold text-slate-800 text-base">Estudiantes</h2>
-              <div className="flex justify-center items-center my-4">
-                <div className="w-36 h-36 rounded-full border-8 border-blue-500 border-t-emerald-500 flex items-center justify-center font-bold text-xs text-slate-600">
-                  👥 100%
-                </div>
-              </div>
-              <div className="flex justify-center gap-6 text-xs text-slate-500">
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-blue-500 rounded-full" /> Niños (47%)</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-full" /> Niñas (53%)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabla e Historia Reciente */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Tabla Estudiantes Destacados */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold text-slate-800 text-base">Estudiantes Destacados</h2>
-                <a href="#" className="text-xs text-blue-600 font-semibold hover:underline">Ver Todo</a>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left">
-                  <thead className="text-slate-400 border-b border-slate-100">
-                    <tr>
-                      <th className="pb-3 font-semibold">ID</th>
-                      <th className="pb-3 font-semibold">Nombre</th>
-                      <th className="pb-3 font-semibold">Calificación</th>
-                      <th className="pb-3 font-semibold">Porcentaje</th>
-                      <th className="pb-3 font-semibold">Año</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {[
-                      { id: "PRE1225", name: "John Smith", marks: "1185", pct: "98%", year: "2024" },
-                      { id: "PRE1225", name: "John Smith", marks: "1195", pct: "99%", year: "2023" },
-                      { id: "PRE1225", name: "John Smith", marks: "1187", pct: "99.6%", year: "2022" },
-                      { id: "PRE1225", name: "John Smith", marks: "1187", pct: "99.6%", year: "2022" },
-                    ].map((row, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50">
-                        <td className="py-3 font-medium">{row.id}</td>
-                        <td className="py-3">{row.name}</td>
-                        <td className="py-3">{row.marks}</td>
-                        <td className="py-3 font-semibold text-emerald-600">{row.pct}</td>
-                        <td className="py-3 text-slate-400">{row.year}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Actividad Reciente */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold text-slate-800 text-base">Actividad Reciente</h2>
-                <a href="#" className="text-xs text-blue-600 font-semibold hover:underline">Ver Todas</a>
-              </div>
-
-              <div className="space-y-4">
-                {[1, 2, 3].map((_, idx) => (
-                  <div key={idx} className="flex gap-3 text-xs">
-                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center shrink-0">👤</div>
-                    <div>
-                      <p className="text-slate-700">
-                        <strong className="text-slate-900">David Lee</strong> asignó una nueva tarea
-                      </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Hace 20 minutos</p>
+              {/* Barras de distribución por lugares */}
+              <div className="space-y-3.5 pt-2">
+                {[
+                  { lugar: "Salón de clases", pct: 40, count: "10 casos", color: "bg-[#1B5E9E]" },
+                  { lugar: "Descanso / Zonas deportivas", pct: 25, count: "6 casos", color: "bg-[#2C5F57]" },
+                  { lugar: "Internet / Redes sociales (Ciberacoso)", pct: 20, count: "5 casos", color: "bg-rose-500" },
+                  { lugar: "Pasillos o escaleras", pct: 10, count: "2 casos", color: "bg-amber-500" },
+                  { lugar: "Salida del colegio", pct: 5, count: "1 caso", color: "bg-indigo-400" },
+                ].map((item, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex justify-between text-xs font-bold text-slate-700">
+                      <span>{item.lugar}</span>
+                      <span className="text-slate-500">{item.count} ({item.pct}%)</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                      <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${item.pct}%` }} />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Gráfico 2: Tipos de Agresión más comunes */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs flex flex-col justify-between space-y-4">
+              <div className="border-b border-slate-100 pb-3">
+                <h2 className="font-extrabold text-slate-800 text-base">Tipos de Agresión</h2>
+                <p className="text-xs text-slate-400">Categorías de afectación recibidas</p>
+              </div>
+
+              <div className="flex justify-center items-center my-2">
+                <div className="w-36 h-36 rounded-full border-8 border-[#1B5E9E] border-t-[#2C5F57] border-r-rose-500 flex items-center justify-center text-center p-3">
+                  <div>
+                    <span className="text-lg font-black text-slate-800">Verbal</span>
+                    <p className="text-[10px] text-slate-400 font-semibold">45% de casos</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-xs font-semibold text-slate-600">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-[#1B5E9E] rounded-md" /> Insultos / Apodos</span>
+                  <span className="font-bold text-slate-800">45%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-[#2C5F57] rounded-md" /> Exclusión / Chismes</span>
+                  <span className="font-bold text-slate-800">30%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-rose-500 rounded-md" /> Ciberacoso</span>
+                  <span className="font-bold text-slate-800">15%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-amber-500 rounded-md" /> Agresión Física</span>
+                  <span className="font-bold text-slate-800">10%</span>
+                </div>
+              </div>
+            </div>
+
           </div>
+
+          {/* Tabla de Últimos Reportes Recibidos */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h2 className="font-extrabold text-slate-800 text-base">Últimos Reportes Anónimos</h2>
+                <p className="text-xs text-slate-400">Casos más recientes ingresados por los estudiantes</p>
+              </div>
+              <Link to="/docente/reportes" className="text-xs text-[#1B5E9E] font-extrabold hover:underline">
+                Ir a la Bandeja &rarr;
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead className="text-slate-400 border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th className="pb-3 font-bold">Código Seguimiento</th>
+                    <th className="pb-3 font-bold">Grado Afectado</th>
+                    <th className="pb-3 font-bold">Ubicación</th>
+                    <th className="pb-3 font-bold">Frecuencia</th>
+                    <th className="pb-3 font-bold text-right">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                  <tr className="hover:bg-slate-50/60">
+                    <td className="py-3.5 font-mono font-bold text-[#1B5E9E]">SV-2026-88A</td>
+                    <td className="py-3.5">Grado 8°</td>
+                    <td className="py-3.5">Salón de clases</td>
+                    <td className="py-3.5">Varias semanas</td>
+                    <td className="py-3.5 text-right">
+                      <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-bold">
+                        En Revisión
+                      </span>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/60">
+                    <td className="py-3.5 font-mono font-bold text-[#1B5E9E]">SV-2026-42B</td>
+                    <td className="py-3.5">Grado 10°</td>
+                    <td className="py-3.5">Redes sociales</td>
+                    <td className="py-3.5">Primera vez</td>
+                    <td className="py-3.5 text-right">
+                      <span className="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full text-[10px] font-bold">
+                        Pendiente
+                      </span>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/60">
+                    <td className="py-3.5 font-mono font-bold text-[#1B5E9E]">SV-2026-19C</td>
+                    <td className="py-3.5">Grado 6°</td>
+                    <td className="py-3.5">Descanso</td>
+                    <td className="py-3.5">Varios meses</td>
+                    <td className="py-3.5 text-right">
+                      <span className="bg-emerald-50 text-[#2C5F57] border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-bold">
+                        Atendido
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </main>
       </div>
     </div>
