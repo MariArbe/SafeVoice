@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 from core.permissions import EsDirectivo, EsDirectivoOOrientador
 
 from .serializers import (
+    ActualizarEstadoSerializer,
     ConsultarReporteSerializer,
     CrearReporteSerializer,
     ReporteLecturaSerializer,
@@ -25,6 +26,34 @@ from .serializers import (
 from .services import ReporteService
 
 _service = ReporteService()
+
+
+class ActualizarEstadoReporteView(APIView):
+    """
+    PATCH /api/v1/reports/<id>/estado/
+    Actualiza el estado de un reporte y registra el cambio en el historial
+    de auditoría (HU-08). Solo accesible por Directivo u Orientador.
+
+    Flujo:
+      ActualizarEstadoSerializer (validación) → Service (lógica + auditoría) → ORM
+    """
+
+    permission_classes = [EsDirectivoOOrientador]
+
+    def patch(self, request: Request, reporte_id: int) -> Response:
+        serializer = ActualizarEstadoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        reporte = _service.actualizar_estado(
+            reporte_id=reporte_id,
+            nuevo_estado=serializer.validated_data["nuevo_estado"],
+            usuario=request.user,
+            observaciones=serializer.validated_data.get("observaciones", ""),
+        )
+
+        respuesta = ReporteLecturaSerializer(reporte)
+        return Response(respuesta.data, status=status.HTTP_200_OK)
+
 
 
 class CrearReporteView(APIView):

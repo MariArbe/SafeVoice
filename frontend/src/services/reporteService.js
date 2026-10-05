@@ -28,6 +28,26 @@ const reporteService = {
       throw error;
     }
   },
+
+  /**
+   * Actualiza el estado de un reporte (HU-08).
+   * @param {number} reporteId - ID (PK) del reporte a actualizar
+   * @param {Object} datos - { nuevo_estado, observaciones }
+   * @returns {Promise<Object>} - El reporte actualizado con historial de estados
+   */
+  actualizarReporte: async (reporteId, datos) => {
+    try {
+      const response = await api.patch(`/reports/${reporteId}/estado/`, {
+        nuevo_estado: datos.estado,
+        observaciones: datos.notas_orientador || "",
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar el estado del reporte:", error);
+      throw error;
+    }
+  },
 };
 
 export default reporteService;
+

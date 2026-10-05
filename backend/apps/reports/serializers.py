@@ -10,7 +10,30 @@ from datetime import date
 
 from rest_framework import serializers
 
-from .models import Reporte
+from .models import Reporte, SeguimientoCaso
+
+
+class HistorialEstadoSerializer(serializers.ModelSerializer):
+    """
+    Serializer de solo lectura para exponer registros de auditoría
+    de cambios de estado (SeguimientoCaso).
+    """
+
+    usuario_email = serializers.EmailField(
+        source="orientador.email", read_only=True, default=None,
+    )
+
+    class Meta:
+        model = SeguimientoCaso
+        fields = [
+            "id",
+            "estado_anterior",
+            "estado_nuevo",
+            "observaciones",
+            "fecha_atencion",
+            "usuario_email",
+        ]
+        read_only_fields = fields
 
 
 class ReporteLecturaSerializer(serializers.ModelSerializer):
@@ -18,6 +41,10 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
     Serializer de solo lectura para exponer un Reporte.
     Solo expone campos públicos y anónimos; nunca datos identificables.
     """
+
+    historial_estados = HistorialEstadoSerializer(
+        source="seguimientos", many=True, read_only=True,
+    )
 
     class Meta:
         model = Reporte
@@ -37,6 +64,7 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
             "acepta_revelar_identidad",
             "nombre_contacto_victima",
             "medio_contacto_victima",
+            "historial_estados",
         ]
         read_only_fields = fields
 
@@ -93,4 +121,22 @@ class ConsultarReporteSerializer(serializers.Serializer):
 
     codigo_seguimiento = serializers.UUIDField(
         help_text="UUID del código de seguimiento entregado al crear el reporte."
+    )
+
+
+class ActualizarEstadoSerializer(serializers.Serializer):
+    """
+    Serializer de entrada para PATCH /reportes/<id>/estado/ (HU-08).
+    Valida el nuevo estado y las observaciones opcionales del orientador.
+    """
+
+    nuevo_estado = serializers.ChoiceField(
+        choices=Reporte.Estado.choices,
+        help_text="Nuevo estado al que se quiere transicionar el reporte.",
+    )
+    observaciones = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="Notas u observaciones del orientador sobre el cambio.",
     )

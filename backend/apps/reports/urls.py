@@ -5,6 +5,7 @@ apps/reports/urls.py — Rutas de la app reports.
 from django.urls import path
 
 from .views import (
+    ActualizarEstadoReporteView,
     ConsultarReporteView,
     CrearReporteView,
     HeatmapView,
@@ -23,4 +24,7 @@ urlpatterns = [
 
     # Consulta anónima de estado por código de seguimiento
     path("consultar/", ConsultarReporteView.as_view(), name="consultar-reporte"),
+
+    # Actualización de estado de un reporte (HU-08)
+    path("<int:reporte_id>/estado/", ActualizarEstadoReporteView.as_view(), name="actualizar-estado"),
 ]

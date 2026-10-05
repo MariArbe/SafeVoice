@@ -9,8 +9,10 @@ REGLA: Las views NO acceden al ORM ni al proxy directamente.
 import logging
 import uuid
 
+from django.db import transaction
+
 from .exceptions import ReporteNoEncontradoError
-from .models import Reporte
+from .models import Reporte, SeguimientoCaso
 from .repository import ReporteRepositoryProxy
 
 logger = logging.getLogger(__name__)
@@ -100,6 +102,64 @@ class ReporteService:
         )
         return reporte
 
+    # ── Actualización de estado (HU-08) ────────────────────────────────────
+
+    def actualizar_estado(
+        self,
+        reporte_id: int,
+        nuevo_estado: str,
+        usuario,
+        observaciones: str = "",
+    ) -> Reporte:
+        """
+        Actualiza el estado de un reporte y registra el cambio en el
+        historial de auditoría (SeguimientoCaso).
+
+        Ambas operaciones se ejecutan de forma atómica: si alguna falla,
+        ningún cambio se persiste.
+
+        Args:
+            reporte_id: PK del reporte a actualizar.
+            nuevo_estado: Valor del nuevo estado (debe ser un Reporte.Estado válido).
+            usuario: Instancia de Usuario autenticado que realiza el cambio.
+            observaciones: Notas opcionales del orientador.
+
+        Returns:
+            Instancia del Reporte con el estado actualizado.
+
+        Raises:
+            ReporteNoEncontradoError: Si el reporte no existe.
+        """
+        try:
+            reporte = Reporte.objects.get(pk=reporte_id)
+        except Reporte.DoesNotExist:
+            raise ReporteNoEncontradoError()
+
+        estado_anterior = reporte.estado
+
+        with transaction.atomic():
+            # 1. Actualizar el estado del reporte
+            reporte.estado = nuevo_estado
+            reporte.save(update_fields=["estado", "fecha_actualizacion"])
+
+            # 2. Registrar en el historial de auditoría
+            SeguimientoCaso.objects.create(
+                reporte=reporte,
+                orientador=usuario,
+                estado_anterior=estado_anterior,
+                estado_nuevo=nuevo_estado,
+                observaciones=observaciones,
+            )
+
+        logger.info(
+            "Estado actualizado: reporte_id=%s | %s → %s | usuario=%s",
+            reporte_id,
+            estado_anterior,
+            nuevo_estado,
+            usuario.email,
+        )
+        return reporte
+
     # ── Consulta pública (anónima) ─────────────────────────────────────────
 
     def consultar_por_codigo(self, codigo: uuid.UUID) -> Reporte:
@@ -132,3 +192,4 @@ class ReporteService:
             QuerySet de Reporte ordenado por fecha descendente.
         """
         return _proxy.listar_todos(filtros)
+
