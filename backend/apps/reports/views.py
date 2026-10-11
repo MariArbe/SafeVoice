@@ -21,6 +21,7 @@ from .serializers import (
     ActualizarEstadoSerializer,
     ConsultarReporteSerializer,
     CrearReporteSerializer,
+    FiltroFechasSerializer,
     ReporteLecturaSerializer,
 )
 from .services import ReporteService
@@ -136,35 +137,42 @@ class ListarReportesView(APIView):
 
 
 class StatisticsOverviewView(APIView):
-    """Contrato de estadísticas para HU-13; la lógica real queda fuera de este sprint."""
+    """
+    GET /api/v1/reports/statistics/?fecha_inicio=YYYY-MM-DD&fecha_fin=YYYY-MM-DD
+    Estadísticas agregadas (HU-13). Solo Directivo; solo ve su institución.
+    """
 
     permission_classes = [EsDirectivo]
 
     def get(self, request: Request) -> Response:
-        return Response(
-            {
-                "total_reports": None,
-                "by_status": {},
-                "by_risk_level": {},
-            },
-            status=status.HTTP_200_OK,
+        filtros = FiltroFechasSerializer(data=request.query_params)
+        filtros.is_valid(raise_exception=True)
+
+        datos = _service.obtener_estadisticas(
+            institucion_id=request.user.institution_id,
+            fecha_inicio=filtros.validated_data.get("fecha_inicio"),
+            fecha_fin=filtros.validated_data.get("fecha_fin"),
         )
+        return Response(datos, status=status.HTTP_200_OK)
 
 
 class HeatmapView(APIView):
-    """Contrato de mapa de calor para HU-14; la lógica real queda fuera de este sprint."""
+    """
+    GET /api/v1/reports/heatmap/?fecha_inicio=YYYY-MM-DD&fecha_fin=YYYY-MM-DD
+    Concentración de casos por zona de la sede (HU-14). Solo Directivo;
+    solo ve su institución.
+    """
 
     permission_classes = [EsDirectivo]
 
     def get(self, request: Request) -> Response:
-        return Response(
-            {
-                "points": [],
-                "dimensions": {
-                    "latitude": None,
-                    "longitude": None,
-                    "intensity": None,
-                },
-            },
-            status=status.HTTP_200_OK,
+        filtros = FiltroFechasSerializer(data=request.query_params)
+        filtros.is_valid(raise_exception=True)
+
+        datos = _service.obtener_mapa_calor(
+            institucion_id=request.user.institution_id,
+            fecha_inicio=filtros.validated_data.get("fecha_inicio"),
+            fecha_fin=filtros.validated_data.get("fecha_fin"),
         )
+        return Response(datos, status=status.HTTP_200_OK)
+

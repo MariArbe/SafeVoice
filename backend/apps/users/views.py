@@ -15,6 +15,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from rest_framework.permissions import AllowAny
+from apps.institutions.models import Institution
+
 from .permissions import EsDirectivo
 from .serializers import CrearUsuarioSerializer, UsuarioLecturaSerializer
 from .services import UsuarioService
@@ -103,6 +106,40 @@ class CrearUsuarioView(APIView):
         # El usuario creado hereda la institución del directivo autenticado
         datos = serializer.validated_data
         datos["institution"] = request.user.institution
+
+        usuario = _service.crear_usuario(datos)
+        return Response(
+            UsuarioLecturaSerializer(usuario).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class RegistrarUsuarioPublicoView(APIView):
+    """
+    POST /api/v1/users/register/
+
+    Permite el registro público de nuevos usuarios (Docentes, Orientadores, Directivos)
+    desde el formulario de registro del frontend (SignUp). No requiere token previo.
+    Asocia al nuevo usuario con la institución indicada o con la primera institución activa.
+    """
+
+    permission_classes = [AllowAny]
+    throttle_scope = "registro"
+
+    def post(self, request: Request) -> Response:
+        serializer = CrearUsuarioSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        datos = serializer.validated_data
+
+        institution_id = request.data.get("institution_id")
+        institution = None
+        if institution_id:
+            institution = Institution.objects.filter(pk=institution_id).first()
+        if not institution:
+            institution = Institution.objects.filter(is_active=True).first()
+
+        datos["institution"] = institution
 
         usuario = _service.crear_usuario(datos)
         return Response(

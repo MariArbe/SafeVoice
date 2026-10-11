@@ -31,6 +31,8 @@ import uuid
 
 from cryptography.fernet import Fernet
 from django.conf import settings
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 
 from .exceptions import ReporteCampoNoPermitidoError, ReporteNoEncontradoError
 from .models import Reporte
@@ -230,3 +232,69 @@ class ReporteRepositoryProxy:
         for r in qs:
             reportes_lista.append(self._desencriptar_sensibles(r))
         return reportes_lista
+
+    # ── Agregaciones para el dashboard (HU-13 / HU-14) ─────────────────────
+    # Solo operan con COUNT/GROUP BY sobre columnas no sensibles. Nunca leen
+    # ni desencriptan `descripcion` ni los datos de contacto de la víctima.
+
+    def _qs_filtrado(self, institucion_id=None, fecha_inicio=None, fecha_fin=None):
+        qs = Reporte.objects.all()
+        if institucion_id is not None:
+            qs = qs.filter(institucion_id=institucion_id)
+        if fecha_inicio is not None:
+            qs = qs.filter(fecha_creacion__date__gte=fecha_inicio)
+        if fecha_fin is not None:
+            qs = qs.filter(fecha_creacion__date__lte=fecha_fin)
+        return qs
+
+    @staticmethod
+    def _conteo(qs, campo: str) -> dict:
+        filas = qs.values(campo).annotate(total=Count("id")).order_by()
+        return {(fila[campo] or "SIN_DATO"): fila["total"] for fila in filas}
+
+    def estadisticas(self, institucion_id=None, fecha_inicio=None, fecha_fin=None) -> dict:
+        """Conteos agregados de reportes (total, estado, riesgo, tipo, ubicación, mes)."""
+        qs = self._qs_filtrado(institucion_id, fecha_inicio, fecha_fin)
+
+        por_tipo = {
+            fila["tipos_agresion__nombre"]: fila["total"]
+            for fila in qs.filter(tipos_agresion__isnull=False)
+            .values("tipos_agresion__nombre")
+            .annotate(total=Count("id", distinct=True))
+            .order_by()
+        }
+        por_mes = {
+            fila["mes"].strftime("%Y-%m"): fila["total"]
+            for fila in qs.annotate(mes=TruncMonth("fecha_creacion"))
+            .values("mes")
+            .annotate(total=Count("id"))
+            .order_by("mes")
+        }
+
+        return {
+            "total_reports": qs.count(),
+            "by_status": self._conteo(qs, "estado"),
+            "by_risk_level": self._conteo(qs, "nivel_riesgo_predicho"),
+            "by_type": por_tipo,
+            "by_location": self._conteo(qs, "ubicacion"),
+            "by_frequency": self._conteo(qs, "frecuencia"),
+            "by_month": por_mes,
+        }
+
+    def mapa_calor(self, institucion_id=None, fecha_inicio=None, fecha_fin=None) -> list:
+        """Concentración de casos por zona (ubicación dentro de la sede), con
+        desglose por nivel de riesgo."""
+        qs = self._qs_filtrado(institucion_id, fecha_inicio, fecha_fin)
+        filas = (
+            qs.values("ubicacion", "nivel_riesgo_predicho")
+            .annotate(total=Count("id"))
+            .order_by()
+        )
+        zonas: dict = {}
+        for fila in filas:
+            zona = fila["ubicacion"] or "SIN_DATO"
+            datos = zonas.setdefault(zona, {"zone": zona, "count": 0, "by_risk_level": {}})
+            datos["count"] += fila["total"]
+            nivel = fila["nivel_riesgo_predicho"] or "SIN_DATO"
+            datos["by_risk_level"][nivel] = fila["total"]
+        return sorted(zonas.values(), key=lambda z: z["count"], reverse=True)

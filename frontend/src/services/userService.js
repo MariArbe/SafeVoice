@@ -10,7 +10,7 @@ const userService = {
    * @returns {Promise<Object>} - Datos del usuario creado devueltos por el backend
    */
   crearUsuario: async (userData) => {
-    const response = await api.post("/users/", userData);
+    const response = await api.post("/users/register/", userData);
     return response.data;
   },
 };

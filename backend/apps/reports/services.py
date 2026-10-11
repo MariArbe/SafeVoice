@@ -193,3 +193,20 @@ class ReporteService:
         """
         return _proxy.listar_todos(filtros)
 
+
+    # ── Dashboard: estadísticas y mapa de calor (HU-13 / HU-14) ───────────
+
+    def obtener_estadisticas(self, institucion_id=None, fecha_inicio=None, fecha_fin=None) -> dict:
+        """Estadísticas agregadas de reportes, acotadas a la institución del usuario."""
+        return _proxy.estadisticas(institucion_id, fecha_inicio, fecha_fin)
+
+    def obtener_mapa_calor(self, institucion_id=None, fecha_inicio=None, fecha_fin=None) -> dict:
+        """Concentración de reportes por zona de la sede, con intensidad relativa (0-1)."""
+        zonas = _proxy.mapa_calor(institucion_id, fecha_inicio, fecha_fin)
+        maximo = max((z["count"] for z in zonas), default=0)
+        for zona in zonas:
+            zona["intensity"] = round(zona["count"] / maximo, 2) if maximo else 0
+        return {
+            "points": zonas,
+            "dimensions": {"zone": "ubicacion", "intensity": "count / max(count)"},
+        }

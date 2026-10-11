@@ -140,3 +140,18 @@ class ActualizarEstadoSerializer(serializers.Serializer):
         default="",
         help_text="Notas u observaciones del orientador sobre el cambio.",
     )
+
+
+class FiltroFechasSerializer(serializers.Serializer):
+    """Filtro opcional por rango de fechas (YYYY-MM-DD) para estadísticas y mapa de calor."""
+
+    fecha_inicio = serializers.DateField(required=False)
+    fecha_fin = serializers.DateField(required=False)
+
+    def validate(self, attrs):
+        inicio, fin = attrs.get("fecha_inicio"), attrs.get("fecha_fin")
+        if inicio and fin and inicio > fin:
+            raise serializers.ValidationError(
+                {"fecha_fin": "La fecha final no puede ser anterior a la fecha inicial."}
+            )
+        return attrs

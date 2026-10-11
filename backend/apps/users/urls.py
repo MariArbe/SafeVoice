@@ -4,7 +4,13 @@ apps/users/urls.py — Rutas de la app users.
 
 from django.urls import path
 
-from .views import CrearUsuarioView, LoginView, RefreshTokenView, UsuarioMeView
+from .views import (
+    CrearUsuarioView,
+    LoginView,
+    RefreshTokenView,
+    RegistrarUsuarioPublicoView,
+    UsuarioMeView,
+)
 
 app_name = "users"
 
@@ -15,6 +21,9 @@ urlpatterns = [
 
     # Perfil del usuario autenticado
     path("me/", UsuarioMeView.as_view(), name="me"),
+
+    # Registro público de nuevos usuarios (SignUp)
+    path("register/", RegistrarUsuarioPublicoView.as_view(), name="register"),
 
     # Gestión de usuarios (solo Directivo)
     path("", CrearUsuarioView.as_view(), name="crear-usuario"),
