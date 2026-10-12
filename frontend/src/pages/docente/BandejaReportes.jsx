@@ -287,7 +287,12 @@ export default function BandejaReportesDocente() {
                     reportes.map((item) => (
                       <tr key={item.codigo_seguimiento} className="hover:bg-slate-50/80 transition-colors">
                         <td className="py-3.5 px-4 font-mono font-bold text-[#1B5E9E]">
-                          {item.codigo_seguimiento}
+                          <div>{item.codigo_seguimiento}</div>
+                          {(item.nombre_contacto_victima || item.medio_contacto_victima) && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md mt-1">
+                              👤 Con contacto
+                            </span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 text-slate-600">
                           {new Date(item.fecha_creacion).toLocaleDateString("es-CO")}
@@ -390,6 +395,33 @@ export default function BandejaReportesDocente() {
                 <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs text-slate-700 italic leading-relaxed">
                   "{reporteSeleccionado.descripcion}"
                 </div>
+              </div>
+
+              {/* Datos de contacto (si el estudiante decidió identificarse) */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Datos de contacto del estudiante:
+                </label>
+                {reporteSeleccionado.nombre_contacto_victima || reporteSeleccionado.medio_contacto_victima ? (
+                  <div className="grid grid-cols-2 gap-3 bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 text-xs">
+                    <div>
+                      <p className="text-emerald-700/80 font-bold uppercase text-[10px]">Nombre</p>
+                      <p className="font-bold text-slate-800 break-words mt-0.5">
+                        {reporteSeleccionado.nombre_contacto_victima || "No indicado"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-700/80 font-bold uppercase text-[10px]">Medio de contacto</p>
+                      <p className="font-bold text-slate-800 break-words mt-0.5">
+                        {reporteSeleccionado.medio_contacto_victima || "No indicado"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs text-slate-500 italic">
+                    El estudiante prefirió mantener el reporte 100% anónimo (no suministró nombre ni medio de contacto).
+                  </div>
+                )}
               </div>
 
               {/* Cambiar Estado */}
