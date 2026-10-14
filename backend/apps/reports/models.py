@@ -29,8 +29,13 @@ class Reporte(models.Model):
         CRITICO = "CRITICO", "Crítico"
 
     class Estado(models.TextChoices):
+        NUEVO = "nuevo", "Nuevo"
+        EN_REVISION = "en_revision", "En Revisión"
+        EN_SEGUIMIENTO = "en_seguimiento", "En Seguimiento"
+        CERRADO = "cerrado", "Cerrado"
+
+        # Compatibilidad con datos o tests heredados
         PENDIENTE = "PENDIENTE", "Pendiente"
-        EN_REVISION = "EN_REVISION", "En Revisión"
         ATENDIDO = "ATENDIDO", "Atendido"
         DESCARTADO = "DESCARTADO", "Descartado"
 
@@ -76,7 +81,14 @@ class Reporte(models.Model):
     )
 
     estado = models.CharField(
-        max_length=20, choices=Estado.choices, default=Estado.PENDIENTE, verbose_name="estado"
+        max_length=20, choices=Estado.choices, default=Estado.NUEVO, verbose_name="estado"
+    )
+
+    historial_cambios = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="historial de cambios",
+        help_text="Auditoría inmutable de transiciones de estado del reporte."
     )
 
     acepta_revelar_identidad = models.BooleanField(default=False, verbose_name="acepta revelar identidad")

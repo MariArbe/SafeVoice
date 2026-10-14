@@ -15,13 +15,14 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.permissions import EsDirectivo, EsDirectivoOOrientador
+from core.permissions import EsDirectivo, EsDirectivoOOrientador, EsOrientador
 
 from .serializers import (
     ActualizarEstadoSerializer,
     ConsultarReporteSerializer,
     CrearReporteSerializer,
     FiltroFechasSerializer,
+    HistorialEntradaSerializer,
     ReporteLecturaSerializer,
 )
 from .services import ReporteService
@@ -33,15 +34,13 @@ class ActualizarEstadoReporteView(APIView):
     """
     PATCH /api/v1/reports/<id>/estado/
     Actualiza el estado de un reporte y registra el cambio en el historial
-    de auditoría (HU-08). Solo accesible por Directivo u Orientador.
-
-    Flujo:
-      ActualizarEstadoSerializer (validación) → Service (lógica + auditoría) → ORM
+    de auditoría dentro del reporte (HU-08).
+    Solo accesible por Orientadores de la misma institución del reporte.
     """
 
-    permission_classes = [EsDirectivoOOrientador]
+    permission_classes = [EsOrientador]
 
-    def patch(self, request: Request, reporte_id: int) -> Response:
+    def patch(self, request: Request, reporte_id: int | str) -> Response:
         serializer = ActualizarEstadoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -49,11 +48,30 @@ class ActualizarEstadoReporteView(APIView):
             reporte_id=reporte_id,
             nuevo_estado=serializer.validated_data["nuevo_estado"],
             usuario=request.user,
+            comentario=serializer.validated_data.get("comentario", ""),
             observaciones=serializer.validated_data.get("observaciones", ""),
         )
 
         respuesta = ReporteLecturaSerializer(reporte)
         return Response(respuesta.data, status=status.HTTP_200_OK)
+
+
+class HistorialReporteView(APIView):
+    """
+    GET /api/v1/reports/<id>/historial/
+    Devuelve los cambios de estado del reporte del más reciente al más antiguo.
+    Solo accesible por Orientadores de la misma institución del reporte (HU-08).
+    """
+
+    permission_classes = [EsOrientador]
+
+    def get(self, request: Request, reporte_id: int | str) -> Response:
+        historial = _service.obtener_historial(
+            reporte_id=reporte_id,
+            usuario=request.user,
+        )
+        serializer = HistorialEntradaSerializer(historial, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 

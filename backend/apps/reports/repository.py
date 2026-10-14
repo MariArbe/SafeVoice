@@ -88,6 +88,7 @@ class ReporteRepositoryProxy:
             "acepta_revelar_identidad",
             "nombre_contacto_victima",
             "medio_contacto_victima",
+            "historial_cambios",
         }
     )
 

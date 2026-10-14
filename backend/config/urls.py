@@ -19,8 +19,11 @@ urlpatterns = [
     # Rutas de la app institutions (registro de institución — HU-11)
     path("api/v1/institutions/", include("apps.institutions.urls")),
 
-    # Rutas de la app reports (reportes anónimos)
+    # Rutas de la app reports (reportes anónimos e historial de cambios)
     path("api/v1/reports/", include("apps.reports.urls")),
+    path("api/v1/reportes/", include("apps.reports.urls")),
+    path("reports/", include("apps.reports.urls")),
+    path("reportes/", include("apps.reports.urls")),
 
     # Rutas de la app resources (recursos de ayuda)
     path("api/v1/resources/", include("apps.resources.urls")),

@@ -49,6 +49,7 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reporte
         fields = [
+            "id",
             "codigo_seguimiento",
             "fecha_creacion",
             "fecha_actualizacion",
@@ -64,6 +65,7 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
             "acepta_revelar_identidad",
             "nombre_contacto_victima",
             "medio_contacto_victima",
+            "historial_cambios",
             "historial_estados",
         ]
         read_only_fields = fields
@@ -127,19 +129,56 @@ class ConsultarReporteSerializer(serializers.Serializer):
 class ActualizarEstadoSerializer(serializers.Serializer):
     """
     Serializer de entrada para PATCH /reportes/<id>/estado/ (HU-08).
-    Valida el nuevo estado y las observaciones opcionales del orientador.
+    Valida el nuevo estado y el comentario opcional del orientador.
     """
 
-    nuevo_estado = serializers.ChoiceField(
-        choices=Reporte.Estado.choices,
+    nuevo_estado = serializers.CharField(
+        required=False,
         help_text="Nuevo estado al que se quiere transicionar el reporte.",
+    )
+    estado = serializers.CharField(
+        required=False,
+        help_text="Alias de nuevo_estado para flexibilidad con clientes API.",
+    )
+    comentario = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="Comentario u observación del orientador sobre el cambio de estado.",
     )
     observaciones = serializers.CharField(
         required=False,
         allow_blank=True,
         default="",
-        help_text="Notas u observaciones del orientador sobre el cambio.",
+        help_text="Alias de comentario para compatibilidad hacia atrás.",
     )
+
+    def validate(self, attrs):
+        nuevo_estado = attrs.get("nuevo_estado") or attrs.get("estado")
+        if not nuevo_estado:
+            raise serializers.ValidationError(
+                {"nuevo_estado": "El campo 'nuevo_estado' es requerido."}
+            )
+        attrs["nuevo_estado"] = nuevo_estado.strip().lower()
+        attrs["comentario"] = (attrs.get("comentario") or attrs.get("observaciones") or "").strip()
+        attrs["observaciones"] = attrs["comentario"]
+        return attrs
+
+
+class HistorialEntradaSerializer(serializers.Serializer):
+    """
+    Serializer de solo lectura para exponer registros de auditoría
+    del historial de cambios de estado (HU-08).
+    """
+
+    estado_anterior = serializers.CharField()
+    estado_nuevo = serializers.CharField()
+    usuario_id = serializers.IntegerField(required=False, allow_null=True)
+    usuario_nombre = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    nombre_orientador = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    fecha_cambio = serializers.CharField()
+    fecha = serializers.CharField(required=False)
+    comentario = serializers.CharField(allow_blank=True, default="")
 
 
 class FiltroFechasSerializer(serializers.Serializer):

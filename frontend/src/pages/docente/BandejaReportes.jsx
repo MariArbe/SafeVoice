@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import reporteService from "../../services/reporteService";
+import {
+  ESTADOS_CONFIG,
+  TRANSICIONES_PERMITIDAS,
+  normalizarEstado,
+  getNombreEstado,
+  getColorEstado,
+  formatearFechaLocal,
+  formatearFechaCompleta,
+} from "../../utils/estadosReporte";
 
 export default function BandejaReportesDocente() {
   const navigate = useNavigate();
@@ -21,11 +30,18 @@ export default function BandejaReportesDocente() {
     notas_orientador: "",
   });
 
+  // Estado para la Línea de Tiempo de Cambios (HU-08)
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
+  const [historial, setHistorial] = useState([]);
+  const [cargandoHistorial, setCargandoHistorial] = useState(false);
+  const [mensajeExito, setMensajeExito] = useState(null);
+  const [errorGuardar, setErrorGuardar] = useState(null);
+
   const fetchReportes = async () => {
     setLoading(true);
     try {
       const params = Object.fromEntries(
-        Object.entries(filtros).filter(([_, v]) => v !== "")
+        Object.entries(filtros).filter(([, v]) => v !== "")
       );
       const data = await reporteService.listarReportes(params);
 
@@ -45,31 +61,55 @@ export default function BandejaReportesDocente() {
       // Fallback mock si la API aún no está disponible en desarrollo
       setReportes([
         {
+          id: 1,
           codigo_seguimiento: "SV-88A92-2026",
           fecha_creacion: "2026-09-28T14:30:00Z",
           nivel_riesgo_predicho: "ALTO",
-          estado: "EN_REVISION",
+          estado: "en_revision",
           ubicacion: "Salon de clases",
           descripcion: "Insultos constantes por parte de dos compañeros durante el trabajo en equipo.",
           notas_orientador: "Se programó citación preliminar con el docente titular.",
+          historial_cambios: [
+            {
+              estado_anterior: "nuevo",
+              estado_nuevo: "en_revision",
+              usuario_id: 1,
+              usuario_nombre: "Psicorientadora Ana",
+              fecha_cambio: "2026-09-28T15:00:00Z",
+              comentario: "Apertura formal de revisión en comité.",
+            },
+          ],
         },
         {
+          id: 2,
           codigo_seguimiento: "SV-42B10-2026",
           fecha_creacion: "2026-09-29T09:15:00Z",
           nivel_riesgo_predicho: "CRITICO",
-          estado: "NUEVO",
+          estado: "nuevo",
           ubicacion: "Redes sociales",
           descripcion: "Creación de grupo anónimo en WhatsApp difundiendo imágenes no autorizadas.",
           notas_orientador: "",
+          historial_cambios: [],
         },
         {
+          id: 3,
           codigo_seguimiento: "SV-19C03-2026",
           fecha_creacion: "2026-09-25T11:00:00Z",
           nivel_riesgo_predicho: "MEDIO",
-          estado: "CERRADO",
+          estado: "cerrado",
           ubicacion: "Descanso / Patio",
           descripcion: "Exclusión sistemática durante los juegos del descanso.",
           notas_orientador: "Caso atendido mediante taller de convivencia y acuerdo firmado.",
+          historial_cambios: [
+            {
+              estado_anterior: "en_seguimiento",
+              estado_nuevo: "cerrado",
+              usuario_id: 1,
+              usuario_nombre: "Psicorientadora Ana",
+              fecha_cambio: "2026-09-27T10:30:00Z",
+              comentario: "Compromisos cumplidos por ambas partes. Se archiva el caso.",
+            },
+          ],
         },
       ]);
     } finally {
@@ -78,7 +118,9 @@ export default function BandejaReportesDocente() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchReportes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtros.nivel_riesgo_predicho, filtros.estado, filtros.page]);
 
   const handleFilterChange = (e) => {
@@ -101,45 +143,111 @@ export default function BandejaReportesDocente() {
     }
   };
 
-  // Abrir modal con los datos del reporte
-  const handleAbrirModal = (item) => {
-    setReporteSeleccionado(item);
-    setFormDataModal({
-      estado: item.estado,
-      notas_orientador: item.notas_orientador || "",
-    });
+  // Cargar historial del reporte seleccionado
+  const cargarHistorial = async (idOcodigo, reporteRef = null) => {
+    setCargandoHistorial(true);
+    try {
+      const data = await reporteService.obtenerHistorial(idOcodigo);
+      setHistorial(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.warn("No se pudo obtener el historial desde la API, usando datos locales:", err);
+      const target = reporteRef || reporteSeleccionado;
+      if (target && Array.isArray(target.historial_cambios)) {
+        // Ordenar más reciente primero
+        setHistorial([...target.historial_cambios].reverse());
+      } else {
+        setHistorial([]);
+      }
+    } finally {
+      setCargandoHistorial(false);
+    }
   };
 
-  // Guardar cambios del reporte
+  // Abrir modal con los datos del reporte
+  const handleAbrirModal = (item) => {
+    const estadoNorm = normalizarEstado(item.estado);
+    const itemNormalizado = { ...item, estado: estadoNorm };
+
+    setReporteSeleccionado(itemNormalizado);
+    setFormDataModal({
+      estado: estadoNorm,
+      notas_orientador: "",
+    });
+    setMostrarHistorial(false);
+    setHistorial([]);
+    setMensajeExito(null);
+    setErrorGuardar(null);
+  };
+
+  // Toggle de la línea de tiempo de cambios
+  const handleToggleHistorial = () => {
+    const siguienteEstado = !mostrarHistorial;
+    setMostrarHistorial(siguienteEstado);
+    if (siguienteEstado && historial.length === 0 && reporteSeleccionado) {
+      const targetId = reporteSeleccionado.id || reporteSeleccionado.codigo_seguimiento;
+      cargarHistorial(targetId, reporteSeleccionado);
+    }
+  };
+
+  // Guardar cambios del reporte (sin cerrar el modal)
   const handleGuardarCambios = async (e) => {
     e.preventDefault();
+    setErrorGuardar(null);
+    setMensajeExito(null);
+
+    const estadoActual = normalizarEstado(reporteSeleccionado.estado);
+    const nuevoEstado = normalizarEstado(formDataModal.estado);
+
+    if (nuevoEstado === estadoActual) {
+      setErrorGuardar("Seleccione un estado diferente al actual para guardar cambios.");
+      return;
+    }
+
     setGuardando(true);
+    const targetId = reporteSeleccionado.id || reporteSeleccionado.codigo_seguimiento;
+
     try {
       if (reporteService.actualizarReporte) {
-        await reporteService.actualizarReporte(reporteSeleccionado.codigo_seguimiento, formDataModal);
+        await reporteService.actualizarReporte(targetId, {
+          estado: nuevoEstado,
+          notas_orientador: formDataModal.notas_orientador,
+        });
       }
-      
-      // Actualizar estado local inmediato
+
+      // Actualizar estado en el modal sin cerrarlo
+      setReporteSeleccionado((prev) => ({
+        ...prev,
+        estado: nuevoEstado,
+      }));
+      setFormDataModal((prev) => ({
+        ...prev,
+        estado: nuevoEstado,
+        notas_orientador: "",
+      }));
+
+      // Actualizar tabla en background
       setReportes((prev) =>
         prev.map((r) =>
+          (r.id && r.id === reporteSeleccionado.id) ||
           r.codigo_seguimiento === reporteSeleccionado.codigo_seguimiento
-            ? { ...r, ...formDataModal }
+            ? { ...r, estado: nuevoEstado }
             : r
         )
       );
 
-      setReporteSeleccionado(null);
+      setMensajeExito("¡Estado del reporte actualizado exitosamente!");
+      setTimeout(() => setMensajeExito(null), 5000);
+
+      // Refrescar inmediatamente el historial sin cerrar el modal
+      await cargarHistorial(targetId);
+      setMostrarHistorial(true);
     } catch (err) {
       console.error("Error actualizando reporte:", err);
-      // Actualización reactiva local
-      setReportes((prev) =>
-        prev.map((r) =>
-          r.codigo_seguimiento === reporteSeleccionado.codigo_seguimiento
-            ? { ...r, ...formDataModal }
-            : r
-        )
-      );
-      setReporteSeleccionado(null);
+      const msg =
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        "No se pudo actualizar el estado del reporte. Verifique que la transición sea permitida.";
+      setErrorGuardar(typeof msg === "string" ? msg : JSON.stringify(msg));
     } finally {
       setGuardando(false);
     }
@@ -249,10 +357,10 @@ export default function BandejaReportesDocente() {
                   className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2C5F57]"
                 >
                   <option value="">Todos los Estados</option>
-                  <option value="NUEVO">Nuevo</option>
-                  <option value="EN_REVISION">En Revisión</option>
-                  <option value="EN_SEGUIMIENTO">En Seguimiento</option>
-                  <option value="CERRADO">Cerrado</option>
+                  <option value="nuevo">Nuevo</option>
+                  <option value="en_revision">En Revisión</option>
+                  <option value="en_seguimiento">En Seguimiento</option>
+                  <option value="cerrado">Cerrado</option>
                 </select>
               </div>
             </div>
@@ -304,8 +412,8 @@ export default function BandejaReportesDocente() {
                         </td>
                         <td className="py-3.5 px-4 capitalize text-slate-700">{item.ubicacion}</td>
                         <td className="py-3.5 px-4">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
-                            {item.estado.replace("_", " ")}
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${getColorEstado(item.estado)}`}>
+                            {getNombreEstado(item.estado)}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-center">
@@ -424,36 +532,237 @@ export default function BandejaReportesDocente() {
                 )}
               </div>
 
-              {/* Cambiar Estado */}
+              {/* Alertas de éxito o error */}
+              {mensajeExito && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-2 text-xs font-semibold text-emerald-800 animate-fade-in">
+                  <svg className="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>{mensajeExito}</span>
+                </div>
+              )}
+
+              {errorGuardar && (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-2 text-xs font-semibold text-rose-800 animate-fade-in">
+                  <svg className="w-4 h-4 text-rose-600 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>{errorGuardar}</span>
+                </div>
+              )}
+
+              {/* Selector Estado del Reporte */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Estado del Reporte:
-                </label>
-                <select
-                  value={formDataModal.estado}
-                  onChange={(e) => setFormDataModal({ ...formDataModal, estado: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1B5E9E]"
-                >
-                  <option value="NUEVO">NUEVO - Sin revisar</option>
-                  <option value="EN_REVISION">EN REVISIÓN - En comité de convivencia</option>
-                  <option value="EN_SEGUIMIENTO">EN SEGUIMIENTO - Proceso de acompañamiento</option>
-                  <option value="CERRADO">CERRADO - Solucionado y archivado</option>
-                </select>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="selector-estado" className="block text-xs font-bold text-slate-700">
+                    Estado del Reporte:
+                  </label>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${getColorEstado(
+                      reporteSeleccionado.estado
+                    )}`}
+                  >
+                    Actual: {getNombreEstado(reporteSeleccionado.estado)}
+                  </span>
+                </div>
+
+                {(() => {
+                  const estadoActual = normalizarEstado(reporteSeleccionado.estado);
+                  const permitidos = TRANSICIONES_PERMITIDAS[estadoActual] || [];
+
+                  return (
+                    <>
+                      <select
+                        id="selector-estado"
+                        value={formDataModal.estado}
+                        onChange={(e) => {
+                          setFormDataModal({ ...formDataModal, estado: e.target.value });
+                          setErrorGuardar(null);
+                        }}
+                        disabled={permitidos.length === 0}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1B5E9E] disabled:opacity-60 cursor-pointer"
+                      >
+                        {/* Estado actual */}
+                        <option value={estadoActual}>
+                          {getNombreEstado(estadoActual)} — (Estado actual)
+                        </option>
+
+                        {/* Opciones disponibles según transiciones permitidas */}
+                        {Object.keys(ESTADOS_CONFIG).map((clave) => {
+                          if (clave === estadoActual) return null;
+                          const esPermitido = permitidos.includes(clave);
+                          return (
+                            <option key={clave} value={clave} disabled={!esPermitido}>
+                              {getNombreEstado(clave)} — {ESTADOS_CONFIG[clave].subtext}{" "}
+                              {!esPermitido ? "(No permitido)" : ""}
+                            </option>
+                          );
+                        })}
+                      </select>
+
+                      {permitidos.length === 0 && (
+                        <p className="text-[11px] text-slate-500 italic mt-1">
+                          El reporte está en estado cerrado y no admite más transiciones.
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
-              {/* Notas del Orientador */}
+              {/* Campo de texto de notas / comentarios */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label htmlFor="notas-seguimiento" className="block text-xs font-bold text-slate-700 mb-1">
                   Notas de Seguimiento (Orientación / Dirección):
                 </label>
                 <textarea
-                  rows="3"
+                  id="notas-seguimiento"
+                  rows="2"
                   value={formDataModal.notas_orientador}
                   onChange={(e) => setFormDataModal({ ...formDataModal, notas_orientador: e.target.value })}
-                  placeholder="Escriba las acciones tomadas, compromisos o citaciones..."
+                  placeholder="Escriba las acciones tomadas, compromisos o citaciones (opcional)..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1B5E9E]"
                 />
               </div>
+
+              {/* Botón Cambios del reporte */}
+              <div>
+                <button
+                  id="btn-cambios-reporte"
+                  type="button"
+                  aria-expanded={mostrarHistorial}
+                  aria-controls="panel-historial-cambios"
+                  onClick={handleToggleHistorial}
+                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-slate-300 hover:border-[#1B5E9E] bg-white hover:bg-slate-50 text-slate-700 hover:text-[#1B5E9E] text-xs font-bold transition-all shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1B5E9E]"
+                >
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="w-4 h-4 text-slate-500 shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span>Cambios del reporte</span>
+                    {historial.length > 0 && (
+                      <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        {historial.length}
+                      </span>
+                    )}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+                      mostrarHistorial ? "rotate-180" : ""
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Panel de Línea de Tiempo de Cambios (Estilo GitHub issue timeline) */}
+              {mostrarHistorial && (
+                <div
+                  id="panel-historial-cambios"
+                  className="bg-slate-50/70 border border-slate-200/90 rounded-2xl p-4 max-h-56 overflow-y-auto space-y-3 animate-fade-in"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Línea de tiempo de cambios
+                    </h4>
+                    {cargandoHistorial && (
+                      <span className="text-[10px] text-slate-400 font-semibold animate-pulse">
+                        Cargando...
+                      </span>
+                    )}
+                  </div>
+
+                  {cargandoHistorial ? (
+                    <div className="py-4 text-center text-xs text-slate-400 font-medium">
+                      Cargando historial de cambios...
+                    </div>
+                  ) : historial.length === 0 ? (
+                    <div className="py-4 text-center text-xs text-slate-400 font-medium italic">
+                      Sin cambios de estado todavía
+                    </div>
+                  ) : (
+                    <div className="relative pl-6 pt-1 space-y-4">
+                      {/* Línea vertical conectora continua */}
+                      <div
+                        className="absolute left-[11px] top-3 bottom-3 w-0.5 bg-slate-200"
+                        aria-hidden="true"
+                      />
+
+                      {historial.map((cambio, idx) => (
+                        <div key={idx} className="relative text-xs">
+                          {/* Ícono de evento sobre la línea */}
+                          <div className="absolute -left-6 top-0.5 w-6 h-6 rounded-full bg-white border-2 border-[#1B5E9E] text-[#1B5E9E] flex items-center justify-center shadow-2xs z-10">
+                            <svg
+                              className="w-3 h-3"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 20h9" />
+                              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                          </div>
+
+                          {/* Fila del evento */}
+                          <div className="flex flex-wrap items-baseline gap-1.5 text-slate-700 leading-relaxed">
+                            <span className="font-extrabold text-slate-900">
+                              {cambio.usuario_nombre || cambio.nombre_orientador || "Orientador"}
+                            </span>
+                            <span className="text-slate-500">cambió el estado de</span>
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${getColorEstado(
+                                cambio.estado_anterior
+                              )}`}
+                            >
+                              {getNombreEstado(cambio.estado_anterior)}
+                            </span>
+                            <span className="text-slate-500">a</span>
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${getColorEstado(
+                                cambio.estado_nuevo
+                              )}`}
+                            >
+                              {getNombreEstado(cambio.estado_nuevo)}
+                            </span>
+                            <span
+                              className="text-[11px] text-slate-400 font-medium ml-auto"
+                              title={formatearFechaCompleta(cambio.fecha_cambio || cambio.fecha)}
+                            >
+                              {formatearFechaLocal(cambio.fecha_cambio || cambio.fecha)}
+                            </span>
+                          </div>
+
+                          {/* Comentario secundario si existe */}
+                          {cambio.comentario && (
+                            <div className="mt-1.5 bg-white border border-slate-200/80 rounded-xl p-2.5 text-slate-600 text-xs italic shadow-2xs">
+                              "{cambio.comentario}"
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Footer Modal */}
               <div className="pt-2 flex justify-end gap-3 border-t border-slate-100">
@@ -466,8 +775,8 @@ export default function BandejaReportesDocente() {
                 </button>
                 <button
                   type="submit"
-                  disabled={guardando}
-                  className="px-5 py-2.5 rounded-xl bg-[#2C5F57] hover:bg-[#234b44] text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                  disabled={guardando || normalizarEstado(formDataModal.estado) === normalizarEstado(reporteSeleccionado.estado)}
+                  className="px-5 py-2.5 rounded-xl bg-[#2C5F57] hover:bg-[#234b44] text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {guardando ? "Guardando..." : "Guardar Cambios"}
                 </button>

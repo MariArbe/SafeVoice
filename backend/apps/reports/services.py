@@ -10,10 +10,24 @@ import logging
 import uuid
 
 from django.db import transaction
+from django.utils import timezone
 
-from .exceptions import ReporteNoEncontradoError
+from apps.users.models import Usuario
+
+from .exceptions import (
+    InstitucionNoCoincideError,
+    MismoEstadoError,
+    PermisoOrientadorRequeridoError,
+    ReporteNoEncontradoError,
+    TransicionEstadoInvalidaError,
+)
 from .models import Reporte, SeguimientoCaso
 from .repository import ReporteRepositoryProxy
+from .transitions import (
+    TRANSICIONES_PERMITIDAS,
+    normalizar_estado,
+    validar_transicion,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +42,41 @@ class ReporteService:
 
     El service es la única clase que interactúa con ReporteRepositoryProxy.
     """
+
+    def _buscar_reporte(self, reporte_id: int | str) -> Reporte:
+        """
+        Busca un reporte por PK (entero o string numérico) o por código de seguimiento.
+        Lanza ReporteNoEncontradoError si no existe.
+        """
+        if isinstance(reporte_id, int) or (isinstance(reporte_id, str) and str(reporte_id).isdigit()):
+            try:
+                return Reporte.objects.get(pk=int(reporte_id))
+            except Reporte.DoesNotExist:
+                raise ReporteNoEncontradoError()
+
+        # Búsqueda por código de seguimiento UUID o cadena
+        try:
+            return Reporte.objects.get(codigo_seguimiento=reporte_id)
+        except (Reporte.DoesNotExist, ValueError):
+            raise ReporteNoEncontradoError()
+
+    def _validar_acceso_orientador(self, reporte: Reporte, usuario) -> None:
+        """
+        Valida que el usuario tenga rol de Orientador y pertenezca a la misma
+        institución del reporte (HU-08).
+        """
+        if not usuario or not usuario.is_authenticated:
+            raise PermisoOrientadorRequeridoError()
+
+        rol_usuario = getattr(usuario, "rol", None)
+        if rol_usuario != Usuario.RolUsuario.ORIENTADOR:
+            raise PermisoOrientadorRequeridoError()
+
+        usuario_inst_id = getattr(usuario, "institution_id", None)
+        reporte_inst_id = getattr(reporte, "institucion_id", None)
+
+        if reporte_inst_id and usuario_inst_id and reporte_inst_id != usuario_inst_id:
+            raise InstitucionNoCoincideError()
 
     # ── Creación de reportes ───────────────────────────────────────────────
 
@@ -106,59 +155,134 @@ class ReporteService:
 
     def actualizar_estado(
         self,
-        reporte_id: int,
+        reporte_id: int | str,
         nuevo_estado: str,
         usuario,
         observaciones: str = "",
+        comentario: str = "",
     ) -> Reporte:
         """
-        Actualiza el estado de un reporte y registra el cambio en el
-        historial de auditoría (SeguimientoCaso).
+        Actualiza el estado de un reporte y registra el cambio en el historial de
+        auditoría ('historial_cambios') dentro del propio reporte de forma atómica.
 
-        Ambas operaciones se ejecutan de forma atómica: si alguna falla,
-        ningún cambio se persiste.
+        Reglas:
+          1. Solo accesible para orientadores de la misma institución del reporte.
+          2. Valida transiciones permitidas (nuevo -> en_revision -> en_seguimiento -> cerrado).
+          3. Rechaza si el estado nuevo es igual al actual o si la transición es inválida.
+          4. Operación atómica: persiste el nuevo estado y añade la entrada al historial
+             con usuario_id (del JWT) y timestamp UTC del servidor.
 
         Args:
-            reporte_id: PK del reporte a actualizar.
-            nuevo_estado: Valor del nuevo estado (debe ser un Reporte.Estado válido).
-            usuario: Instancia de Usuario autenticado que realiza el cambio.
-            observaciones: Notas opcionales del orientador.
+            reporte_id: PK o código de seguimiento del reporte.
+            nuevo_estado: Valor del nuevo estado deseado.
+            usuario: Instancia de Usuario autenticado (Orientador).
+            observaciones: Texto opcional / comentario del orientador.
+            comentario: Texto opcional del modal.
 
         Returns:
-            Instancia del Reporte con el estado actualizado.
-
-        Raises:
-            ReporteNoEncontradoError: Si el reporte no existe.
+            Instancia del Reporte actualizado.
         """
+        reporte = self._buscar_reporte(reporte_id)
+
+        # 1. Validación de rol de orientador e institución
+        self._validar_acceso_orientador(reporte, usuario)
+
+        # 2. Validación de estados y transiciones permitidas
+        estado_actual_norm = normalizar_estado(reporte.estado)
+        nuevo_estado_norm = normalizar_estado(nuevo_estado)
+
+        if estado_actual_norm == nuevo_estado_norm:
+            raise MismoEstadoError(estado_actual=estado_actual_norm)
+
         try:
-            reporte = Reporte.objects.get(pk=reporte_id)
-        except Reporte.DoesNotExist:
-            raise ReporteNoEncontradoError()
-
-        estado_anterior = reporte.estado
-
-        with transaction.atomic():
-            # 1. Actualizar el estado del reporte
-            reporte.estado = nuevo_estado
-            reporte.save(update_fields=["estado", "fecha_actualizacion"])
-
-            # 2. Registrar en el historial de auditoría
-            SeguimientoCaso.objects.create(
-                reporte=reporte,
-                orientador=usuario,
-                estado_anterior=estado_anterior,
-                estado_nuevo=nuevo_estado,
-                observaciones=observaciones,
+            validar_transicion(estado_actual_norm, nuevo_estado_norm)
+        except ValueError as err:
+            permitidos = TRANSICIONES_PERMITIDAS.get(estado_actual_norm, [])
+            raise TransicionEstadoInvalidaError(
+                mensaje=str(err),
+                estado_actual=estado_actual_norm,
+                estados_permitidos=permitidos,
             )
 
+        # 3. Operación atómica: actualizar estado y registrar en historial
+        texto_comentario = (comentario or observaciones or "").strip()
+        nombre_orientador = (
+            usuario.get_full_name().strip()
+            if hasattr(usuario, "get_full_name") and usuario.get_full_name().strip()
+            else (getattr(usuario, "first_name", "") or getattr(usuario, "email", "Orientador"))
+        )
+
+        with transaction.atomic():
+            entrada_historial = {
+                "estado_anterior": estado_actual_norm,
+                "estado_nuevo": nuevo_estado_norm,
+                "usuario_id": usuario.id,
+                "usuario_nombre": nombre_orientador,
+                "fecha_cambio": timezone.now().isoformat(),
+                "comentario": texto_comentario,
+            }
+
+            historial = list(reporte.historial_cambios or [])
+            historial.append(entrada_historial)
+            reporte.historial_cambios = historial
+            reporte.estado = nuevo_estado_norm
+            reporte.save(update_fields=["estado", "historial_cambios", "fecha_actualizacion"])
+
+            # Compatibilidad retroactiva con SeguimientoCaso para evitar romper migraciones antiguas
+            try:
+                SeguimientoCaso.objects.create(
+                    reporte=reporte,
+                    orientador=usuario,
+                    estado_anterior=estado_actual_norm,
+                    estado_nuevo=nuevo_estado_norm,
+                    observaciones=texto_comentario,
+                )
+            except Exception as e:
+                logger.debug("Omitiendo SeguimientoCaso legado: %s", e)
+
         logger.info(
-            "Estado actualizado: reporte_id=%s | %s → %s | usuario=%s",
-            reporte_id,
-            estado_anterior,
-            nuevo_estado,
+            "Estado actualizado: reporte_id=%s | %s → %s | orientador_id=%s (%s)",
+            reporte.id,
+            estado_actual_norm,
+            nuevo_estado_norm,
+            usuario.id,
             usuario.email,
         )
         return reporte
+
+    # ── Consulta de historial (HU-08) ──────────────────────────────────────
+
+    def obtener_historial(self, reporte_id: int | str, usuario) -> list[dict]:
+        """
+        Obtiene el historial de cambios de estado de un reporte, ordenado
+        del más reciente al más antiguo.
+
+        Solo accesible para orientadores de la misma institución del reporte.
+        No expone ningún dato que identifique al estudiante.
+        """
+        reporte = self._buscar_reporte(reporte_id)
+        self._validar_acceso_orientador(reporte, usuario)
+
+        historial = list(reporte.historial_cambios or [])
+
+        # Ordenar del más reciente al más antiguo (último agregado primero)
+        historial_ordenado = list(reversed(historial))
+
+        # Garantizar estructura y nombres de clave
+        resultado = []
+        for entrada in historial_ordenado:
+            resultado.append({
+                "estado_anterior": entrada.get("estado_anterior"),
+                "estado_nuevo": entrada.get("estado_nuevo"),
+                "usuario_id": entrada.get("usuario_id"),
+                "usuario_nombre": entrada.get("usuario_nombre"),
+                "nombre_orientador": entrada.get("usuario_nombre"),
+                "fecha_cambio": entrada.get("fecha_cambio"),
+                "fecha": entrada.get("fecha_cambio"),
+                "comentario": entrada.get("comentario", ""),
+            })
+
+        return resultado
 
     # ── Consulta pública (anónima) ─────────────────────────────────────────
 

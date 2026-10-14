@@ -31,19 +31,34 @@ const reporteService = {
 
   /**
    * Actualiza el estado de un reporte (HU-08).
-   * @param {number} reporteId - ID (PK) del reporte a actualizar
-   * @param {Object} datos - { nuevo_estado, observaciones }
-   * @returns {Promise<Object>} - El reporte actualizado con historial de estados
+   * @param {number|string} reporteId - ID (PK) o código de seguimiento del reporte a actualizar
+   * @param {Object} datos - { estado / nuevo_estado, notas_orientador / comentario }
+   * @returns {Promise<Object>} - El reporte actualizado
    */
   actualizarReporte: async (reporteId, datos) => {
     try {
       const response = await api.patch(`/reports/${reporteId}/estado/`, {
-        nuevo_estado: datos.estado,
-        observaciones: datos.notas_orientador || "",
+        nuevo_estado: datos.nuevo_estado || datos.estado,
+        comentario: datos.comentario || datos.notas_orientador || "",
       });
       return response.data;
     } catch (error) {
       console.error("Error al actualizar el estado del reporte:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene el historial cronológico de cambios de estado del reporte (HU-08).
+   * @param {number|string} reporteId - ID o código de seguimiento del reporte
+   * @returns {Promise<Array>} - Lista de cambios ordenada de más reciente a más antiguo
+   */
+  obtenerHistorial: async (reporteId) => {
+    try {
+      const response = await api.get(`/reports/${reporteId}/historial/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener historial del reporte:", error);
       throw error;
     }
   },
