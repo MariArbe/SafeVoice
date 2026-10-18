@@ -62,6 +62,32 @@ const reporteService = {
       throw error;
     }
   },
+
+  /**
+   * Obtiene estadísticas agregadas de la institución (HU-13).
+   */
+  obtenerEstadisticas: async (params = {}) => {
+    try {
+      const response = await api.get("/reports/statistics/", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener estadísticas:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene datos para el mapa de calor por zonas (HU-14).
+   */
+  obtenerMapaCalor: async (params = {}) => {
+    try {
+      const response = await api.get("/reports/heatmap/", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener mapa de calor:", error);
+      throw error;
+    }
+  },
 };
 
 export default reporteService;

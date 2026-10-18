@@ -27,7 +27,7 @@ export default function LoginDocente() {
           localStorage.setItem("refresh_token", response.data.refresh);
         }
         localStorage.setItem("user", JSON.stringify(response.data));
-        navigate("/docente/reportes");
+        navigate("/docente/menu");
       }
     } catch (err) {
       console.error("Error en login:", err);

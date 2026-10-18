@@ -12,16 +12,19 @@ from apps.users.models import Usuario
 
 class IsDirectivo(BasePermission):
     """
-    Permite el acceso únicamente a usuarios autenticados con rol DIRECTIVO.
+    Permite el acceso a usuarios autenticados con rol DIRECTIVO u ORIENTADOR (unificados).
     """
 
-    message = "Solo los directivos pueden realizar esta acción."
+    message = "Solo el personal autorizado puede realizar esta acción."
 
     def has_permission(self, request, view) -> bool:
         return bool(
             request.user
             and request.user.is_authenticated
-            and request.user.rol == Usuario.RolUsuario.DIRECTIVO
+            and request.user.rol in (
+                Usuario.RolUsuario.DIRECTIVO,
+                Usuario.RolUsuario.ORIENTADOR,
+            )
         )
 
 
@@ -31,26 +34,28 @@ EsDirectivo = IsDirectivo
 
 class EsOrientador(BasePermission):
     """
-    Permite el acceso únicamente a usuarios autenticados con rol ORIENTADOR.
+    Permite el acceso a usuarios autenticados con rol ORIENTADOR o DIRECTIVO (unificados).
     """
 
-    message = "Solo los orientadores pueden realizar esta acción."
+    message = "Solo el personal autorizado puede realizar esta acción."
 
     def has_permission(self, request, view) -> bool:
         return bool(
             request.user
             and request.user.is_authenticated
-            and request.user.rol == Usuario.RolUsuario.ORIENTADOR
+            and request.user.rol in (
+                Usuario.RolUsuario.DIRECTIVO,
+                Usuario.RolUsuario.ORIENTADOR,
+            )
         )
 
 
 class EsDirectivoOOrientador(BasePermission):
     """
     Permite el acceso a usuarios autenticados con rol DIRECTIVO u ORIENTADOR.
-    Equivale a (EsDirectivo | EsOrientador) con un solo mensaje de error.
     """
 
-    message = "Solo el personal autorizado (directivos u orientadores) puede realizar esta acción."
+    message = "Solo el personal autorizado puede realizar esta acción."
 
     def has_permission(self, request, view) -> bool:
         return bool(

@@ -224,25 +224,13 @@ export default function RegistroDocente() {
               )}
             </div>
 
-            {/* Rol */}
+            {/* Rol Unificado */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Rol institucional*</label>
-              <select
-                name="rol"
-                value={formData.rol}
-                onChange={handleChange}
-                className={`w-full border ${
-                  getFieldError("rol") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
-                } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent bg-slate-50/50 focus:bg-white text-slate-700 font-medium`}
-                required
-                disabled={isLoading}
-              >
-                <option value="ORIENTADOR">Orientador(a)</option>
-                <option value="DIRECTIVO">Directivo / Coordinación</option>
-              </select>
-              {getFieldError("rol") && (
-                <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("rol")}</p>
-              )}
+              <label className="block text-xs font-bold text-slate-700 mb-1">Rol institucional</label>
+              <div className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 text-slate-700 font-semibold flex items-center justify-between">
+                <span>Docente / Orientador(a) Escolar</span>
+                <span className="text-[10px] bg-[#DCEAF7] text-[#1B5E9E] font-bold px-2 py-0.5 rounded-md">Acceso Completo</span>
+              </div>
             </div>
 
             {/* Contraseñas */}

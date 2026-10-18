@@ -31,8 +31,8 @@ class TestAccesoSinAutenticacion:
 class TestControlAccesoPorRol:
     """Solo el directivo puede crear usuarios."""
 
-    def test_orientador_no_puede_crear_usuarios(self, cliente_orientador):
-        """HU-09: El orientador no tiene permisos de gestión de usuarios."""
+    def test_orientador_puede_crear_usuarios(self, cliente_orientador):
+        """Con roles unificados, el orientador tiene permisos completos de gestión."""
         payload = {
             "email": "nuevo@colegio.edu.co",
             "first_name": "Nuevo",
@@ -42,7 +42,7 @@ class TestControlAccesoPorRol:
             "password_confirmacion": "SeguraPass123!",
         }
         response = cliente_orientador.post(CREAR_USUARIO_URL, payload, format="json")
-        assert response.status_code == 403
+        assert response.status_code == 201
 
     def test_directivo_puede_acceder_a_crear_usuarios(
         self, cliente_directivo, institucion

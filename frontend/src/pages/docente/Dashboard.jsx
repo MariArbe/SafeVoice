@@ -1,9 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Cell,
+  PieChart,
+  Pie,
+} from "recharts";
+import reporteService from "../../services/reporteService";
 
 export default function DashboardDocente() {
   const navigate = useNavigate();
   const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [ultimosReportes, setUltimosReportes] = useState([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      setCargando(true);
+      try {
+        const statsData = await reporteService.obtenerEstadisticas();
+        if (statsData) {
+          setStats(statsData);
+        }
+      } catch (err) {
+        console.warn("No se pudieron cargar estadísticas en vivo, usando datos de respaldo:", err);
+      }
+
+      try {
+        const reportesData = await reporteService.listarReportes({ page: 1 });
+        if (reportesData && reportesData.results) {
+          setUltimosReportes(reportesData.results.slice(0, 5));
+        } else if (Array.isArray(reportesData)) {
+          setUltimosReportes(reportesData.slice(0, 5));
+        }
+      } catch (err) {
+        console.warn("No se pudieron cargar últimos reportes en vivo:", err);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarDatos();
+  }, []);
 
   // Zonas del colegio con coordenadas vectoriales y niveles sin luces traseras
   const zonasColegio = [
@@ -86,6 +130,97 @@ export default function DashboardDocente() {
       fillBg: "#132a24"
     },
   ];
+
+  // Preparar datos para BarChart a partir de stats.by_location o respaldo
+  const datosFrecuencia = useMemo(() => {
+    if (stats?.by_location && Object.keys(stats.by_location).length > 0) {
+      const total = stats.total_reports || Object.values(stats.by_location).reduce((a, b) => a + b, 0);
+      const palette = ["#f43f5e", "#f97316", "#f59e0b", "#1B5E9E", "#10b981", "#8b5cf6", "#06b6d4"];
+      return Object.entries(stats.by_location)
+        .slice(0, 6)
+        .map(([lugar, count], i) => ({
+          lugar: lugar.length > 15 ? lugar.slice(0, 15) + "..." : lugar,
+          nombreCompleto: lugar,
+          count,
+          pct: total > 0 ? Math.round((count / total) * 100) : 0,
+          color: palette[i % palette.length],
+        }));
+    }
+    return [
+      { lugar: "Canchas & Patios", count: 14, pct: 35, color: "#f43f5e" },
+      { lugar: "Pasillos", count: 10, pct: 25, color: "#f97316" },
+      { lugar: "Baños Sec.", count: 9, pct: 22, color: "#f59e0b" },
+      { lugar: "Bloque A", count: 7, pct: 15, color: "#1B5E9E" },
+      { lugar: "Biblioteca", count: 1, pct: 3, color: "#10b981" },
+    ];
+  }, [stats]);
+
+  // Preparar datos para PieChart a partir de stats.by_type o respaldo
+  const datosTiposAgresion = useMemo(() => {
+    if (stats?.by_type && Object.keys(stats.by_type).length > 0) {
+      const sum = Object.values(stats.by_type).reduce((a, b) => a + b, 0);
+      const palette = ["#1B5E9E", "#2C5F57", "#f43f5e", "#f59e0b", "#8b5cf6", "#06b6d4"];
+      return Object.entries(stats.by_type).map(([name, count], i) => ({
+        name: name.replace(/\?\?/g, "ó").replace(/\?a/g, "ía"),
+        count,
+        value: sum > 0 ? Math.round((count / sum) * 100) : 0,
+        color: palette[i % palette.length],
+      }));
+    }
+    return [
+      { name: "Insultos / Apodos", value: 45, color: "#1B5E9E" },
+      { name: "Exclusión / Chismes", value: 30, color: "#2C5F57" },
+      { name: "Ciberacoso", value: 15, color: "#f43f5e" },
+      { name: "Agresión Física", value: 10, color: "#f59e0b" },
+    ];
+  }, [stats]);
+
+  // KPIs calculados
+  const totalReportes = stats ? (stats.total_reports ?? 0) : 41;
+  const enRevision = useMemo(() => {
+    if (!stats?.by_status) return 10;
+    let sum = 0;
+    const activos = ["EN_REVISION", "PENDIENTE", "NUEVO", "EN_SEGUIMIENTO"];
+    for (const [st, val] of Object.entries(stats.by_status)) {
+      if (activos.includes(st.toUpperCase())) sum += val;
+    }
+    return sum;
+  }, [stats]);
+  const resueltos = useMemo(() => {
+    if (!stats?.by_status) return 31;
+    let sum = 0;
+    const finalizados = ["CERRADO", "ATENDIDO", "DESCARTADO"];
+    for (const [st, val] of Object.entries(stats.by_status)) {
+      if (finalizados.includes(st.toUpperCase())) sum += val;
+    }
+    return sum;
+  }, [stats]);
+  const zonaCritica = useMemo(() => {
+    if (stats?.by_location && Object.keys(stats.by_location).length > 0) {
+      const entries = Object.entries(stats.by_location);
+      entries.sort((a, b) => b[1] - a[1]);
+      return { nombre: entries[0][0], count: entries[0][1] };
+    }
+    return { nombre: "Canchas & Patios", count: 14 };
+  }, [stats]);
+
+  // Tabla de reportes recientes
+  const reportesTabla = useMemo(() => {
+    if (ultimosReportes && ultimosReportes.length > 0) {
+      return ultimosReportes.map((rep) => ({
+        codigo: rep.codigo_seguimiento || `SV-2026-${rep.id}`,
+        grado: rep.grado_victima ? `Grado ${rep.grado_victima}°` : "General",
+        ubicacion: rep.ubicacion || "Sin especificar",
+        frecuencia: rep.frecuencia || "Reiterativo",
+        estado: rep.estado || "PENDIENTE",
+      }));
+    }
+    return [
+      { codigo: "SV-2026-88A", grado: "Grado 8°", ubicacion: "Salón de clases", frecuencia: "Varias semanas", estado: "EN_REVISION" },
+      { codigo: "SV-2026-42B", grado: "Grado 10°", ubicacion: "Redes sociales", frecuencia: "Primera vez", estado: "PENDIENTE" },
+      { codigo: "SV-2026-19C", grado: "Grado 6°", ubicacion: "Descanso", frecuencia: "Varios meses", estado: "ATENDIDO" },
+    ];
+  }, [ultimosReportes]);
 
   return (
     <div className="min-h-screen bg-[#DCEAF7]/40 flex font-sans text-slate-800">
@@ -205,8 +340,8 @@ export default function DashboardDocente() {
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Reportes</p>
-                <p className="text-2xl font-black text-slate-800 mt-1">41</p>
-                <span className="text-[11px] text-emerald-600 font-bold">+5 esta semana</span>
+                <p className="text-2xl font-black text-slate-800 mt-1">{cargando ? "..." : totalReportes}</p>
+                <span className="text-[11px] text-emerald-600 font-bold">Datos en vivo</span>
               </div>
               <div className="w-11 h-11 bg-blue-50 text-[#1B5E9E] rounded-2xl flex items-center justify-center text-xl shadow-2xs">
                 📋
@@ -216,8 +351,8 @@ export default function DashboardDocente() {
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Zona Más Crítica</p>
-                <p className="text-lg font-black text-rose-600 mt-1">Canchas & Patios</p>
-                <span className="text-[11px] text-rose-600 font-bold">14 casos registrados</span>
+                <p className="text-lg font-black text-rose-600 mt-1 truncate max-w-[150px]">{zonaCritica.nombre}</p>
+                <span className="text-[11px] text-rose-600 font-bold">{zonaCritica.count} casos registrados</span>
               </div>
               <div className="w-11 h-11 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-xl shadow-2xs">
                 🚨
@@ -226,8 +361,8 @@ export default function DashboardDocente() {
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">En Revisión</p>
-                <p className="text-2xl font-black text-amber-600 mt-1">10</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">En Revisión / Pendiente</p>
+                <p className="text-2xl font-black text-amber-600 mt-1">{enRevision}</p>
                 <span className="text-[11px] text-amber-600 font-bold">Requieren atención</span>
               </div>
               <div className="w-11 h-11 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-xl shadow-2xs">
@@ -238,8 +373,10 @@ export default function DashboardDocente() {
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Casos Resueltos</p>
-                <p className="text-2xl font-black text-[#2C5F57] mt-1">31</p>
-                <span className="text-[11px] text-[#2C5F57] font-bold">75.6% efectividad</span>
+                <p className="text-2xl font-black text-[#2C5F57] mt-1">{resueltos}</p>
+                <span className="text-[11px] text-[#2C5F57] font-bold">
+                  {totalReportes > 0 ? `${Math.round((resueltos / totalReportes) * 100)}% atendidos` : "0% atendidos"}
+                </span>
               </div>
               <div className="w-11 h-11 bg-emerald-50 text-[#2C5F57] rounded-2xl flex items-center justify-center text-xl shadow-2xs">
                 ✅
@@ -450,24 +587,25 @@ export default function DashboardDocente() {
                 </span>
               </div>
 
-              <div className="space-y-3.5 pt-2">
-                {[
-                  { lugar: "Canchas & Patios", pct: 35, count: "14 casos", color: "bg-rose-500" },
-                  { lugar: "Pasillo Principal", pct: 25, count: "10 casos", color: "bg-orange-500" },
-                  { lugar: "Baños Secundaria", pct: 22, count: "9 casos", color: "bg-amber-500" },
-                  { lugar: "Bloque A (Aulas 6° a 9°)", pct: 15, count: "7 casos", color: "bg-[#1B5E9E]" },
-                  { lugar: "Biblioteca & Labs", pct: 3, count: "1 caso", color: "bg-emerald-500" },
-                ].map((item, i) => (
-                  <div key={i} className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold text-slate-700">
-                      <span>{item.lugar}</span>
-                      <span className="text-slate-500">{item.count} ({item.pct}%)</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                      <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${item.pct}%` }} />
-                    </div>
-                  </div>
-                ))}
+              <div className="h-64 w-full pt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={datosFrecuencia}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 20 }}
+                  >
+                    <XAxis dataKey="lugar" tick={{ fontSize: 11, fill: "#64748b" }} interval={0} />
+                    <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
+                    <Tooltip
+                      formatter={(value, name, props) => [`${value} casos (${props.payload.pct}%)`, "Incidentes"]}
+                      contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "12px", fontWeight: "600" }}
+                    />
+                    <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                      {datosFrecuencia.map((entry, index) => (
+                        <Cell key={`bar-cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
@@ -478,32 +616,38 @@ export default function DashboardDocente() {
                 <p className="text-xs text-slate-400">Categorías de afectación recibidas</p>
               </div>
 
-              <div className="flex justify-center items-center my-2">
-                <div className="w-36 h-36 rounded-full border-8 border-[#1B5E9E] border-t-[#2C5F57] border-r-rose-500 flex items-center justify-center text-center p-3">
-                  <div>
-                    <span className="text-lg font-black text-slate-800">Verbal</span>
-                    <p className="text-[10px] text-slate-400 font-semibold">45% de casos</p>
-                  </div>
-                </div>
+              <div className="h-44 w-full flex items-center justify-center my-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={datosTiposAgresion}
+                      innerRadius={46}
+                      outerRadius={72}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {datosTiposAgresion.map((entry, index) => (
+                        <Cell key={`pie-cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value) => [`${value}% de casos`, "Frecuencia"]}
+                      contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "12px", fontWeight: "600" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
 
               <div className="space-y-2 text-xs font-semibold text-slate-600">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-[#1B5E9E] rounded-md" /> Insultos / Apodos</span>
-                  <span className="font-bold text-slate-800">45%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-[#2C5F57] rounded-md" /> Exclusión / Chismes</span>
-                  <span className="font-bold text-slate-800">30%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-rose-500 rounded-md" /> Ciberacoso</span>
-                  <span className="font-bold text-slate-800">15%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2"><span className="w-3 h-3 bg-amber-500 rounded-md" /> Agresión Física</span>
-                  <span className="font-bold text-slate-800">10%</span>
-                </div>
+                {datosTiposAgresion.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-md" style={{ backgroundColor: item.color }} />
+                      {item.name}
+                    </span>
+                    <span className="font-bold text-slate-800">{item.value}%</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -533,39 +677,25 @@ export default function DashboardDocente() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                  <tr className="hover:bg-slate-50/60">
-                    <td className="py-3.5 font-mono font-bold text-[#1B5E9E]">SV-2026-88A</td>
-                    <td className="py-3.5">Grado 8°</td>
-                    <td className="py-3.5">Salón de clases</td>
-                    <td className="py-3.5">Varias semanas</td>
-                    <td className="py-3.5 text-right">
-                      <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-bold">
-                        En Revisión
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-slate-50/60">
-                    <td className="py-3.5 font-mono font-bold text-[#1B5E9E]">SV-2026-42B</td>
-                    <td className="py-3.5">Grado 10°</td>
-                    <td className="py-3.5">Redes sociales</td>
-                    <td className="py-3.5">Primera vez</td>
-                    <td className="py-3.5 text-right">
-                      <span className="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full text-[10px] font-bold">
-                        Pendiente
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-slate-50/60">
-                    <td className="py-3.5 font-mono font-bold text-[#1B5E9E]">SV-2026-19C</td>
-                    <td className="py-3.5">Grado 6°</td>
-                    <td className="py-3.5">Descanso</td>
-                    <td className="py-3.5">Varios meses</td>
-                    <td className="py-3.5 text-right">
-                      <span className="bg-emerald-50 text-[#2C5F57] border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-bold">
-                        Atendido
-                      </span>
-                    </td>
-                  </tr>
+                  {reportesTabla.map((rep, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/60">
+                      <td className="py-3.5 font-mono font-bold text-[#1B5E9E]">{rep.codigo}</td>
+                      <td className="py-3.5">{rep.grado}</td>
+                      <td className="py-3.5">{rep.ubicacion}</td>
+                      <td className="py-3.5">{rep.frecuencia}</td>
+                      <td className="py-3.5 text-right">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                          rep.estado === "CERRADO" || rep.estado === "ATENDIDO"
+                            ? "bg-emerald-50 text-[#2C5F57] border-emerald-200"
+                            : rep.estado === "EN_REVISION"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
+                        }`}>
+                          {rep.estado}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

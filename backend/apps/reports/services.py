@@ -69,7 +69,7 @@ class ReporteService:
             raise PermisoOrientadorRequeridoError()
 
         rol_usuario = getattr(usuario, "rol", None)
-        if rol_usuario != Usuario.RolUsuario.ORIENTADOR:
+        if rol_usuario not in (Usuario.RolUsuario.ORIENTADOR, Usuario.RolUsuario.DIRECTIVO):
             raise PermisoOrientadorRequeridoError()
 
         usuario_inst_id = getattr(usuario, "institution_id", None)

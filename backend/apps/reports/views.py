@@ -157,10 +157,10 @@ class ListarReportesView(APIView):
 class StatisticsOverviewView(APIView):
     """
     GET /api/v1/reports/statistics/?fecha_inicio=YYYY-MM-DD&fecha_fin=YYYY-MM-DD
-    Estadísticas agregadas (HU-13). Solo Directivo; solo ve su institución.
+    Estadísticas agregadas (HU-13). Orientador o Directivo; solo ve su institución.
     """
 
-    permission_classes = [EsDirectivo]
+    permission_classes = [EsDirectivoOOrientador]
 
     def get(self, request: Request) -> Response:
         filtros = FiltroFechasSerializer(data=request.query_params)
@@ -177,11 +177,11 @@ class StatisticsOverviewView(APIView):
 class HeatmapView(APIView):
     """
     GET /api/v1/reports/heatmap/?fecha_inicio=YYYY-MM-DD&fecha_fin=YYYY-MM-DD
-    Concentración de casos por zona de la sede (HU-14). Solo Directivo;
+    Concentración de casos por zona de la sede (HU-14). Orientador o Directivo;
     solo ve su institución.
     """
 
-    permission_classes = [EsDirectivo]
+    permission_classes = [EsDirectivoOOrientador]
 
     def get(self, request: Request) -> Response:
         filtros = FiltroFechasSerializer(data=request.query_params)

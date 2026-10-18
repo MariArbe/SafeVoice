@@ -42,14 +42,14 @@ def _crear_reporte(institucion, ubicacion="Salón", estado="PENDIENTE", riesgo="
 
 @pytest.mark.django_db
 class TestAccesoDashboard:
-    def test_orientador_no_puede_consultar_estadisticas(self, cliente_orientador):
-        assert cliente_orientador.get(STATISTICS_URL).status_code == 403
+    def test_orientador_puede_consultar_estadisticas(self, cliente_orientador):
+        assert cliente_orientador.get(STATISTICS_URL).status_code == 200
 
     def test_usuario_sin_token_no_puede_consultar_estadisticas(self, api_client):
         assert api_client.get(STATISTICS_URL).status_code == 401
 
-    def test_orientador_no_puede_consultar_heatmap(self, cliente_orientador):
-        assert cliente_orientador.get(HEATMAP_URL).status_code == 403
+    def test_orientador_puede_consultar_heatmap(self, cliente_orientador):
+        assert cliente_orientador.get(HEATMAP_URL).status_code == 200
 
     def test_usuario_sin_token_no_puede_consultar_heatmap(self, api_client):
         assert api_client.get(HEATMAP_URL).status_code == 401

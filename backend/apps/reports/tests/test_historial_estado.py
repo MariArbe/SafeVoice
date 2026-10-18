@@ -197,19 +197,19 @@ class TestTransicionesPermitidas:
 class TestControlAccesoYRoles:
     """Verifica permisos de orientador, institución y autenticación."""
 
-    def test_usuario_sin_rol_orientador_es_rechazado_con_403(
+    def test_directivo_tiene_acceso_unificado_a_historial(
         self, cliente_directivo, reporte
     ):
-        """Un directivo (sin rol orientador) no puede actualizar ni consultar historial."""
+        """Con roles unificados, directivo también puede actualizar y consultar historial."""
         url_patch = ESTADO_URL.format(reporte.id)
         res_patch = cliente_directivo.patch(
             url_patch, data={"nuevo_estado": "en_revision"}, format="json"
         )
-        assert res_patch.status_code == 403
+        assert res_patch.status_code == 200
 
         url_get = HISTORIAL_URL.format(reporte.id)
         res_get = cliente_directivo.get(url_get)
-        assert res_get.status_code == 403
+        assert res_get.status_code == 200
 
     def test_orientador_de_otra_institucion_es_rechazado_con_403(
         self, cliente_otra_institucion, reporte
