@@ -23,6 +23,7 @@ from .exceptions import (
 )
 from .models import Reporte, SeguimientoCaso
 from .repository import ReporteRepositoryProxy
+from .recommendations import generar_recomendaciones_reporte
 from .transitions import (
     TRANSICIONES_PERMITIDAS,
     normalizar_estado,
@@ -334,3 +335,18 @@ class ReporteService:
             "points": zonas,
             "dimensions": {"zone": "ubicacion", "intensity": "count / max(count)"},
         }
+
+    # ── Sugerencias de intervención y protocolos (HU-15) ───────────────────
+
+    def obtener_recomendaciones(self, reporte_id: int | str, usuario) -> dict:
+        """
+        Genera y retorna las recomendaciones y protocolos de intervención
+        automáticos correspondientes al reporte según su nivel de riesgo y
+        tipo de agresión (HU-15).
+        Solo accesible por personal autorizado (Orientador o Directivo) de
+        la misma institución educativa.
+        """
+        reporte = self._buscar_reporte(reporte_id)
+        self._validar_acceso_orientador(reporte, usuario)
+        return generar_recomendaciones_reporte(reporte)
+

@@ -11,6 +11,7 @@ from .views import (
     HeatmapView,
     HistorialReporteView,
     ListarReportesView,
+    RecomendacionesReporteView,
     StatisticsOverviewView,
 )
 
@@ -26,7 +27,8 @@ urlpatterns = [
     # Consulta anónima de estado por código de seguimiento
     path("consultar/", ConsultarReporteView.as_view(), name="consultar-reporte"),
 
-    # Actualización de estado e historial de cambios de un reporte (HU-08)
+    # Gestión de reporte: estado, historial (HU-08) y recomendaciones (HU-15)
     re_path(r"^(?P<reporte_id>[^/]+)/estado/?$", ActualizarEstadoReporteView.as_view(), name="actualizar-estado"),
     re_path(r"^(?P<reporte_id>[^/]+)/historial/?$", HistorialReporteView.as_view(), name="historial-reporte"),
+    re_path(r"^(?P<reporte_id>[^/]+)/recomendaciones/?$", RecomendacionesReporteView.as_view(), name="recomendaciones-reporte"),
 ]

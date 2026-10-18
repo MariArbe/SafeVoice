@@ -23,9 +23,13 @@ El objetivo del proyecto es fortalecer los procesos de prevención, detección e
 - 📂 Docs
     - [index.md (Documentación del proyecto)](./doc/index.md)
     - 📂 Analysis
-        - [📄 index.md (Tabla de navegación de Analysis)](./doc/analysis/index.md)
+        - [📄 index.md (Tabla de navegación de Analysis)](./docs/Analysis/index.md)
         - [📄 Historias_de_Usuario_SafeVoice.md (Todas las HU)](./docs/Analysis/Historias_de_Usuario_SafeVoice.md)
-        - [📄 documentacion_formulario.md (Preguntas que se haran en el formulario)](.docs\Analysis\documentacion_formulario.md)
+        - [📄 criterios_clasificacion_riesgo.md (Rúbrica de Riesgo IA - HU-12)](./docs/Analysis/criterios_clasificacion_riesgo.md)
+        - [📄 protocolos_intervencion_ley1620.md (Protocolos de Intervención Ley 1620 - HU-15)](./docs/Analysis/protocolos_intervencion_ley1620.md)
+        - [📄 documentacion_formulario.md (Preguntas del formulario)](./docs/Analysis/documentacion_formulario.md)
+    - 📂 design
+        - [📄 database.md (Diseño y modelo ERD de BD)](./docs/design/database.md)
 - 📂 backend 
 - 📂 frontend 
 - 📂 model

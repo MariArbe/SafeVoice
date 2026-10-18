@@ -37,6 +37,11 @@ export default function BandejaReportesDocente() {
   const [mensajeExito, setMensajeExito] = useState(null);
   const [errorGuardar, setErrorGuardar] = useState(null);
 
+  // Estado para Sugerencias de Intervención (HU-15)
+  const [recomendaciones, setRecomendaciones] = useState(null);
+  const [cargandoRecomendaciones, setCargandoRecomendaciones] = useState(false);
+  const [mostrarRecomendaciones, setMostrarRecomendaciones] = useState(true);
+
   const fetchReportes = async () => {
     setLoading(true);
     try {
@@ -163,6 +168,115 @@ export default function BandejaReportesDocente() {
     }
   };
 
+  // Cargar sugerencias de intervención y protocolos (HU-15)
+  const cargarRecomendaciones = async (targetId, fallbackItem) => {
+    setCargandoRecomendaciones(true);
+    try {
+      if (reporteService.obtenerRecomendaciones) {
+        const data = await reporteService.obtenerRecomendaciones(targetId);
+        if (data && data.protocolo_principal) {
+          setRecomendaciones(data);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("No se pudieron cargar recomendaciones desde la API, usando catálogo de contingencia:", err);
+    } finally {
+      setCargandoRecomendaciones(false);
+    }
+
+    // Catálogo de contingencia en frontend alineado con la Ley 1620
+    const nivel = (fallbackItem?.nivel_riesgo_predicho || "MEDIO").toUpperCase();
+    const fallbackMap = {
+      CRITICO: {
+        nivel_riesgo: "CRITICO",
+        tipo_situacion: "Situación Tipo III (Presuntos Delitos / Riesgo Vital / Violencia Severa)",
+        urgencia: "Inmediata (< 2 horas)",
+        color: "rose",
+        protocolo_principal: "Activación de Ruta de Atención Integral en Salud, Protección y Justicia",
+        acciones_clave: [
+          "Brindar atención médica de urgencias o primeros auxilios psicológicos si hay afectación física o ideación suicida.",
+          "Garantizar la protección física y contención emocional inmediata del estudiante en un espacio seguro y confidencial.",
+          "Notificar de inmediato a Rectoría y citar con carácter urgente a padres o acudientes por separado.",
+          "Efectuar la remisión obligatoria a autoridades competentes: Policía de Infancia (123), ICBF (141) o Fiscalía.",
+          "Convocar sesión extraordinaria del Comité Escolar de Convivencia y reportar en el aplicativo SIUCE dentro de las 48 horas.",
+        ],
+        lineas_ayuda: [
+          { nombre: "Policía de Infancia y Adolescencia / Emergencias", contacto: "123" },
+          { nombre: "Línea 141 ICBF (Protección de Niñas, Niños y Adolescentes)", contacto: "141" },
+          { nombre: "Línea 106 (Salud Mental y Prevención del Suicidio)", contacto: "106" },
+          { nombre: "Línea 155 (Orientación a Mujeres Víctimas de Violencia)", contacto: "155" },
+        ],
+        recomendaciones_especificas: [],
+      },
+      ALTO: {
+        nivel_riesgo: "ALTO",
+        tipo_situacion: "Situación Tipo II (Acoso Escolar Sistemático / Daño Físico o Emocional)",
+        urgencia: "Alta (< 24 horas hábiles)",
+        color: "orange",
+        protocolo_principal: "Protocolo de Intervención Tipo II - Contención, Protección Activa y Comité de Convivencia",
+        acciones_clave: [
+          "Garantizar medidas cautelares de protección para evitar coincidencias de las partes en recesos o grupos.",
+          "Citar de forma individual a los padres o acudientes de las partes para formalizar compromisos por escrito.",
+          "Brindar espacio de escucha individual y acompañamiento socioemocional desde Orientación Escolar.",
+          "Remitir el caso al Comité Escolar de Convivencia para estructurar el plan de acción pedagógico.",
+          "Establecer monitoreo semanal documentado del clima en el aula y de la seguridad del estudiante reportante.",
+        ],
+        lineas_ayuda: [
+          { nombre: "Línea 106 (Acompañamiento Psicológico Escolar)", contacto: "106" },
+          { nombre: "Comité Escolar de Convivencia", contacto: "Orientación Escolar" },
+        ],
+        recomendaciones_especificas: [],
+      },
+      MEDIO: {
+        nivel_riesgo: "MEDIO",
+        tipo_situacion: "Situación Tipo I Reiterada (Frecuencia Continua / Hostigamiento Incipiente)",
+        urgencia: "Media (< 48 horas)",
+        color: "yellow",
+        protocolo_principal: "Estrategia Pedagógica Formativa y Mediación Asistida",
+        acciones_clave: [
+          "Realizar entrevistas diagnósticas individuales con cada estudiante para clarificar la dinámica relacional.",
+          "Establecer acuerdos restaurativos claros y compromisos firmados de buen trato y respeto mutuo.",
+          "Involucrar al docente titular o director de grupo en la supervisión preventiva durante clases y recesos.",
+          "Desarrollar talleres grupales en el aula sobre empatía, límites y convivencia constructiva.",
+        ],
+        lineas_ayuda: [
+          { nombre: "Orientación Escolar y Docencia Titular", contacto: "Convivencia" },
+        ],
+        recomendaciones_especificas: [],
+      },
+      BAJO: {
+        nivel_riesgo: "BAJO",
+        tipo_situacion: "Situación Tipo I (Conflictos Esporádicos / Roce Convivencial Menor)",
+        urgencia: "Normal (< 72 horas)",
+        color: "emerald",
+        protocolo_principal: "Mediación Escolar y Diálogo Restaurativo",
+        acciones_clave: [
+          "Facilitar un espacio pedagógico de diálogo constructivo guiado por el docente de grupo u orientador.",
+          "Fomentar el reconocimiento del impacto de los actos y acordar compromisos voluntarios de respeto.",
+          "Monitoreo pedagógico discreto en el salón de clases durante las siguientes dos semanas.",
+        ],
+        lineas_ayuda: [
+          { nombre: "Docente Director de Grupo", contacto: "Aula de Clases" },
+        ],
+        recomendaciones_especificas: [],
+      },
+    };
+    setRecomendaciones(fallbackMap[nivel] || fallbackMap.MEDIO);
+  };
+
+  // Copiar el protocolo y acciones recomendadas a las notas de seguimiento
+  const handleCopiarRecomendacion = (protocolo, acciones) => {
+    const textoAcciones = (acciones || []).map((a, i) => `${i + 1}. ${a}`).join("\n");
+    const textoCompleto = `[Protocolo Ley 1620]: ${protocolo}\nAcciones a seguir:\n${textoAcciones}`;
+    setFormDataModal((prev) => ({
+      ...prev,
+      notas_orientador: prev.notas_orientador
+        ? `${prev.notas_orientador}\n\n${textoCompleto}`
+        : textoCompleto,
+    }));
+  };
+
   // Abrir modal con los datos del reporte
   const handleAbrirModal = (item) => {
     const estadoNorm = normalizarEstado(item.estado);
@@ -177,6 +291,8 @@ export default function BandejaReportesDocente() {
     setHistorial([]);
     setMensajeExito(null);
     setErrorGuardar(null);
+    setMostrarRecomendaciones(true);
+    cargarRecomendaciones(itemNormalizado.id || itemNormalizado.codigo_seguimiento, itemNormalizado);
   };
 
   // Toggle de la línea de tiempo de cambios
@@ -528,6 +644,159 @@ export default function BandejaReportesDocente() {
                 ) : (
                   <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs text-slate-500 italic">
                     El estudiante prefirió mantener el reporte 100% anónimo (no suministró nombre ni medio de contacto).
+                  </div>
+                )}
+              </div>
+
+              {/* PANEL DE SUGERENCIAS DE INTERVENCIÓN (HU-15 - Ley 1620) */}
+              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs transition-all">
+                {/* Header del Panel */}
+                <button
+                  type="button"
+                  onClick={() => setMostrarRecomendaciones(!mostrarRecomendaciones)}
+                  className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 hover:bg-slate-100/80 text-left transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-xl bg-[#1B5E9E] text-white flex items-center justify-center text-sm shadow-xs">
+                      🛡️
+                    </span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-slate-900">
+                          Sugerencias de Intervención y Protocolo
+                        </span>
+                        <span className="text-[10px] bg-blue-100 text-[#1B5E9E] font-bold px-2 py-0.5 rounded-md">
+                          Ley 1620
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        {recomendaciones
+                          ? `${recomendaciones.tipo_situacion} • Urgencia: ${recomendaciones.urgencia}`
+                          : "Generando sugerencias pedagógicas y ruta de atención..."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <svg
+                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+                      mostrarRecomendaciones ? "rotate-180" : ""
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+
+                {/* Contenido expandible del panel */}
+                {mostrarRecomendaciones && (
+                  <div className="p-4 bg-white space-y-3.5 border-t border-slate-200/80 text-xs animate-fade-in">
+                    {cargandoRecomendaciones ? (
+                      <div className="py-4 text-center text-slate-400 font-medium flex items-center justify-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#1B5E9E] animate-ping" />
+                        Analizando variables de riesgo y cargando protocolo...
+                      </div>
+                    ) : recomendaciones ? (
+                      <>
+                        {/* Protocolo Principal */}
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/70">
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
+                            Protocolo Orientador Sugerido
+                          </p>
+                          <p className="font-extrabold text-slate-800 text-xs">
+                            {recomendaciones.protocolo_principal}
+                          </p>
+                        </div>
+
+                        {/* Acciones Clave Recomendadas */}
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                              Ruta de Acción Paso a Paso
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleCopiarRecomendacion(
+                                  recomendaciones.protocolo_principal,
+                                  recomendaciones.acciones_clave
+                                )
+                              }
+                              className="text-[10px] text-[#1B5E9E] hover:text-[#124270] font-bold flex items-center gap-1 cursor-pointer hover:underline"
+                            >
+                              <span>📋 Copiar a notas</span>
+                            </button>
+                          </div>
+
+                          <ul className="space-y-2">
+                            {recomendaciones.acciones_clave?.map((accion, idx) => (
+                              <li
+                                key={idx}
+                                className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50/70 border border-slate-100 text-slate-700 leading-relaxed text-[11px]"
+                              >
+                                <span className="w-4 h-4 rounded-full bg-[#1B5E9E]/10 text-[#1B5E9E] font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                                  {idx + 1}
+                                </span>
+                                <span>{accion}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Medidas Específicas por Tipo de Agresión (si existen) */}
+                        {recomendaciones.recomendaciones_especificas?.length > 0 && (
+                          <div className="space-y-2 pt-1">
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                              Medidas Complementarias por Tipología
+                            </p>
+                            {recomendaciones.recomendaciones_especificas.map((esp, i) => (
+                              <div
+                                key={i}
+                                className="p-2.5 rounded-xl bg-amber-50/50 border border-amber-200/60 text-[11px] text-amber-950"
+                              >
+                                <p className="font-bold flex items-center gap-1.5 mb-1 text-amber-900">
+                                  <span>{esp.icono}</span>
+                                  <span>{esp.titulo}</span>
+                                </p>
+                                <ul className="list-disc pl-4 space-y-1 text-slate-700">
+                                  {esp.pautas?.map((pauta, pIdx) => (
+                                    <li key={pIdx}>{pauta}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Directorio de Líneas de Apoyo */}
+                        {recomendaciones.lineas_ayuda?.length > 0 && (
+                          <div className="pt-2 border-t border-slate-100">
+                            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">
+                              Contactos y Líneas de Asistencia
+                            </p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {recomendaciones.lineas_ayuda.map((linea, lIdx) => (
+                                <div
+                                  key={lIdx}
+                                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-[11px]"
+                                >
+                                  <span className="text-slate-600 font-medium truncate pr-1">
+                                    {linea.nombre}
+                                  </span>
+                                  <span className="font-mono font-black text-[#1B5E9E] shrink-0 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                                    {linea.contacto}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : null}
                   </div>
                 )}
               </div>

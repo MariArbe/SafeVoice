@@ -1,7 +1,8 @@
 En este directorio va lo de los requisitos y las:
 - [Historias_de_Usuario_SafeVoice.md](./Historias_de_Usuario_SafeVoice.md): Todas las historias de usuario del proyecto.
 - [documentacion_formulario.md](./documentacion_formulario.md): Preguntas que se harán en el formulario y su justificación.
-- [criterios_clasificacion_riesgo.md](./criterios_clasificacion_riesgo.md): **(NUEVO)** Criterios y ejemplos de los niveles de riesgo usados por el Modelo de IA (HU-12).
+- [criterios_clasificacion_riesgo.md](./criterios_clasificacion_riesgo.md): Criterios y ejemplos de los niveles de riesgo usados por el Modelo de IA (HU-12).
+- [protocolos_intervencion_ley1620.md](./protocolos_intervencion_ley1620.md): **(NUEVO)** Protocolos y sugerencias de intervención pedagógica y marco legal (Ley 1620 de 2013) (HU-15).
 
 # Requisitos Funcionales
 > Proyecto: **SafeVoice** – Plataforma digital de Reporte anonimo del acoso.

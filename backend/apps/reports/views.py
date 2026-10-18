@@ -194,3 +194,23 @@ class HeatmapView(APIView):
         )
         return Response(datos, status=status.HTTP_200_OK)
 
+
+class RecomendacionesReporteView(APIView):
+    """
+    GET /api/v1/reports/<reporte_id>/recomendaciones/
+    Devuelve las recomendaciones automáticas de intervención y protocolos
+    pedagógicos / convivenciales asociados al reporte según el nivel de riesgo
+    (HU-12) y tipo de agresión (HU-15).
+    Solo accesible por Orientador o Directivo de la misma institución.
+    """
+
+    permission_classes = [EsDirectivoOOrientador]
+
+    def get(self, request: Request, reporte_id: int | str) -> Response:
+        recomendaciones = _service.obtener_recomendaciones(
+            reporte_id=reporte_id,
+            usuario=request.user,
+        )
+        return Response(recomendaciones, status=status.HTTP_200_OK)
+
+

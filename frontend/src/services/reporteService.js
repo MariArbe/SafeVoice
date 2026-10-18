@@ -88,6 +88,21 @@ const reporteService = {
       throw error;
     }
   },
+
+  /**
+   * Obtiene recomendaciones automáticas de intervención y protocolos (HU-15).
+   * @param {number|string} reporteId - ID o código de seguimiento del reporte
+   * @returns {Promise<Object>} - Protocolo, acciones clave, medidas específicas y líneas de ayuda
+   */
+  obtenerRecomendaciones: async (reporteId) => {
+    try {
+      const response = await api.get(`/reports/${reporteId}/recomendaciones/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener recomendaciones de intervención:", error);
+      throw error;
+    }
+  },
 };
 
 export default reporteService;
