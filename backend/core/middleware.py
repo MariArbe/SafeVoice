@@ -29,10 +29,13 @@ class AnonymizeRequestMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Modificar el request.META en sitio para eliminar la información identificable.
-        for key in SENSITIVE_HEADERS:
-            if key in request.META:
-                request.META[key] = "[ENMASCARADO]"
+        # HU-05: Anonimización estricta de metadatos e IP para reportes estudiantiles.
+        # Los endpoints de autenticación y usuarios (/api/v1/users/) deben preservar
+        # la IP del cliente para mitigación de ataques de fuerza bruta y rate limiting (H-05).
+        if not request.path.startswith("/api/v1/users/"):
+            for key in SENSITIVE_HEADERS:
+                if key in request.META:
+                    request.META[key] = "[ENMASCARADO]"
 
         response = self.get_response(request)
         return response

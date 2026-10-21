@@ -89,10 +89,14 @@ def safevoice_exception_handler(exc: Exception, context: dict) -> Response | Non
             http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    # 3. Reformateo al esquema estándar
     if isinstance(exc, APIException):
         code = exc.default_code if hasattr(exc, "default_code") else "api_error"
-        message = exc.default_detail if isinstance(exc.detail, str) else "Error en la solicitud."
+        if isinstance(exc.detail, str):
+            message = str(exc.detail)
+        elif hasattr(exc, "default_detail") and isinstance(exc.default_detail, str):
+            message = str(exc.default_detail)
+        else:
+            message = "Error en la solicitud."
 
         # Los errores de validación (422) incluyen detalles de campo en "details"
         details: dict | None = None

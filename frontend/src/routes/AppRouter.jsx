@@ -11,25 +11,31 @@ import SignUp from "../pages/docente/SignUp";
 import MenuDocente from "../pages/docente/MenuDocente";
 import Dashboard from "../pages/docente/Dashboard";
 import BandejaReportes from "../pages/docente/BandejaReportes";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Zona pública — estudiantes, sin login */}
+        {/* Zona pública — estudiantes y visitantes, sin login */}
         <Route path="/" element={<Inicio />} />
         <Route path="/informacion" element={<SeccionInformativa />} />
         <Route path="/contactos" element={<ContactosRecursos />} />
         <Route path="/lineas-ayuda" element={<LineasAyuda />} />
         <Route path="/reporte" element={<Reporte />} />
 
-        {/* Zona docente */}
+        {/* Zona pública docente — acceso y registro */}
         <Route path="/docente/login" element={<Login />} />
         <Route path="/docente/registro" element={<SignUp />} />
-        <Route path="/docente/menu" element={<MenuDocente />} />
-        <Route path="/docente/dashboard" element={<Dashboard />} />
-        <Route path="/docente/reportes" element={<BandejaReportes />} />
-        <Route path="/docente/bandeja" element={<BandejaReportes />} />
+
+        {/* Zona protegida del orientador/docente — requiere inicio de sesión */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/docente/menu" element={<MenuDocente />} />
+          <Route path="/docente/dashboard" element={<Dashboard />} />
+          <Route path="/docente/reportes" element={<BandejaReportes />} />
+          <Route path="/docente/bandeja" element={<BandejaReportes />} />
+          <Route path="/docente/casos" element={<BandejaReportes />} />
+        </Route>
 
         <Route path="*" element={<p>Página no encontrada</p>} />
       </Routes>

@@ -7,13 +7,42 @@ export default function ContactosRecursos() {
   const [recursos, setRecursos] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const RECURSOS_POR_DEFECTO = [
+    {
+      id: "icbf-141",
+      titulo: "Instituto Colombiano de Bienestar Familiar (ICBF) — Línea 141",
+      categoria: "LINEA_DE_AYUDA",
+      descripcion: "Línea gratuita nacional para la protección, orientación y restablecimiento de derechos de niños, niñas y adolescentes.",
+      telefono: "141",
+      url: "https://www.icbf.gov.co/",
+    },
+    {
+      id: "te-protejo",
+      titulo: "Te Protejo — Red Papaz (Reporte de Ciberacoso)",
+      categoria: "LINEA_DE_AYUDA",
+      descripcion: "Canal virtual para reportar situaciones que afecten a menores de 18 años en entornos digitales e internet.",
+      url: "https://teprotejo.org/",
+    },
+    {
+      id: "orientacion-colegio",
+      titulo: "Orientación Escolar y Bienestar Institucional — UPB",
+      categoria: "ORIENTACION",
+      descripcion: "Acompañamiento psicosocial confidencial y activación de protocolos del Comité Escolar de Convivencia.",
+      telefono: "6044488388",
+      correo: "orientacion.escolar@upb.edu.co",
+      url: "https://www.upb.edu.co/es/colegio",
+    },
+  ];
+
   useEffect(() => {
     const fetchRecursos = async () => {
       try {
         const data = await recursoService.listarRecursosPublicos();
-        setRecursos(data);
+        const lista = Array.isArray(data) ? data : data?.results || [];
+        setRecursos(lista.length > 0 ? lista : RECURSOS_POR_DEFECTO);
       } catch (error) {
-        console.error("Error al cargar los recursos", error);
+        console.error("Error al cargar los recursos, usando directorio base:", error);
+        setRecursos(RECURSOS_POR_DEFECTO);
       } finally {
         setLoading(false);
       }
@@ -26,7 +55,7 @@ export default function ContactosRecursos() {
       case 'LINEA_DE_AYUDA': 
         return <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Línea Directa</span>;
       case 'ORIENTACION': 
-        return <span className="bg-emerald-50 text-[#2C5F57] border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Orientación School</span>;
+        return <span className="bg-emerald-50 text-[#2C5F57] border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Orientación Escolar</span>;
       case 'PROFESOR': 
         return <span className="bg-[#DCEAF7] text-[#1B5E9E] border border-[#1B5E9E]/20 text-[10px] font-bold px-2 py-0.5 rounded-md">Docente Enlace</span>;
       default: 
@@ -113,8 +142,23 @@ export default function ContactosRecursos() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-slate-800 text-sm">{recurso.titulo}</h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {recurso.url ? (
+                          <a
+                            href={recurso.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-bold text-[#1B5E9E] hover:underline text-sm inline-flex items-center gap-1 cursor-pointer"
+                            title={`Ir al sitio web de ${recurso.titulo}`}
+                          >
+                            <span>{recurso.titulo}</span>
+                            <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        ) : (
+                          <h3 className="font-bold text-slate-800 text-sm">{recurso.titulo}</h3>
+                        )}
                         {getCategoryBadge(recurso.categoria)}
                       </div>
                       <p className="text-xs text-slate-600 leading-relaxed">{recurso.descripcion}</p>

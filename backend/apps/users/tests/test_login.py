@@ -194,3 +194,82 @@ class TestEndpointMe:
     def test_me_sin_token_devuelve_401(self, api_client):
         response = api_client.get(ME_URL)
         assert response.status_code == 401
+
+
+@pytest.mark.django_db
+class TestControlAntiFuerzaBruta:
+    """HU-09/10 y Checklist de Seguridad: Límite de intentos fallidos y bloqueo anti fuerza bruta."""
+
+    def test_primer_intento_fallido_indica_intentos_restantes(self, api_client, usuario_directivo):
+        from django.core.cache import cache
+        cache.clear()
+
+        response = api_client.post(
+            LOGIN_URL,
+            {"email": "directivo@colegio.edu.co", "password": "wrongpassword"},
+            format="json",
+        )
+        assert response.status_code == 401
+        data = response.json()
+        assert "Intentos restantes antes de bloqueo temporal: 4" in data["error"]["message"]
+
+    def test_cinco_intentos_fallidos_bloquean_la_cuenta(self, api_client, usuario_directivo):
+        from django.core.cache import cache
+        cache.clear()
+
+        # 4 intentos iniciales devuelven 401
+        for i in range(1, 5):
+            res = api_client.post(
+                LOGIN_URL,
+                {"email": "directivo@colegio.edu.co", "password": "wrongpassword"},
+                format="json",
+            )
+            assert res.status_code == 401
+            assert f"Intentos restantes antes de bloqueo temporal: {5 - i}" in res.json()["error"]["message"]
+
+        # El 5to intento activa el bloqueo y devuelve 429 Too Many Requests
+        res_bloqueo = api_client.post(
+            LOGIN_URL,
+            {"email": "directivo@colegio.edu.co", "password": "wrongpassword"},
+            format="json",
+        )
+        assert res_bloqueo.status_code == 429
+        assert "bloqueado temporalmente" in res_bloqueo.json()["error"]["message"]
+
+        # Intentos subsiguientes durante el bloqueo son rechazados con 429 incluso con password correcta
+        res_durante_bloqueo = api_client.post(
+            LOGIN_URL,
+            {"email": "directivo@colegio.edu.co", "password": "Password123!"},
+            format="json",
+        )
+        assert res_durante_bloqueo.status_code == 429
+        assert "bloqueado temporalmente" in res_durante_bloqueo.json()["error"]["message"]
+
+    def test_login_exitoso_resetea_contador_de_intentos(self, api_client, usuario_directivo):
+        from django.core.cache import cache
+        cache.clear()
+
+        # 2 intentos fallidos
+        for _ in range(2):
+            api_client.post(
+                LOGIN_URL,
+                {"email": "directivo@colegio.edu.co", "password": "wrongpassword"},
+                format="json",
+            )
+
+        # Login exitoso
+        res_ok = api_client.post(
+            LOGIN_URL,
+            {"email": "directivo@colegio.edu.co", "password": "Password123!"},
+            format="json",
+        )
+        assert res_ok.status_code == 200
+
+        # Ahora un nuevo intento fallido debe comenzar nuevamente en 4 intentos restantes (no en 2)
+        res_fallo = api_client.post(
+            LOGIN_URL,
+            {"email": "directivo@colegio.edu.co", "password": "wrongpassword"},
+            format="json",
+        )
+        assert res_fallo.status_code == 401
+        assert "Intentos restantes antes de bloqueo temporal: 4" in res_fallo.json()["error"]["message"]

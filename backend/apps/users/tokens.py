@@ -12,8 +12,16 @@ Extiende TokenObtainPairSerializer de simplejwt para:
 
 import logging
 
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.exceptions import AuthenticationFailed, InvalidToken
+
+from .brute_force import (
+    check_login_lockout,
+    get_client_ip,
+    record_failed_login,
+    reset_failed_logins,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +38,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
       - institution_id: ID de la institución del usuario (None si es superusuario)
       - email: correo del usuario autenticado
 
-    El mensaje de error en caso de credenciales incorrectas es genérico
-    para cumplir con el requisito de no revelar si un email existe.
+    Incorpora control anti fuerza bruta:
+      - Verificación de bloqueo temporal previo.
+      - Límite de 5 intentos fallidos consecutivos con contador.
+      - Reseteo de intentos tras autenticación exitosa.
     """
 
     @classmethod
@@ -52,20 +62,23 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs: dict) -> dict:
         """
-        Valida credenciales y enriquece el body de la respuesta.
-
-        En caso de error, captura la excepción de simplejwt y la reemplaza
-        por nuestro mensaje genérico (HU-09/10: no revelar si el usuario existe).
+        Valida credenciales, aplica control anti fuerza bruta y enriquece la respuesta.
         """
+        request = self.context.get("request")
+        email = attrs.get(self.username_field, "")
+        ip = get_client_ip(request)
+
+        # 1. Verificar si la cuenta/IP se encuentra temporalmente bloqueada
+        check_login_lockout(email, ip)
+
         try:
             data = super().validate(attrs)
-        except (AuthenticationFailed, InvalidToken) as exc:
-            # Re-lanzar con mensaje genérico sin revelar si el email existe
-            logger.warning(
-                "Intento de login fallido para email: %s",
-                attrs.get(self.username_field, "desconocido"),
-            )
-            raise AuthenticationFailed(_MSG_CREDENCIALES_INVALIDAS) from exc
+        except (AuthenticationFailed, InvalidToken, TokenError) as exc:
+            # 2. Registrar intento fallido y lanzar advertencia de intentos o bloqueo (429/401)
+            record_failed_login(email, ip)
+
+        # 3. Autenticación exitosa: resetear contador de intentos fallidos
+        reset_failed_logins(email, ip)
 
         # Enriquecer el body de la respuesta (además del payload del token)
         user = self.user

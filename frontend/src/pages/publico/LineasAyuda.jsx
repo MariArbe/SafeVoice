@@ -60,66 +60,102 @@ export default function LineasAyuda() {
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 w-full max-w-2xl space-y-4">
           <div className="border-b border-slate-100 pb-4">
             <h2 className="text-lg font-bold text-[#2C5F57]">Atención Telefónica Directa</h2>
-            <p className="text-xs text-slate-500">Haz clic en el número para realizar la llamada de forma inmediata.</p>
+            <p className="text-xs text-slate-500">Haz clic en el título de cada línea para ir a su página web oficial o en el ícono para llamar.</p>
           </div>
 
           <div className="space-y-3">
             {/* Línea 141 - ICBF */}
-            <a
-              href="tel:141"
-              className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-[#1B5E9E]/50 hover:bg-blue-50/30 transition-all group cursor-pointer shadow-2xs"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#1B5E9E] text-base group-hover:underline">Línea 141 — ICBF</span>
+            <div className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-[#1B5E9E]/50 hover:bg-blue-50/30 transition-all group shadow-2xs">
+              <div className="space-y-1 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <a
+                    href="https://www.icbf.gov.co/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-[#1B5E9E] text-base hover:underline inline-flex items-center gap-1.5 cursor-pointer"
+                    title="Ir al sitio web oficial del ICBF"
+                  >
+                    <span>Línea 141 — ICBF</span>
+                    <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
                   <span className="text-[10px] bg-emerald-100 text-[#2C5F57] font-bold px-2 py-0.5 rounded-full">Gratis</span>
                 </div>
                 <p className="text-xs text-slate-600">Orientación y atención prioritaria para niños, niñas y adolescentes.</p>
               </div>
-              <div className="w-11 h-11 bg-[#2C5F57] group-hover:bg-[#1B5E9E] text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-colors">
+              <a
+                href="tel:141"
+                title="Llamar a la Línea 141"
+                className="w-11 h-11 bg-[#2C5F57] hover:bg-[#1B5E9E] text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-colors cursor-pointer"
+              >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-              </div>
-            </a>
+              </a>
+            </div>
 
             {/* Línea 123 - Emergencias */}
-            <a
-              href="tel:123"
-              className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-[#1B5E9E]/50 hover:bg-rose-50/30 transition-all group cursor-pointer shadow-2xs"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-rose-700 text-base group-hover:underline">Línea 123 — Emergencias</span>
+            <div className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-[#1B5E9E]/50 hover:bg-rose-50/30 transition-all group shadow-2xs">
+              <div className="space-y-1 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <a
+                    href="https://www.policia.gov.co/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-rose-700 text-base hover:underline inline-flex items-center gap-1.5 cursor-pointer"
+                    title="Ir al sitio web de la Policía Nacional — Línea 123"
+                  >
+                    <span>Línea 123 — Emergencias</span>
+                    <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
                   <span className="text-[10px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full">24 Horas</span>
                 </div>
                 <p className="text-xs text-slate-600">Para situaciones de peligro inminente o riesgo físico directo.</p>
               </div>
-              <div className="w-11 h-11 bg-rose-600 group-hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-colors">
+              <a
+                href="tel:123"
+                title="Llamar a la Línea 123"
+                className="w-11 h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-colors cursor-pointer"
+              >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-              </div>
-            </a>
+              </a>
+            </div>
 
             {/* Línea 106 - Salud Mental */}
-            <a
-              href="tel:106"
-              className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-[#1B5E9E]/50 hover:bg-emerald-50/30 transition-all group cursor-pointer shadow-2xs"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#2C5F57] text-base group-hover:underline">Línea 106 — Salud Mental</span>
+            <div className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-[#1B5E9E]/50 hover:bg-emerald-50/30 transition-all group shadow-2xs">
+              <div className="space-y-1 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <a
+                    href="https://www.medellin.gov.co/es/secretaria-de-salud/linea-amiga/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-[#2C5F57] text-base hover:underline inline-flex items-center gap-1.5 cursor-pointer"
+                    title="Ir a la Línea Amiga Salud Mental de Medellín"
+                  >
+                    <span>Línea 106 — Salud Mental</span>
+                    <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
                   <span className="text-[10px] bg-emerald-100 text-[#2C5F57] font-bold px-2 py-0.5 rounded-full">Escucha activa</span>
                 </div>
                 <p className="text-xs text-slate-600">Espacio seguro de escucha, apoyo psicológico y orientación emocional.</p>
               </div>
-              <div className="w-11 h-11 bg-[#2C5F57] group-hover:bg-[#1B5E9E] text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-colors">
+              <a
+                href="tel:106"
+                title="Llamar a la Línea 106"
+                className="w-11 h-11 bg-[#2C5F57] hover:bg-[#1B5E9E] text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-colors cursor-pointer"
+              >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-              </div>
-            </a>
+              </a>
+            </div>
           </div>
         </div>
       </main>

@@ -8,10 +8,12 @@ export default function LoginDocente() {
   const [formData, setFormData] = useState({ username: "", password: "", rememberMe: false });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLocked) return;
     setError(null);
     setLoading(true);
 
@@ -22,6 +24,7 @@ export default function LoginDocente() {
       });
 
       if (response.data && response.data.access) {
+        setIsLocked(false);
         localStorage.setItem("token", response.data.access);
         if (response.data.refresh) {
           localStorage.setItem("refresh_token", response.data.refresh);
@@ -31,6 +34,8 @@ export default function LoginDocente() {
       }
     } catch (err) {
       console.error("Error en login:", err);
+      const isThrottle = err.response?.status === 429 || err.response?.data?.error?.code === "throttled";
+      setIsLocked(isThrottle);
       const msg =
         err.response?.data?.error?.message ||
         err.response?.data?.detail ||
@@ -92,8 +97,26 @@ export default function LoginDocente() {
           )}
 
           {error && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-xs font-semibold">
-              {error}
+            <div
+              className={`border px-4 py-3 rounded-xl text-xs font-semibold flex items-start gap-2.5 transition-all ${
+                isLocked
+                  ? "bg-amber-50 border-amber-300 text-amber-900 shadow-xs"
+                  : "bg-rose-50 border-rose-200 text-rose-700"
+              }`}
+            >
+              {isLocked ? (
+                <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              )}
+              <div className="flex-1">
+                {isLocked && <strong className="block text-amber-900 mb-0.5 font-bold">Bloqueo de Seguridad Anti Fuerza Bruta</strong>}
+                <span>{error}</span>
+              </div>
             </div>
           )}
 
@@ -158,11 +181,21 @@ export default function LoginDocente() {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-[#1B5E9E] hover:bg-[#154a7d] active:scale-[0.99] text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md hover:shadow-lg mt-2 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              disabled={loading || isLocked}
+              className={`w-full text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md mt-2 flex items-center justify-center gap-2 ${
+                isLocked
+                  ? "bg-slate-400 cursor-not-allowed opacity-80"
+                  : "bg-[#1B5E9E] hover:bg-[#154a7d] active:scale-[0.99] hover:shadow-lg cursor-pointer disabled:opacity-50"
+              }`}
             >
-              <span>{loading ? "Iniciando sesión..." : "Ingresar al Portal"}</span>
-              {!loading && (
+              <span>
+                {loading
+                  ? "Iniciando sesión..."
+                  : isLocked
+                  ? "Acceso bloqueado temporalmente"
+                  : "Ingresar al Portal"}
+              </span>
+              {!loading && !isLocked && (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>

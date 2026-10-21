@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../../utils/auth";
 import reporteService from "../../services/reporteService";
 import {
   ESTADOS_CONFIG,
@@ -60,6 +61,7 @@ export default function BandejaReportesDocente() {
     } catch (error) {
       console.error("Error al cargar reportes", error);
       if (error.response?.status === 401) {
+        logout();
         navigate("/docente/login");
         return;
       }
@@ -413,7 +415,10 @@ export default function BandejaReportesDocente() {
 
         <div className="p-4 border-t border-slate-100 space-y-1 text-xs font-bold text-slate-600">
           <button
-            onClick={() => navigate("/docente/login")}
+            onClick={() => {
+              logout();
+              navigate("/docente/login");
+            }}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-rose-50 text-rose-700 transition-colors text-left cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

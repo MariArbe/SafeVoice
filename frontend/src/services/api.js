@@ -27,4 +27,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Interceptor de respuesta: ante un 401 en endpoints protegidos, limpia la sesión y redirige
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isPublic = PUBLIC_ENDPOINTS.some((path) => error.config?.url?.includes(path));
+    if (error.response?.status === 401 && !isPublic) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
+      if (
+        typeof window !== "undefined" &&
+        window.location.pathname.startsWith("/docente/") &&
+        !["/docente/login", "/docente/registro"].includes(window.location.pathname)
+      ) {
+        window.location.href = "/docente/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

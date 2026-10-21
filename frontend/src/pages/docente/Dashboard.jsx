@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../../utils/auth";
 import {
   ResponsiveContainer,
   BarChart,
@@ -286,7 +287,10 @@ export default function DashboardDocente() {
           </Link>
 
           <button
-            onClick={() => navigate("/docente/login")}
+            onClick={() => {
+              logout();
+              navigate("/docente/login");
+            }}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-rose-50 text-rose-700 transition-colors text-left cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
