@@ -33,6 +33,22 @@ class InstitutionLecturaSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class InstitutionCatalogoSerializer(serializers.ModelSerializer):
+    """
+    Serializer público y ligero para catálogo y menús desplegables de colegios.
+    Solo expone id, nombre y ciudad.
+    """
+
+    class Meta:
+        model = Institution
+        fields = [
+            "id",
+            "nombre",
+            "ciudad",
+        ]
+        read_only_fields = fields
+
+
 class DirectivoRegistroSerializer(serializers.Serializer):
     """
     Sub-serializer con los datos del usuario directivo que se creará

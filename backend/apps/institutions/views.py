@@ -15,10 +15,40 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import InstitutionLecturaSerializer, RegistrarInstitucionSerializer
+from .serializers import (
+    InstitutionCatalogoSerializer,
+    InstitutionLecturaSerializer,
+    RegistrarInstitucionSerializer,
+)
 from .services import InstitutionService
 
 _service = InstitutionService()
+
+
+class ListarInstitucionesView(APIView):
+    """
+    GET /api/v1/institutions/
+
+    Endpoint público y ligero para obtener el catálogo de colegios activos.
+    Alimenta los selectores del formulario de reporte y el registro docente.
+
+    Respuesta (200 OK):
+        [
+            {
+                "id": 1,
+                "nombre": "Colegio UPB",
+                "ciudad": "Medellín"
+            },
+            ...
+        ]
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        instituciones = _service.listar_activas()
+        serializer = InstitutionCatalogoSerializer(instituciones, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RegistrarInstitucionView(APIView):

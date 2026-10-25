@@ -165,3 +165,43 @@ class TestRegistroInstitucionValidaciones:
         }
         response = api_client.post(URL, payload, format="json")
         assert response.status_code == 400
+
+
+@pytest.mark.django_db
+class TestListarInstituciones:
+    """Tests para el endpoint público de catálogo de instituciones activas."""
+
+    CATALOGO_URL = "/api/v1/institutions/"
+
+    def test_catalogo_devuelve_200_sin_autenticacion(self, api_client):
+        Institution.objects.create(nombre="Colegio Activo", ciudad="Medellín", is_active=True)
+        response = api_client.get(self.CATALOGO_URL)
+        assert response.status_code == 200
+
+    def test_catalogo_retorna_solo_campos_ligeros(self, api_client):
+        inst = Institution.objects.create(
+            nombre="Gimnasio del Norte",
+            ciudad="Bogotá",
+            codigo_dane="12345678",
+            is_active=True,
+        )
+        response = api_client.get(self.CATALOGO_URL)
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) >= 1
+        primer_item = next(item for item in data if item["id"] == inst.id)
+        assert primer_item["nombre"] == "Gimnasio del Norte"
+        assert primer_item["ciudad"] == "Bogotá"
+        # codigo_dane y fecha_creacion NO deben exponerse en el catalogo ligero
+        assert "codigo_dane" not in primer_item
+        assert "fecha_creacion" not in primer_item
+
+    def test_catalogo_excluye_instituciones_inactivas(self, api_client):
+        activa = Institution.objects.create(nombre="Colegio Abierto", ciudad="Cali", is_active=True)
+        inactiva = Institution.objects.create(nombre="Colegio Clausurado", ciudad="Cali", is_active=False)
+
+        response = api_client.get(self.CATALOGO_URL)
+        assert response.status_code == 200
+        nombres = [item["nombre"] for item in response.json()]
+        assert "Colegio Abierto" in nombres
+        assert "Colegio Clausurado" not in nombres
