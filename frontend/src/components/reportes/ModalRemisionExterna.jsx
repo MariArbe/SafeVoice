@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { getUser } from "../../utils/auth";
 
 export default function ModalRemisionExterna({
   reporte,
@@ -6,6 +7,8 @@ export default function ModalRemisionExterna({
   onConfirmarActivacion,
 }) {
   if (!reporte) return null;
+  const usuario = getUser();
+  const institucionNombre = reporte.institucion_nombre || usuario?.institution_nombre || "Institución Educativa";
 
   const [entidadClave, setEntidadClave] = useState("ICBF");
   const [radicado, setRadicado] = useState(
@@ -145,7 +148,7 @@ ${peticionConcreta}
 Remitido por:
 ${funcionario}
 Cargo: ${cargo}
-Institución Educativa SafeVoice
+${institucionNombre}
     `.trim();
   }, [
     radicado,
@@ -509,7 +512,7 @@ Institución Educativa SafeVoice
                   <div>
                     <p className="font-extrabold text-slate-900">{funcionario}</p>
                     <p className="text-[11px] text-slate-500 font-medium">{cargo}</p>
-                    <p className="text-[10px] text-slate-400">Institución Educativa SafeVoice</p>
+                    <p className="text-[10px] text-slate-400">{institucionNombre}</p>
                   </div>
                 </div>
 

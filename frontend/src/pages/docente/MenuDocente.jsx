@@ -1,8 +1,29 @@
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../../utils/auth";
+import { logout, getUser } from "../../utils/auth";
+import api from "../../services/api";
 
 export default function MenuDocente() {
   const navigate = useNavigate();
+  const [usuario, setUsuario] = useState(() => getUser());
+
+  useEffect(() => {
+    const u = getUser();
+    if (u && (!u.institution_nombre || !u.first_name)) {
+      api
+        .get("/users/me/")
+        .then((res) => {
+          if (res.data) {
+            const updated = { ...u, ...res.data };
+            localStorage.setItem("user", JSON.stringify(updated));
+            setUsuario(updated);
+          }
+        })
+        .catch((err) => {
+          console.warn("No se pudo hidratar perfil docente:", err);
+        });
+    }
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -44,11 +65,11 @@ export default function MenuDocente() {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#1B5E9E]/20 text-[#1B5E9E] text-xs font-bold tracking-wide uppercase shadow-2xs backdrop-blur-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Sesión Activa &bull; Comité de Convivencia
+            Sesión Activa &bull; {usuario?.institution_nombre || "Comité de Convivencia"}
           </div>
           
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1B5E9E]">
-            ¡Hola, Docente!
+            ¡Hola, {usuario?.first_name ? `${usuario.first_name} ${usuario.last_name || ""}`.trim() : "Docente"}!
           </h1>
           <p className="text-slate-600 text-sm sm:text-base max-w-lg mx-auto">
             ¿Qué acción deseas realizar hoy en la plataforma?

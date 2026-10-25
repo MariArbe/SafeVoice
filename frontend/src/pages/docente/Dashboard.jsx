@@ -13,10 +13,30 @@ import {
   Pie,
 } from "recharts";
 import reporteService from "../../services/reporteService";
+import api from "../../services/api";
 
 export default function DashboardDocente() {
   const navigate = useNavigate();
-  const usuario = getUser();
+  const [usuario, setUsuario] = useState(() => getUser());
+
+  // Hidratar nombre de institución y perfil del usuario autenticado si faltan en caché
+  useEffect(() => {
+    const u = getUser();
+    if (u && (!u.institution_nombre || !u.first_name)) {
+      api
+        .get("/users/me/")
+        .then((res) => {
+          if (res.data) {
+            const updated = { ...u, ...res.data };
+            localStorage.setItem("user", JSON.stringify(updated));
+            setUsuario(updated);
+          }
+        })
+        .catch((err) => {
+          console.warn("No se pudo hidratar perfil docente:", err);
+        });
+    }
+  }, []);
   const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
   const [stats, setStats] = useState(null);
   const [heatmapPoints, setHeatmapPoints] = useState(null);
@@ -706,7 +726,7 @@ export default function DashboardDocente() {
                 {usuario?.first_name ? `${usuario.first_name} ${usuario.last_name || ""}`.trim() : "Comité de Convivencia"}
               </p>
               <p className="text-[10px] text-[#2C5F57] font-semibold">
-                {usuario?.institution_nombre || "Sede Principal"}
+                {usuario?.institution_nombre || "Institución Educativa"}
               </p>
             </div>
           </div>
@@ -1056,7 +1076,7 @@ export default function DashboardDocente() {
                 </svg>
 
                 <div className="absolute bottom-3 left-4 text-[10px] text-slate-400 font-mono tracking-widest uppercase">
-                  MAPA DE CALOR EN VIVO &bull; COLEGIO SAFEVOICE
+                  MAPA DE CALOR EN VIVO &bull; {usuario?.institution_nombre ? usuario.institution_nombre.toUpperCase() : "COLEGIO SAFEVOICE"}
                 </div>
               </div>
 

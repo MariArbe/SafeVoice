@@ -1,7 +1,10 @@
 import React from "react";
+import { getUser } from "../../utils/auth";
 
 export default function ModalActaOficial({ reporte, historial = [], recomendaciones = null, rutaExternaInfo = null, onClose }) {
   if (!reporte) return null;
+  const usuario = getUser();
+  const institucionNombre = reporte.institucion_nombre || usuario?.institution_nombre || "Institución Educativa";
 
   const handleImprimir = () => {
     window.print();
@@ -160,7 +163,7 @@ export default function ModalActaOficial({ reporte, historial = [], recomendacio
                     Sistema Nacional de Convivencia Escolar — Ley 1620 de 2013
                   </p>
                   <p className="text-[11px] font-bold text-[#2C5F57]">
-                    Comité Escolar de Convivencia • Institución Educativa SafeVoice
+                    Comité Escolar de Convivencia • {institucionNombre}
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center font-sans font-bold text-slate-600 text-[10px] border border-slate-300 text-center">

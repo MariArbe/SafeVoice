@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { logout, getUser } from "../../utils/auth";
 import reporteService from "../../services/reporteService";
+import api from "../../services/api";
 import {
   ESTADOS_CONFIG,
   TRANSICIONES_PERMITIDAS,
@@ -18,7 +19,26 @@ import ModuloSemaforoPostCierre from "../../components/reportes/ModuloSemaforoPo
 
 export default function BandejaReportesDocente() {
   const navigate = useNavigate();
-  const usuario = getUser();
+  const [usuario, setUsuario] = useState(() => getUser());
+
+  // Hidratar nombre de institución y perfil del usuario autenticado si faltan en caché
+  useEffect(() => {
+    const u = getUser();
+    if (u && (!u.institution_nombre || !u.first_name)) {
+      api
+        .get("/users/me/")
+        .then((res) => {
+          if (res.data) {
+            const updated = { ...u, ...res.data };
+            localStorage.setItem("user", JSON.stringify(updated));
+            setUsuario(updated);
+          }
+        })
+        .catch((err) => {
+          console.warn("No se pudo hidratar perfil docente:", err);
+        });
+    }
+  }, []);
   const [searchParams] = useSearchParams();
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -650,7 +670,7 @@ export default function BandejaReportesDocente() {
                 {usuario?.first_name ? `${usuario.first_name} ${usuario.last_name || ""}`.trim() : "Psicorientador(a)"}
               </p>
               <p className="text-[10px] text-[#2C5F57] font-semibold">
-                {usuario?.institution_nombre || "Comité Institucional"}
+                {usuario?.institution_nombre || "Institución Educativa"}
               </p>
             </div>
           </div>
