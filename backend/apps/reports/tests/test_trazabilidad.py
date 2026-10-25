@@ -78,3 +78,58 @@ class TestTrazabilidadYAnonimato:
         reporte_recuperado = self.proxy.obtener_por_codigo(reporte_creado.codigo_seguimiento)
         
         assert reporte_recuperado.descripcion == "Texto confidencial de prueba"
+
+    def test_datos_contacto_encriptados_en_base_de_datos(self):
+        """
+        Verifica que los datos de contacto personal de la víctima (nombre y medio/teléfono)
+        quedan cifrados con Fernet en la base de datos y no en texto plano.
+        """
+        datos = self.datos_validos.copy()
+        datos["acepta_revelar_identidad"] = True
+        datos["nombre_contacto_victima"] = "Estudiante Anonimo Gomez"
+        datos["medio_contacto_victima"] = "estudiante.gomez@colegio.edu.co"
+
+        reporte_creado = self.proxy.crear(datos)
+
+        # Consultar directamente el ORM sin pasar por desencriptar_sensibles
+        reporte_bd = Reporte.objects.get(codigo_seguimiento=reporte_creado.codigo_seguimiento)
+
+        assert reporte_bd.nombre_contacto_victima != "Estudiante Anonimo Gomez"
+        assert "Gomez" not in reporte_bd.nombre_contacto_victima
+        assert reporte_bd.nombre_contacto_victima.startswith("gAAAAA")
+
+        assert reporte_bd.medio_contacto_victima != "estudiante.gomez@colegio.edu.co"
+        assert "@colegio.edu.co" not in reporte_bd.medio_contacto_victima
+        assert reporte_bd.medio_contacto_victima.startswith("gAAAAA")
+
+        # Recuperar a través del proxy para orientador autorizado
+        reporte_recuperado = self.proxy.obtener_por_codigo(reporte_creado.codigo_seguimiento)
+        assert reporte_recuperado.nombre_contacto_victima == "Estudiante Anonimo Gomez"
+        assert reporte_recuperado.medio_contacto_victima == "estudiante.gomez@colegio.edu.co"
+
+    def test_consulta_publica_no_expone_datos_de_contacto_ni_descripcion(self):
+        """
+        Verifica que el endpoint público de consulta por código (HU-04)
+        use ReporteConsultaPublicaSerializer y NO exponga los campos sensibles
+        (nombre_contacto_victima, medio_contacto_victima, descripcion) en la respuesta JSON.
+        """
+        from rest_framework.test import APIClient
+        client = APIClient()
+
+        datos = self.datos_validos.copy()
+        datos["acepta_revelar_identidad"] = True
+        datos["nombre_contacto_victima"] = "Victima Protegida"
+        datos["medio_contacto_victima"] = "victima@colegio.edu.co"
+
+        reporte = self.proxy.crear(datos)
+
+        response = client.get(f"/api/v1/reports/consultar/?codigo={reporte.codigo_seguimiento}")
+        assert response.status_code == 200
+        json_data = response.json()
+
+        assert "codigo_seguimiento" in json_data
+        assert "estado" in json_data
+        # Campos sensibles NUNCA deben estar en el response público
+        assert "nombre_contacto_victima" not in json_data
+        assert "medio_contacto_victima" not in json_data
+        assert "descripcion" not in json_data

@@ -106,8 +106,8 @@ class Reporte(models.Model):
     )
 
     acepta_revelar_identidad = models.BooleanField(default=False, verbose_name="acepta revelar identidad")
-    nombre_contacto_victima = models.CharField(max_length=150, null=True, blank=True, verbose_name="nombre contacto")
-    medio_contacto_victima = models.CharField(max_length=100, null=True, blank=True, verbose_name="medio contacto")
+    nombre_contacto_victima = models.TextField(null=True, blank=True, verbose_name="nombre contacto")
+    medio_contacto_victima = models.TextField(null=True, blank=True, verbose_name="medio contacto")
 
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creación")
     fecha_actualizacion = models.DateTimeField(auto_now=True, verbose_name="última actualización")
