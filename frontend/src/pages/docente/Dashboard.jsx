@@ -92,12 +92,22 @@ export default function DashboardDocente() {
       if (fechaInicio) params.fecha_inicio = fechaInicio;
       if (fechaFin) params.fecha_fin = fechaFin;
 
+      const verificar401 = (err) => {
+        if (err.response?.status === 401) {
+          logout();
+          navigate("/docente/login");
+          return true;
+        }
+        return false;
+      };
+
       try {
         const statsData = await reporteService.obtenerEstadisticas(params);
         if (statsData) {
           setStats(statsData);
         }
       } catch (err) {
+        if (verificar401(err)) return;
         console.warn("No se pudieron cargar estadísticas en vivo, usando datos de respaldo:", err);
       }
 
@@ -107,6 +117,7 @@ export default function DashboardDocente() {
           setHeatmapPoints(heatmapData.points);
         }
       } catch (err) {
+        if (verificar401(err)) return;
         console.warn("No se pudo cargar mapa de calor en vivo:", err);
       }
 
@@ -118,6 +129,7 @@ export default function DashboardDocente() {
           setUltimosReportes(reportesData.slice(0, 5));
         }
       } catch (err) {
+        if (verificar401(err)) return;
         console.warn("No se pudieron cargar últimos reportes en vivo:", err);
       } finally {
         setCargando(false);
