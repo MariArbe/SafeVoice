@@ -56,6 +56,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Claims personalizados dentro del JWT
         token["rol"] = user.rol
         token["institution_id"] = user.institution_id  # None si no tiene institución
+        token["institution_nombre"] = user.institution.nombre if user.institution else None
         token["email"] = user.email
 
         return token
@@ -84,7 +85,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         user = self.user
         data["rol"] = user.rol
         data["institution_id"] = user.institution_id
+        data["institution_nombre"] = user.institution.nombre if user.institution else None
         data["email"] = user.email
+        data["first_name"] = user.first_name
+        data["last_name"] = user.last_name
 
         logger.info(
             "Login exitoso: %s (rol=%s, institution_id=%s)",

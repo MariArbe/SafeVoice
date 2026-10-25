@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import userService from "../../services/userService";
+import institucionService from "../../services/institucionService";
 
 export default function RegistroDocente() {
   const navigate = useNavigate();
@@ -10,9 +11,47 @@ export default function RegistroDocente() {
     first_name: "",
     last_name: "",
     rol: "ORIENTADOR",
+    institution_id: "",
     password: "",
     password_confirmacion: "",
   });
+
+  const [instituciones, setInstituciones] = useState([]);
+  const [cargandoInstituciones, setCargandoInstituciones] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const cargarInstituciones = async () => {
+      try {
+        const data = await institucionService.listarInstitucionesActivas();
+        if (isMounted) {
+          const lista = Array.isArray(data) ? data : (data.results || []);
+          setInstituciones(lista);
+          if (lista.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              institution_id: prev.institution_id || String(lista[0].id)
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo cargar el catálogo de instituciones:", err);
+        if (isMounted) {
+          const fallback = [{ id: 1, nombre: "Colegio de la UPB", ciudad: "Medellín" }];
+          setInstituciones(fallback);
+          setFormData(prev => ({
+            ...prev,
+            institution_id: prev.institution_id || "1"
+          }));
+        }
+      } finally {
+        if (isMounted) setCargandoInstituciones(false);
+      }
+    };
+
+    cargarInstituciones();
+    return () => { isMounted = false; };
+  }, []);
 
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState("");
@@ -59,7 +98,11 @@ export default function RegistroDocente() {
     setIsLoading(true);
 
     try {
-      await userService.crearUsuario(formData);
+      const payload = {
+        ...formData,
+        institution_id: formData.institution_id ? parseInt(formData.institution_id, 10) : undefined,
+      };
+      await userService.crearUsuario(payload);
       setSuccessMessage("¡Cuenta registrada con éxito! Redirigiendo al inicio de sesión...");
       
       setTimeout(() => {
@@ -222,6 +265,35 @@ export default function RegistroDocente() {
               {getFieldError("email") && (
                 <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("email")}</p>
               )}
+            </div>
+
+            {/* Institución Educativa */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Institución Educativa*</label>
+              <div className="relative">
+                <select
+                  name="institution_id"
+                  value={formData.institution_id}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading || cargandoInstituciones}
+                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#1B5E9E] focus:border-transparent bg-slate-50/50 focus:bg-white text-slate-800 appearance-none cursor-pointer pr-10"
+                >
+                  <option value="" disabled>
+                    {cargandoInstituciones ? "Cargando instituciones..." : "Selecciona tu institución educativa..."}
+                  </option>
+                  {instituciones.map((inst) => (
+                    <option key={inst.id} value={inst.id}>
+                      {inst.nombre} {inst.ciudad ? `(${inst.ciudad})` : ""}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Rol Unificado */}

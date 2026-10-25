@@ -89,6 +89,16 @@ class TestLoginExitoso:
         )
         assert response.json()["email"] == "directivo@colegio.edu.co"
 
+    def test_login_devuelve_institution_nombre(self, api_client, usuario_directivo, institucion):
+        response = api_client.post(
+            LOGIN_URL,
+            {"email": "directivo@colegio.edu.co", "password": "Password123!"},
+            format="json",
+        )
+        data = response.json()
+        assert "institution_nombre" in data
+        assert data["institution_nombre"] == institucion.nombre
+
 
 @pytest.mark.django_db
 class TestLoginCredencialesInvalidas:

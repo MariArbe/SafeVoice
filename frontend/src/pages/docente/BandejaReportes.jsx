@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { logout } from "../../utils/auth";
+import { logout, getUser } from "../../utils/auth";
 import reporteService from "../../services/reporteService";
 import {
   ESTADOS_CONFIG,
@@ -18,6 +18,7 @@ import ModuloSemaforoPostCierre from "../../components/reportes/ModuloSemaforoPo
 
 export default function BandejaReportesDocente() {
   const navigate = useNavigate();
+  const usuario = getUser();
   const [searchParams] = useSearchParams();
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +28,8 @@ export default function BandejaReportesDocente() {
     nivel_riesgo_predicho: "",
     ubicacion: searchParams.get("ubicacion") || "",
     estado: "",
+    fecha_inicio: "",
+    fecha_fin: "",
     q: "",
     page: 1,
   });
@@ -155,7 +158,7 @@ export default function BandejaReportesDocente() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchReportes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtros.nivel_riesgo_predicho, filtros.ubicacion, filtros.estado, filtros.q, filtros.page]);
+  }, [filtros.nivel_riesgo_predicho, filtros.ubicacion, filtros.estado, filtros.fecha_inicio, filtros.fecha_fin, filtros.q, filtros.page]);
 
   // Búsqueda instantánea en cliente (0ms de latencia) sobre la lista cargada
   const reportesFiltrados = useMemo(() => {
@@ -640,11 +643,15 @@ export default function BandejaReportesDocente() {
           <h1 className="text-sm font-extrabold text-[#2C5F57]">Gestión de Casos de Convivencia</h1>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#DCEAF7] flex items-center justify-center font-bold text-xs text-[#1B5E9E]">
-              PO
+              {usuario?.first_name ? usuario.first_name[0].toUpperCase() : "PO"}
             </div>
             <div className="text-right text-xs hidden sm:block">
-              <p className="font-bold text-slate-800">Psicorientador(a)</p>
-              <p className="text-[10px] text-[#2C5F57] font-semibold">Comité Institucional</p>
+              <p className="font-bold text-slate-800">
+                {usuario?.first_name ? `${usuario.first_name} ${usuario.last_name || ""}`.trim() : "Psicorientador(a)"}
+              </p>
+              <p className="text-[10px] text-[#2C5F57] font-semibold">
+                {usuario?.institution_nombre || "Comité Institucional"}
+              </p>
             </div>
           </div>
         </header>
@@ -780,6 +787,42 @@ export default function BandejaReportesDocente() {
                     <option value="AMARILLO">🟡 Tensión Residual</option>
                     <option value="ROJO">🔴 Reincidencia</option>
                   </select>
+
+                  {/* Filtro por Rango de Fechas (Desde / Hasta) */}
+                  <div className="flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-600">
+                    <span className="text-[11px] font-bold text-slate-500">Desde:</span>
+                    <input
+                      type="date"
+                      name="fecha_inicio"
+                      value={filtros.fecha_inicio || ""}
+                      onChange={handleFilterChange}
+                      className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+                      title="Filtrar casos a partir de esta fecha"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-600">
+                    <span className="text-[11px] font-bold text-slate-500">Hasta:</span>
+                    <input
+                      type="date"
+                      name="fecha_fin"
+                      value={filtros.fecha_fin || ""}
+                      onChange={handleFilterChange}
+                      className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
+                      title="Filtrar casos hasta esta fecha"
+                    />
+                  </div>
+
+                  {(filtros.fecha_inicio || filtros.fecha_fin) && (
+                    <button
+                      type="button"
+                      onClick={() => setFiltros((prev) => ({ ...prev, fecha_inicio: "", fecha_fin: "", page: 1 }))}
+                      className="text-xs text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Limpiar fechas"
+                    >
+                      ✕ Limpiar fechas
+                    </button>
+                  )}
                 </div>
               </div>
 

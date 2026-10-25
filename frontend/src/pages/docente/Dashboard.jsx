@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../../utils/auth";
+import { logout, getUser } from "../../utils/auth";
 import {
   ResponsiveContainer,
   BarChart,
@@ -16,6 +16,7 @@ import reporteService from "../../services/reporteService";
 
 export default function DashboardDocente() {
   const navigate = useNavigate();
+  const usuario = getUser();
   const [zonaSeleccionada, setZonaSeleccionada] = useState(null);
   const [stats, setStats] = useState(null);
   const [heatmapPoints, setHeatmapPoints] = useState(null);
@@ -698,11 +699,15 @@ export default function DashboardDocente() {
 
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#DCEAF7] flex items-center justify-center font-bold text-xs text-[#1B5E9E]">
-              CD
+              {usuario?.first_name ? usuario.first_name[0].toUpperCase() : "CD"}
             </div>
             <div className="text-right text-xs hidden sm:block">
-              <p className="font-bold text-slate-800">Comité de Convivencia</p>
-              <p className="text-[10px] text-[#2C5F57] font-semibold">Sede Principal</p>
+              <p className="font-bold text-slate-800">
+                {usuario?.first_name ? `${usuario.first_name} ${usuario.last_name || ""}`.trim() : "Comité de Convivencia"}
+              </p>
+              <p className="text-[10px] text-[#2C5F57] font-semibold">
+                {usuario?.institution_nombre || "Sede Principal"}
+              </p>
             </div>
           </div>
         </header>

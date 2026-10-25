@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Campo from "../../components/ui/Campo";
 import Boton from "../../components/ui/Boton";
 import NavbarPublico from "../../components/ui/NavbarPublico";
 import reporteService from "../../services/reporteService";
+import institucionService from "../../services/institucionService";
 
 export default function Reporte() {
   const navigate = useNavigate();
@@ -22,6 +23,44 @@ export default function Reporte() {
     medio_contacto_victima: "",
     involucrados_grado: "",
   });
+
+  const [instituciones, setInstituciones] = useState([]);
+  const [cargandoInstituciones, setCargandoInstituciones] = useState(true);
+
+  // Cargar catálogo público de instituciones activas (HU-01)
+  useEffect(() => {
+    let isMounted = true;
+    const cargarInstituciones = async () => {
+      try {
+        const data = await institucionService.listarInstitucionesActivas();
+        if (isMounted) {
+          const lista = Array.isArray(data) ? data : (data.results || []);
+          setInstituciones(lista);
+          if (lista.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              institucion: prev.institucion || String(lista[0].id)
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo cargar el catálogo de instituciones, usando respaldo:", err);
+        if (isMounted) {
+          const fallback = [{ id: 1, nombre: "Colegio de la UPB", ciudad: "Medellín" }];
+          setInstituciones(fallback);
+          setFormData(prev => ({
+            ...prev,
+            institucion: prev.institucion || "1"
+          }));
+        }
+      } finally {
+        if (isMounted) setCargandoInstituciones(false);
+      }
+    };
+
+    cargarInstituciones();
+    return () => { isMounted = false; };
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -87,6 +126,11 @@ export default function Reporte() {
     setError(null);
 
     // Validación básica requerida en HU-01
+    const institucionId = parseInt(formData.institucion, 10);
+    if (!institucionId || isNaN(institucionId)) {
+      setError("Por favor selecciona tu institución educativa.");
+      return;
+    }
     if (!formData.descripcion || formData.descripcion.length < 10) {
       setError("La descripción debe tener al menos 10 caracteres.");
       return;
@@ -130,7 +174,7 @@ export default function Reporte() {
       };
 
       const payload = {
-        institucion: 1, // Por ahora forzamos la institución 1 (UPB) que está en la base de datos
+        institucion: institucionId,
         ubicacion: formData.ubicacion,
         frecuencia: formData.frecuencia,
         grado_victima: formData.grado,
@@ -317,14 +361,39 @@ export default function Reporte() {
               <h2 className="text-lg font-bold text-slate-800">Tu Institución</h2>
             </div>
             <div className="max-w-md">
-              <Campo 
-                label="¿A cuál colegio o institución perteneces?" 
-                name="institucion"
-                placeholder="Busca tu colegio..."
-                value={formData.institucion}
-                onChange={handleInputChange}
-                required 
-              />
+              <div className="flex flex-col gap-1.5 w-full">
+                <label htmlFor="institucion" className="text-sm font-medium text-slate-700">
+                  ¿A cuál colegio o institución perteneces? <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id="institucion"
+                    name="institucion"
+                    value={formData.institucion}
+                    onChange={handleInputChange}
+                    required
+                    disabled={cargandoInstituciones}
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs focus:border-[#1B5E9E] focus:outline-none focus:ring-1 focus:ring-[#1B5E9E] appearance-none cursor-pointer pr-10"
+                  >
+                    <option value="" disabled>
+                      {cargandoInstituciones ? "Cargando instituciones disponibles..." : "Selecciona tu institución educativa..."}
+                    </option>
+                    {instituciones.map((inst) => (
+                      <option key={inst.id} value={inst.id}>
+                        {inst.nombre} {inst.ciudad ? `(${inst.ciudad})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Selecciona la institución donde ocurren los hechos para asignar el reporte al equipo de convivencia correspondiente.
+                </p>
+              </div>
             </div>
           </section>
 
@@ -439,15 +508,34 @@ export default function Reporte() {
               <span className="w-7 h-7 rounded-full bg-[#DCEAF7] text-[#1B5E9E] font-bold text-xs flex items-center justify-center shrink-0">G</span>
               <h2 className="text-lg font-bold text-slate-800">Cuéntanos qué pasó</h2>
             </div>
-            <Campo 
-              isTextArea={true}
-              rows={5}
-              name="descripcion"
-              placeholder="Escribe aquí lo que pasó sin decir tu nombre. Por ejemplo: Ayer en el recreo acorralaron a mi amigo y le dijeron que..."
-              value={formData.descripcion}
-              onChange={handleInputChange}
-              required 
-            />
+            <div className="space-y-1.5">
+              <Campo 
+                isTextArea={true}
+                rows={5}
+                name="descripcion"
+                placeholder="Escribe aquí lo que pasó sin decir tu nombre. Por ejemplo: Ayer en el recreo acorralaron a mi amigo y le dijeron que..."
+                value={formData.descripcion}
+                onChange={handleInputChange}
+                required 
+              />
+              <div className="flex justify-between items-center text-xs px-1">
+                <span className={formData.descripcion.length >= 10 ? "text-emerald-700 font-semibold flex items-center gap-1" : "text-slate-500"}>
+                  {formData.descripcion.length >= 10 ? (
+                    <>
+                      <svg className="w-3.5 h-3.5 text-emerald-600 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Longitud adecuada para análisis</span>
+                    </>
+                  ) : (
+                    `Mínimo 10 caracteres (faltan ${Math.max(0, 10 - formData.descripcion.length)})`
+                  )}
+                </span>
+                <span className="text-slate-400 font-mono text-[11px]">
+                  {formData.descripcion.length} caracteres
+                </span>
+              </div>
+            </div>
           </section>
 
           {/* H. Evidencia */}
