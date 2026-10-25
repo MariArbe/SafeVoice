@@ -50,6 +50,29 @@ class TestRegistroUsuarioPublico:
         assert data["email"] == "ana.martinez@gmail.com"
         assert data["rol"] == "DIRECTIVO"
 
+    def test_registro_con_institution_id_especifica(self, api_client, institucion):
+        from apps.institutions.models import Institution
+        otra_inst = Institution.objects.create(
+            nombre="Institución Educativa Rural",
+            codigo_dane="900888777-1",
+            ciudad="Rionegro",
+            is_active=True,
+        )
+        payload = {
+            "first_name": "Laura",
+            "last_name": "Gomez",
+            "email": "laura.gomez@rural.edu.co",
+            "rol": "ORIENTADOR",
+            "institution_id": otra_inst.id,
+            "password": "Password123!",
+            "password_confirmacion": "Password123!",
+        }
+        response = api_client.post(REGISTER_URL, payload, format="json")
+        assert response.status_code == 201
+        data = response.json()
+        assert data["institution_id"] == otra_inst.id
+        assert data["institution_nombre"] == "Institución Educativa Rural"
+
     def test_registro_email_duplicado_rechazado(self, api_client, usuario_orientador):
         payload = {
             "first_name": "Otro",

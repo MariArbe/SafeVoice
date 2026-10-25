@@ -90,6 +90,10 @@ export default function RegistroDocente() {
     setSuccessMessage("");
 
     // Validación básica del lado del cliente
+    if (!formData.institution_id) {
+      setErrors({ institution_id: "Por favor selecciona tu institución educativa." });
+      return;
+    }
     if (formData.password !== formData.password_confirmacion) {
       setErrors({ password_confirmacion: "Las contraseñas no coinciden." });
       return;
@@ -277,7 +281,9 @@ export default function RegistroDocente() {
                   onChange={handleChange}
                   required
                   disabled={isLoading || cargandoInstituciones}
-                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#1B5E9E] focus:border-transparent bg-slate-50/50 focus:bg-white text-slate-800 appearance-none cursor-pointer pr-10"
+                  className={`w-full border ${
+                    getFieldError("institution_id") ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:ring-[#1B5E9E]"
+                  } rounded-xl px-3.5 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:border-transparent bg-slate-50/50 focus:bg-white text-slate-800 appearance-none cursor-pointer pr-10`}
                 >
                   <option value="" disabled>
                     {cargandoInstituciones ? "Cargando instituciones..." : "Selecciona tu institución educativa..."}
@@ -294,6 +300,9 @@ export default function RegistroDocente() {
                   </svg>
                 </div>
               </div>
+              {getFieldError("institution_id") && (
+                <p className="text-[11px] text-red-500 font-medium mt-1">{getFieldError("institution_id")}</p>
+              )}
             </div>
 
             {/* Rol Unificado */}
