@@ -13,7 +13,7 @@ const api = axios.create({
 
 // Endpoints públicos: no deben enviar el token, porque un token vencido o inválido
 // hace que el backend responda 401 aunque el endpoint no requiera autenticación.
-const PUBLIC_ENDPOINTS = ["/users/register/", "/users/login/"];
+const PUBLIC_ENDPOINTS = ["/users/register/", "/users/login/", "/reports/consultar/", "/reports/evidencia/"];
 
 api.interceptors.request.use(
   (config) => {

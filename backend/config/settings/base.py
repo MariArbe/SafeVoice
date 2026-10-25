@@ -125,6 +125,11 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# ─── Archivos de medios / evidencias ───────────────────────────────────────
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 

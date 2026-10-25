@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import NavbarPublico from "../../components/ui/NavbarPublico";
 import recursoService from "../../services/recursoService";
 
 export default function ContactosRecursos() {
@@ -51,42 +52,21 @@ export default function ContactosRecursos() {
   }, []);
 
   const getCategoryBadge = (categoria) => {
-    switch(categoria) {
-      case 'LINEA_DE_AYUDA': 
+    switch (categoria) {
+      case "LINEA_DE_AYUDA":
         return <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Línea Directa</span>;
-      case 'ORIENTACION': 
+      case "ORIENTACION":
         return <span className="bg-emerald-50 text-[#2C5F57] border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Orientación Escolar</span>;
-      case 'PROFESOR': 
+      case "PROFESOR":
         return <span className="bg-[#DCEAF7] text-[#1B5E9E] border border-[#1B5E9E]/20 text-[10px] font-bold px-2 py-0.5 rounded-md">Docente Enlace</span>;
-      default: 
+      default:
         return <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Recurso</span>;
     }
   };
 
   return (
     <div className="min-h-screen bg-[#DCEAF7] flex flex-col justify-between font-sans text-slate-800">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md px-6 md:px-12 py-4 flex items-center justify-between border-b border-slate-200/80 shadow-2xs sticky top-0 z-10">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-2xl bg-[#DCEAF7] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <svg className="w-6 h-6 text-[#1B5E9E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="m9 12 2 2 4-4" />
-            </svg>
-          </div>
-          <span className="text-xl font-extrabold text-[#1B5E9E] tracking-tight">SafeVoice</span>
-        </Link>
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-xs font-bold text-[#2C5F57] hover:text-[#1B5E9E] bg-slate-100/80 hover:bg-slate-200/80 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
-          title="Volver al inicio"
-        >
-          <span>Inicio</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </button>
-      </header>
+      <NavbarPublico />
 
       {/* Contenido Principal */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full flex-1 flex flex-col items-center">
@@ -100,6 +80,16 @@ export default function ContactosRecursos() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
             </svg>
             <span>Volver a Sección Informativa</span>
+          </button>
+
+          <button
+            onClick={() => navigate("/lineas-ayuda")}
+            className="flex items-center gap-2 text-xs font-bold text-[#1B5E9E] hover:text-white bg-white/80 hover:bg-[#1B5E9E] px-3.5 py-2 rounded-xl border border-[#1B5E9E]/20 transition-all shadow-2xs cursor-pointer"
+          >
+            <span>Líneas Nacionales 24/7</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
 

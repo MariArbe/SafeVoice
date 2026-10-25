@@ -1,30 +1,10 @@
 import { Link } from "react-router-dom";
+import NavbarPublico from "../../components/ui/NavbarPublico";
 
 export default function Inicio() {
   return (
     <div className="min-h-screen bg-[#DCEAF7] flex flex-col justify-between font-sans text-slate-800">
-      {/* Header superior */}
-      <header className="bg-white/90 backdrop-blur-md px-6 md:px-12 py-4 flex items-center justify-between border-b border-slate-200/80 shadow-2xs sticky top-0 z-20">
-        <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-10 h-10 rounded-2xl bg-[#DCEAF7] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <svg className="w-6 h-6 text-[#1B5E9E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="m9 12 2 2 4-4" />
-            </svg>
-          </div>
-          <span className="text-xl font-extrabold text-[#1B5E9E] tracking-tight">SafeVoice</span>
-        </div>
-
-        <Link
-          to="/docente/login"
-          className="bg-[#2C5F57] hover:bg-[#234c45] active:scale-[0.98] text-white text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          <span>Portal Docentes</span>
-        </Link>
-      </header>
+      <NavbarPublico />
 
       {/* Contenido Principal (Hero Section) */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 w-full flex-1 flex flex-col justify-between space-y-10">
@@ -43,11 +23,11 @@ export default function Inicio() {
             </h1>
 
             <p className="text-slate-600 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Reporta situaciones de bullying o ciberbullying de forma <strong className="text-slate-800">100% segura y anónima</strong>. Encuentra orientación, recursos y contactos institucionales cuando más lo necesites.
+              Reporta situaciones de bullying o ciberbullying de forma <strong className="text-slate-800">100% segura y anónima</strong>. Encuentra orientación, recursos y haz seguimiento a tu caso con tu código único.
             </p>
 
-            {/* Botón Principal Destacado */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+            {/* Botones Principales Destacados */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
               <Link
                 to="/reporte"
                 className="w-full sm:w-auto bg-[#2C5F57] hover:bg-[#234c45] active:scale-[0.98] text-white font-bold text-base px-8 py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3 group cursor-pointer"
@@ -59,6 +39,16 @@ export default function Inicio() {
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
+              </Link>
+
+              <Link
+                to="/consultar"
+                className="w-full sm:w-auto bg-white hover:bg-slate-50 active:scale-[0.98] text-[#1B5E9E] border border-[#1B5E9E]/25 font-bold text-base px-6 py-4 rounded-2xl transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-2.5 group cursor-pointer"
+              >
+                <svg className="w-5 h-5 text-[#1B5E9E] group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span>Consultar Estado de mi Reporte</span>
               </Link>
             </div>
           </div>
@@ -107,7 +97,7 @@ export default function Inicio() {
             <span className="text-xs text-slate-400 font-medium hidden sm:inline">Explora las opciones de ayuda</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Opción 1: Reportar */}
             <Link
@@ -125,7 +115,23 @@ export default function Inicio() {
               </div>
             </Link>
 
-            {/* Opción 2: Contactos de ayuda */}
+            {/* Opción 2: Consultar estado */}
+            <Link
+              to="/consultar"
+              className="group p-5 rounded-2xl border border-slate-200 hover:border-purple-600 bg-slate-50/50 hover:bg-purple-50/30 transition-all flex items-start gap-4 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800 text-sm group-hover:text-purple-700 transition-colors">Consultar mi reporte</h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">Revisa el estado y avances de tu caso usando tu código único.</p>
+              </div>
+            </Link>
+
+            {/* Opción 3: Contactos de ayuda */}
             <Link
               to="/lineas-ayuda"
               className="group p-5 rounded-2xl border border-slate-200 hover:border-[#1B5E9E] bg-slate-50/50 hover:bg-blue-50/30 transition-all flex items-start gap-4 cursor-pointer"
@@ -141,7 +147,7 @@ export default function Inicio() {
               </div>
             </Link>
 
-            {/* Opción 3: Información */}
+            {/* Opción 4: Información */}
             <Link
               to="/informacion"
               className="group p-5 rounded-2xl border border-slate-200 hover:border-amber-500 bg-slate-50/50 hover:bg-amber-50/30 transition-all flex items-start gap-4 cursor-pointer"

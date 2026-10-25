@@ -61,10 +61,40 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
             "grado_victima",
             "involucrados_tipo",
             "descripcion",
+            "evidencia_url",
             "institucion_id",
             "acepta_revelar_identidad",
             "nombre_contacto_victima",
             "medio_contacto_victima",
+            "historial_cambios",
+            "historial_estados",
+        ]
+        read_only_fields = fields
+
+
+class ReporteConsultaPublicaSerializer(serializers.ModelSerializer):
+    """
+    Serializer seguro de solo lectura para la consulta pública por código (HU-04).
+    Omite deliberadamente datos de contacto personal (nombre_contacto_victima,
+    medio_contacto_victima), la narrativa sensible (descripcion) y URLs de archivos
+    para garantizar privacidad en endpoints sin autenticación.
+    """
+
+    historial_estados = HistorialEstadoSerializer(
+        source="seguimientos", many=True, read_only=True,
+    )
+
+    class Meta:
+        model = Reporte
+        fields = [
+            "id",
+            "codigo_seguimiento",
+            "fecha_creacion",
+            "fecha_actualizacion",
+            "estado",
+            "ubicacion",
+            "frecuencia",
+            "acepta_revelar_identidad",
             "historial_cambios",
             "historial_estados",
         ]
@@ -117,13 +147,28 @@ class CrearReporteSerializer(serializers.ModelSerializer):
 
 class ConsultarReporteSerializer(serializers.Serializer):
     """
-    Serializer para la consulta anónima de estado por código de seguimiento.
+    Serializer para la consulta anónima de estado por código de seguimiento (HU-04).
     Valida que el input sea un UUID válido antes de consultar.
+    Soporta tanto 'codigo_seguimiento' como 'codigo' en los query params.
     """
 
     codigo_seguimiento = serializers.UUIDField(
-        help_text="UUID del código de seguimiento entregado al crear el reporte."
+        required=False,
+        help_text="UUID del código de seguimiento entregado al crear el reporte.",
     )
+    codigo = serializers.UUIDField(
+        required=False,
+        help_text="Alias de codigo_seguimiento para consultas por query param ?codigo=.",
+    )
+
+    def validate(self, attrs):
+        codigo = attrs.get("codigo_seguimiento") or attrs.get("codigo")
+        if not codigo:
+            raise serializers.ValidationError(
+                {"codigo_seguimiento": "Debes proporcionar un código de seguimiento válido."}
+            )
+        attrs["codigo_seguimiento"] = codigo
+        return attrs
 
 
 class ActualizarEstadoSerializer(serializers.Serializer):

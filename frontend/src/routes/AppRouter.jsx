@@ -5,6 +5,8 @@ import SeccionInformativa from "../pages/publico/SeccionInformativa";
 import ContactosRecursos from "../pages/publico/ContactosRecursos";
 import LineasAyuda from "../pages/publico/LineasAyuda";
 import Reporte from "../pages/publico/Reporte";
+import ConsultarReporte from "../pages/publico/ConsultarReporte";
+import PaginaNoEncontrada from "../pages/publico/PaginaNoEncontrada";
 
 import Login from "../pages/docente/Login";
 import SignUp from "../pages/docente/SignUp";
@@ -23,6 +25,9 @@ export default function AppRouter() {
         <Route path="/contactos" element={<ContactosRecursos />} />
         <Route path="/lineas-ayuda" element={<LineasAyuda />} />
         <Route path="/reporte" element={<Reporte />} />
+        <Route path="/reportar" element={<Reporte />} />
+        <Route path="/consultar" element={<ConsultarReporte />} />
+        <Route path="/consultar-reporte" element={<ConsultarReporte />} />
 
         {/* Zona pública docente — acceso y registro */}
         <Route path="/docente/login" element={<Login />} />
@@ -37,7 +42,7 @@ export default function AppRouter() {
           <Route path="/docente/casos" element={<BandejaReportes />} />
         </Route>
 
-        <Route path="*" element={<p>Página no encontrada</p>} />
+        <Route path="*" element={<PaginaNoEncontrada />} />
       </Routes>
     </BrowserRouter>
   );

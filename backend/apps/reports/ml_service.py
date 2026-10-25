@@ -1,5 +1,5 @@
 """
-apps/reports/ml_service.py â€” Servicio puente entre Django y el Modelo de Machine Learning.
+apps/reports/ml_service.py — Servicio puente entre Django y el Modelo de Machine Learning.
 """
 
 import os
@@ -15,6 +15,28 @@ MODEL_PATH = (
 _modelo = None
 
 
+def _normalizar_ubicacion(ubicacion: str) -> str:
+    """Normaliza la etiqueta de ubicación del formulario al código técnico del modelo ML."""
+    if not ubicacion or not isinstance(ubicacion, str):
+        return "SALON"
+    u = ubicacion.strip().lower()
+    if "salón" in u or "salon" in u:
+        return "SALON"
+    if "pasillo" in u or "escalera" in u:
+        return "PASILLOS"
+    if "baño" in u or "bano" in u:
+        return "BANOS"
+    if "descanso" in u or "deportiva" in u or "cancha" in u or "patio" in u:
+        return "DESCANSO"
+    if "salida" in u:
+        return "SALIDA"
+    if "internet" in u or "redes" in u or "virtual" in u:
+        return "INTERNET"
+    if "otro" in u:
+        return "OTRO"
+    return ubicacion.strip().upper()
+
+
 def predecir_nivel_riesgo(
     descripcion: str,
     frecuencia: str,
@@ -22,8 +44,8 @@ def predecir_nivel_riesgo(
     involucrados_tipo: str,
 ) -> str:
     """
-    Recibe las variables categÃ³ricas y de texto, carga el modelo Scikit-Learn
-    y devuelve la clasificaciÃ³n de riesgo.
+    Recibe las variables categóricas y de texto, carga el modelo Scikit-Learn
+    y devuelve la clasificación de riesgo.
     """
     global _modelo
 
@@ -50,7 +72,7 @@ def predecir_nivel_riesgo(
         except Exception:
             _modelo = None
 
-    # 3. Predicción con Random Forest
+    # 3. Predicción con Random Forest / Ensamble
     if _modelo:
         try:
             df_input = pd.DataFrame(
@@ -58,7 +80,7 @@ def predecir_nivel_riesgo(
                     {
                         "descripcion": descripcion.strip(),
                         "frecuencia": frecuencia or "PRIMERA_VEZ",
-                        "ubicacion": ubicacion or "SALON",
+                        "ubicacion": _normalizar_ubicacion(ubicacion),
                         "involucrados_tipo": involucrados_tipo or "INDIVIDUAL",
                     }
                 ]

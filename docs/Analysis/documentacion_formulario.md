@@ -36,6 +36,7 @@ Este documento detalla la estructura del formulario de captura de datos para los
 * [ ] En el descanso / zonas deportivas.
 * [ ] A la salida del colegio.
 * [ ] En internet (WhatsApp, redes sociales, juegos online).
+* [ ] Otro.
 
 ### E. Frecuencia del Incidente (Selección Única)
 *Ayuda a determinar si se trata de un caso aislado o un patrón continuo de acoso (crucial para el Nivel de Riesgo).*

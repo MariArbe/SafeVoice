@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { logout } from "../../utils/auth";
 import reporteService from "../../services/reporteService";
 import {
@@ -11,14 +11,23 @@ import {
   formatearFechaLocal,
   formatearFechaCompleta,
 } from "../../utils/estadosReporte";
+import ModalActaOficial from "../../components/reportes/ModalActaOficial";
+import ModalRemisionExterna from "../../components/reportes/ModalRemisionExterna";
+import AsistenteLegalLey1620 from "../../components/reportes/AsistenteLegalLey1620";
+import ModuloSemaforoPostCierre from "../../components/reportes/ModuloSemaforoPostCierre";
 
 export default function BandejaReportesDocente() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroSemaforo, setFiltroSemaforo] = useState("");
   const [filtros, setFiltros] = useState({
     nivel_riesgo_predicho: "",
+    ubicacion: searchParams.get("ubicacion") || "",
     estado: "",
+    q: "",
     page: 1,
   });
   const [totalPages, setTotalPages] = useState(1);
@@ -42,6 +51,12 @@ export default function BandejaReportesDocente() {
   const [recomendaciones, setRecomendaciones] = useState(null);
   const [cargandoRecomendaciones, setCargandoRecomendaciones] = useState(false);
   const [mostrarRecomendaciones, setMostrarRecomendaciones] = useState(true);
+
+  // Estado para Acta Oficial, Remisión Externa y Exportación CSV (Ley 1620)
+  const [mostrarActa, setMostrarActa] = useState(false);
+  const [mostrarRemisionExterna, setMostrarRemisionExterna] = useState(false);
+  const [rutaExternaInfo, setRutaExternaInfo] = useState(null);
+  const [exportandoCSV, setExportandoCSV] = useState(false);
 
   const fetchReportes = async () => {
     setLoading(true);
@@ -73,7 +88,7 @@ export default function BandejaReportesDocente() {
           fecha_creacion: "2026-09-28T14:30:00Z",
           nivel_riesgo_predicho: "ALTO",
           estado: "en_revision",
-          ubicacion: "Salon de clases",
+          ubicacion: "Salón de clases",
           descripcion: "Insultos constantes por parte de dos compañeros durante el trabajo en equipo.",
           notas_orientador: "Se programó citación preliminar con el docente titular.",
           historial_cambios: [
@@ -93,7 +108,7 @@ export default function BandejaReportesDocente() {
           fecha_creacion: "2026-09-29T09:15:00Z",
           nivel_riesgo_predicho: "CRITICO",
           estado: "nuevo",
-          ubicacion: "Redes sociales",
+          ubicacion: "Internet / Redes sociales",
           descripcion: "Creación de grupo anónimo en WhatsApp difundiendo imágenes no autorizadas.",
           notas_orientador: "",
           historial_cambios: [],
@@ -104,7 +119,7 @@ export default function BandejaReportesDocente() {
           fecha_creacion: "2026-09-25T11:00:00Z",
           nivel_riesgo_predicho: "MEDIO",
           estado: "cerrado",
-          ubicacion: "Descanso / Patio",
+          ubicacion: "Descanso / zonas deportivas",
           descripcion: "Exclusión sistemática durante los juegos del descanso.",
           notas_orientador: "Caso atendido mediante taller de convivencia y acuerdo firmado.",
           historial_cambios: [
@@ -124,11 +139,64 @@ export default function BandejaReportesDocente() {
     }
   };
 
+  // Sincronizar búsqueda debounced con los filtros del backend (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFiltros((prev) => {
+        const clean = busqueda.trim();
+        if (prev.q === clean) return prev;
+        return { ...prev, q: clean, page: 1 };
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [busqueda]);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchReportes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtros.nivel_riesgo_predicho, filtros.estado, filtros.page]);
+  }, [filtros.nivel_riesgo_predicho, filtros.ubicacion, filtros.estado, filtros.q, filtros.page]);
+
+  // Búsqueda instantánea en cliente (0ms de latencia) sobre la lista cargada
+  const reportesFiltrados = useMemo(() => {
+    let resultado = reportes;
+
+    if (filtroSemaforo) {
+      resultado = resultado.filter((item) => {
+        const cambios = item.historial_cambios || [];
+        const chequeos = cambios.filter(
+          (c) =>
+            c.tipo_accion === "CHEQUEO_POST_CIERRE" ||
+            c.tipo_accion === "REACTIVACION_REINCIDENCIA"
+        );
+        if (filtroSemaforo === "PENDIENTE") {
+          return normalizarEstado(item.estado) === "cerrado" && chequeos.length === 0;
+        }
+        if (chequeos.length === 0) return false;
+        const ultimo = chequeos[chequeos.length - 1];
+        return ultimo.metadata?.semaforo === filtroSemaforo;
+      });
+    }
+
+    if (!busqueda.trim()) return resultado;
+    const q = busqueda.trim().toLowerCase();
+    return resultado.filter((item) => {
+      const cod = String(item.codigo_seguimiento || "").toLowerCase();
+      const desc = String(item.descripcion || "").toLowerCase();
+      const ubi = String(item.ubicacion || "").toLowerCase();
+      const nom = String(item.nombre_contacto_victima || "").toLowerCase();
+      const medio = String(item.medio_contacto_victima || "").toLowerCase();
+      const grado = String(item.grado_victima || "").toLowerCase();
+      return (
+        cod.includes(q) ||
+        desc.includes(q) ||
+        ubi.includes(q) ||
+        nom.includes(q) ||
+        medio.includes(q) ||
+        grado.includes(q)
+      );
+    });
+  }, [reportes, busqueda, filtroSemaforo]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -267,6 +335,25 @@ export default function BandejaReportesDocente() {
     setRecomendaciones(fallbackMap[nivel] || fallbackMap.MEDIO);
   };
 
+  // Helpers para manejo y visualización de archivos de evidencia (HU-02)
+  const getEvidenciaUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    const base = (import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1").replace(/\/api\/v1\/?$/, "");
+    return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  const esImagen = (url) => {
+    if (!url) return false;
+    const clean = url.toLowerCase().split("?")[0];
+    return [".png", ".jpg", ".jpeg", ".webp", ".gif"].some((ext) => clean.endsWith(ext));
+  };
+
+  const esPdf = (url) => {
+    if (!url) return false;
+    return url.toLowerCase().split("?")[0].endsWith(".pdf");
+  };
+
   // Copiar el protocolo y acciones recomendadas a las notas de seguimiento
   const handleCopiarRecomendacion = (protocolo, acciones) => {
     const textoAcciones = (acciones || []).map((a, i) => `${i + 1}. ${a}`).join("\n");
@@ -277,6 +364,22 @@ export default function BandejaReportesDocente() {
         ? `${prev.notas_orientador}\n\n${textoCompleto}`
         : textoCompleto,
     }));
+  };
+
+  // Exportar listado de reportes a CSV (Excel / SIUCE)
+  const handleExportarCSV = async () => {
+    setExportandoCSV(true);
+    try {
+      const params = Object.fromEntries(
+        Object.entries(filtros).filter(([k, v]) => v !== "" && k !== "page")
+      );
+      await reporteService.exportarReportesCSV(params, reportesFiltrados);
+    } catch (err) {
+      console.error("Error al exportar reportes:", err);
+      alert("No se pudo exportar el archivo CSV. Por favor intente de nuevo.");
+    } finally {
+      setExportandoCSV(false);
+    }
   };
 
   // Abrir modal con los datos del reporte
@@ -294,7 +397,84 @@ export default function BandejaReportesDocente() {
     setMensajeExito(null);
     setErrorGuardar(null);
     setMostrarRecomendaciones(true);
+
+    // Verificar si en el historial ya existe registro previo de Ruta Externa activada
+    const rutaEnHistorial = (itemNormalizado.historial_cambios || []).find(
+      (h) => h.tipo_accion === "ACTIVACION_RUTA_EXTERNA"
+    );
+    if (rutaEnHistorial && rutaEnHistorial.metadata) {
+      setRutaExternaInfo({
+        entidad: rutaEnHistorial.metadata.entidad_nombre || rutaEnHistorial.metadata.entidad,
+        radicado: rutaEnHistorial.metadata.radicado,
+        fecha: rutaEnHistorial.fecha_cambio,
+      });
+    } else {
+      setRutaExternaInfo(null);
+    }
+
     cargarRecomendaciones(itemNormalizado.id || itemNormalizado.codigo_seguimiento, itemNormalizado);
+    cargarHistorial(itemNormalizado.id || itemNormalizado.codigo_seguimiento, itemNormalizado);
+  };
+
+  // Confirmar y registrar formalmente la activación de Ruta Externa (Tipo III)
+  const handleConfirmarActivacionRuta = async (datos) => {
+    if (!reporteSeleccionado) return;
+    const targetId = reporteSeleccionado.id || reporteSeleccionado.codigo_seguimiento;
+    try {
+      if (reporteService.registrarSeguimiento) {
+        await reporteService.registrarSeguimiento(targetId, {
+          comentario: `🚨 Activación Formal de Ruta Externa Ley 1620: Remisión efectuada ante ${datos.entidad_nombre} bajo radicado institucional ${datos.radicado}. Medidas cautelares: ${datos.observaciones || "Protección y atención prioritaria."}`,
+          tipo_accion: "ACTIVACION_RUTA_EXTERNA",
+          metadata: datos,
+        });
+      }
+      setRutaExternaInfo({
+        entidad: datos.entidad_nombre,
+        radicado: datos.radicado,
+        fecha: datos.fecha_activacion,
+      });
+      setMensajeExito(
+        `¡Ruta Externa activada exitosamente ante ${datos.entidad_nombre}! Se generó el oficio formal y quedó registrado en auditoría.`
+      );
+      setTimeout(() => setMensajeExito(null), 6000);
+      await cargarHistorial(targetId);
+      setMostrarHistorial(true);
+    } catch (err) {
+      console.error("Error al activar ruta externa:", err);
+      setErrorGuardar("No se pudo registrar la activación de ruta externa en el servidor.");
+    }
+  };
+
+  // Manejo de chequeo post-cierre registrado (15, 30 o 60 días)
+  const handleChequeoRegistrado = (reporteActualizado) => {
+    const estadoNorm = normalizarEstado(reporteActualizado.estado);
+    const itemActualizado = { ...reporteActualizado, estado: estadoNorm };
+
+    setReporteSeleccionado(itemActualizado);
+    setFormDataModal((prev) => ({
+      ...prev,
+      estado: estadoNorm,
+    }));
+    setReportes((prev) =>
+      prev.map((r) =>
+        (r.id && r.id === itemActualizado.id) ||
+        r.codigo_seguimiento === itemActualizado.codigo_seguimiento
+          ? { ...r, ...itemActualizado }
+          : r
+      )
+    );
+
+    if (estadoNorm === "en_seguimiento" && reporteSeleccionado?.estado === "cerrado") {
+      setMensajeExito(
+        "⚠️ ¡ALERTA DE REINCIDENCIA! El caso fue reactivado automáticamente a estado «En Seguimiento» para intervención prioritaria."
+      );
+    } else {
+      setMensajeExito("¡Chequeo post-cierre registrado exitosamente en la bitácora del caso!");
+    }
+    setTimeout(() => setMensajeExito(null), 6000);
+
+    const targetId = itemActualizado.id || itemActualizado.codigo_seguimiento;
+    cargarHistorial(targetId);
   };
 
   // Toggle de la línea de tiempo de cambios
@@ -307,7 +487,7 @@ export default function BandejaReportesDocente() {
     }
   };
 
-  // Guardar cambios del reporte (sin cerrar el modal)
+  // Guardar cambios del reporte (cambio de estado o notas de seguimiento)
   const handleGuardarCambios = async (e) => {
     e.preventDefault();
     setErrorGuardar(null);
@@ -315,14 +495,39 @@ export default function BandejaReportesDocente() {
 
     const estadoActual = normalizarEstado(reporteSeleccionado.estado);
     const nuevoEstado = normalizarEstado(formDataModal.estado);
+    const targetId = reporteSeleccionado.id || reporteSeleccionado.codigo_seguimiento;
 
+    // Si el estado es el mismo, pero escribió una nota de seguimiento / mediación
     if (nuevoEstado === estadoActual) {
-      setErrorGuardar("Seleccione un estado diferente al actual para guardar cambios.");
-      return;
+      if (!formDataModal.notas_orientador.trim()) {
+        setErrorGuardar("Seleccione un estado diferente al actual o ingrese una nota de seguimiento.");
+        return;
+      }
+
+      setGuardando(true);
+      try {
+        if (reporteService.registrarSeguimiento) {
+          await reporteService.registrarSeguimiento(targetId, {
+            comentario: formDataModal.notas_orientador,
+            tipo_accion: "NOTA_SEGUIMIENTO",
+          });
+        }
+        setFormDataModal((prev) => ({ ...prev, notas_orientador: "" }));
+        setMensajeExito("¡Nota de seguimiento guardada exitosamente en la bitácora del caso!");
+        setTimeout(() => setMensajeExito(null), 5000);
+        await cargarHistorial(targetId);
+        setMostrarHistorial(true);
+        return;
+      } catch (err) {
+        console.error("Error al registrar nota de seguimiento:", err);
+        setErrorGuardar("No se pudo guardar la nota de seguimiento.");
+        return;
+      } finally {
+        setGuardando(false);
+      }
     }
 
     setGuardando(true);
-    const targetId = reporteSeleccionado.id || reporteSeleccionado.codigo_seguimiento;
 
     try {
       if (reporteService.actualizarReporte) {
@@ -444,45 +649,169 @@ export default function BandejaReportesDocente() {
           </div>
         </header>
 
+        {/* Barra de Navegación Rápida Móvil (sólo pantallas < md) */}
+        <div className="flex md:hidden items-center justify-between px-4 py-2.5 bg-white border-b border-slate-200 text-xs font-bold text-slate-700 shadow-2xs">
+          <div className="flex items-center gap-1.5">
+            <Link
+              to="/docente/dashboard"
+              className="px-3 py-1.5 rounded-xl hover:bg-slate-100 text-slate-700 transition-colors"
+            >
+              Dashboard
+            </Link>
+            <Link
+              to="/docente/reportes"
+              className="px-3 py-1.5 rounded-xl bg-[#2C5F57] text-white shadow-2xs font-extrabold"
+            >
+              Bandeja
+            </Link>
+            <Link
+              to="/docente/menu"
+              className="px-2.5 py-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors"
+            >
+              Menú
+            </Link>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              navigate("/docente/login");
+            }}
+            className="text-rose-600 hover:text-rose-800 text-[11px] font-bold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+          >
+            Salir
+          </button>
+        </div>
+
         <main className="p-4 sm:p-8 space-y-6 overflow-y-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-black text-[#2C5F57]">Bandeja de Entrada de Reportes</h1>
               <p className="text-xs text-slate-500 mt-0.5">Revise, clasifique y dé seguimiento a las alertas recibidas.</p>
             </div>
+
+            <button
+              onClick={handleExportarCSV}
+              disabled={exportandoCSV || loading}
+              className="self-start sm:self-auto flex items-center gap-2 bg-[#2C5F57] hover:bg-[#234c45] active:scale-[0.98] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+              title="Descarga el listado filtrado en formato CSV para Microsoft Excel o reportes al SIUCE"
+            >
+              {exportandoCSV ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Exportando datos...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Exportar a Excel / CSV</span>
+                </>
+              )}
+            </button>
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-2xs p-6 space-y-5">
             {/* Buscador y Filtros */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <h2 className="font-extrabold text-slate-800 text-base">Últimos Casos Recibidos</h2>
+            <div className="space-y-4 border-b border-slate-100 pb-4">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <h2 className="font-extrabold text-slate-800 text-base">Bandeja de Casos</h2>
+                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
+                    {reportesFiltrados.length} {reportesFiltrados.length === 1 ? "caso" : "casos"}
+                  </span>
+                </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <select
-                  name="nivel_riesgo_predicho"
-                  value={filtros.nivel_riesgo_predicho}
-                  onChange={handleFilterChange}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2C5F57]"
-                >
-                  <option value="">Todos los Riesgos IA</option>
-                  <option value="CRITICO">Riesgo Crítico</option>
-                  <option value="ALTO">Riesgo Alto</option>
-                  <option value="MEDIO">Riesgo Medio</option>
-                  <option value="BAJO">Riesgo Bajo</option>
-                </select>
+                {/* Filtros desplegables */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <select
+                    name="nivel_riesgo_predicho"
+                    value={filtros.nivel_riesgo_predicho}
+                    onChange={handleFilterChange}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2C5F57] cursor-pointer"
+                  >
+                    <option value="">Todos los Riesgos IA</option>
+                    <option value="CRITICO">Riesgo Crítico</option>
+                    <option value="ALTO">Riesgo Alto</option>
+                    <option value="MEDIO">Riesgo Medio</option>
+                    <option value="BAJO">Riesgo Bajo</option>
+                  </select>
 
-                <select
-                  name="estado"
-                  value={filtros.estado}
-                  onChange={handleFilterChange}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2C5F57]"
-                >
-                  <option value="">Todos los Estados</option>
-                  <option value="nuevo">Nuevo</option>
-                  <option value="en_revision">En Revisión</option>
-                  <option value="en_seguimiento">En Seguimiento</option>
-                  <option value="cerrado">Cerrado</option>
-                </select>
+                  <select
+                    name="ubicacion"
+                    value={filtros.ubicacion}
+                    onChange={handleFilterChange}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2C5F57] cursor-pointer"
+                  >
+                    <option value="">Todas las Ubicaciones</option>
+                    <option value="Salón de clases">Salón de clases</option>
+                    <option value="Pasillos o escaleras">Pasillos o escaleras</option>
+                    <option value="Baños">Baños</option>
+                    <option value="Descanso / zonas deportivas">Descanso / zonas deportivas</option>
+                    <option value="Salida del colegio">Salida del colegio</option>
+                    <option value="Internet / Redes sociales">Internet / Redes sociales</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+
+                  <select
+                    name="estado"
+                    value={filtros.estado}
+                    onChange={handleFilterChange}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2C5F57] cursor-pointer"
+                  >
+                    <option value="">Todos los Estados</option>
+                    <option value="nuevo">Nuevo</option>
+                    <option value="en_revision">En Revisión</option>
+                    <option value="en_seguimiento">En Seguimiento</option>
+                    <option value="cerrado">Cerrado</option>
+                  </select>
+
+                  {/* Filtro por Semáforo de Convivencia Post-Cierre */}
+                  <select
+                    name="filtroSemaforo"
+                    value={filtroSemaforo}
+                    onChange={(e) => setFiltroSemaforo(e.target.value)}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2C5F57] cursor-pointer"
+                  >
+                    <option value="">Semáforo Post-Cierre</option>
+                    <option value="PENDIENTE">⏳ D15 Pendiente</option>
+                    <option value="VERDE">🟢 Convivencia Estable</option>
+                    <option value="AMARILLO">🟡 Tensión Residual</option>
+                    <option value="ROJO">🔴 Reincidencia</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Barra de Búsqueda Instantánea */}
+              <div className="relative flex items-center">
+                <div className="absolute left-3.5 text-slate-400 pointer-events-none flex items-center">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  placeholder="Búsqueda instantánea por código de seguimiento (ej. SV-2026-..., UUID) o fragmento de la descripción..."
+                  className="w-full bg-slate-50 hover:bg-slate-50/80 focus:bg-white border border-slate-200 focus:border-[#1B5E9E] rounded-2xl pl-10 pr-24 py-2.5 text-xs text-slate-800 placeholder-slate-400 font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#1B5E9E]/20"
+                />
+                {busqueda && (
+                  <div className="absolute right-3 flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 hidden sm:inline">
+                      {reportesFiltrados.length} encontrados
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setBusqueda("")}
+                      className="w-5 h-5 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 text-xs flex items-center justify-center transition-all cursor-pointer"
+                      title="Limpiar búsqueda"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -506,22 +835,51 @@ export default function BandejaReportesDocente() {
                         Cargando reportes...
                       </td>
                     </tr>
-                  ) : reportes.length === 0 ? (
+                  ) : reportesFiltrados.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="py-8 text-center text-slate-400 font-semibold">
-                        No hay reportes que coincidan con los filtros.
+                      <td colSpan="6" className="py-12 text-center text-slate-400">
+                        <div className="max-w-md mx-auto space-y-2">
+                          <span className="text-2xl block">🔍</span>
+                          <p className="font-bold text-slate-700 text-sm">
+                            No se encontraron reportes coincidentes
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {busqueda
+                              ? `Ningún caso coincide con "${busqueda}". Intenta buscar por otro código o palabra clave.`
+                              : "No hay reportes que coincidan con los filtros seleccionados."}
+                          </p>
+                          {busqueda && (
+                            <button
+                              type="button"
+                              onClick={() => setBusqueda("")}
+                              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                            >
+                              <span>✕ Limpiar búsqueda</span>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ) : (
-                    reportes.map((item) => (
+                    reportesFiltrados.map((item) => (
                       <tr key={item.codigo_seguimiento} className="hover:bg-slate-50/80 transition-colors">
                         <td className="py-3.5 px-4 font-mono font-bold text-[#1B5E9E]">
                           <div>{item.codigo_seguimiento}</div>
-                          {(item.nombre_contacto_victima || item.medio_contacto_victima) && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md mt-1">
-                              👤 Con contacto
-                            </span>
-                          )}
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {item.evidencia_url && (
+                              <span
+                                className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-md"
+                                title="Reporte con archivo de evidencia adjunto"
+                              >
+                                📎 Evidencia
+                              </span>
+                            )}
+                            {(item.nombre_contacto_victima || item.medio_contacto_victima) && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md">
+                                👤 Con contacto
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-slate-600">
                           {new Date(item.fecha_creacion).toLocaleDateString("es-CO")}
@@ -536,6 +894,44 @@ export default function BandejaReportesDocente() {
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${getColorEstado(item.estado)}`}>
                             {getNombreEstado(item.estado)}
                           </span>
+                          {/* Mini indicador de semáforo post-cierre si el caso está cerrado */}
+                          {(() => {
+                            if (normalizarEstado(item.estado) !== "cerrado") return null;
+                            const cambios = item.historial_cambios || [];
+                            const chequeos = cambios.filter(
+                              (c) =>
+                                c.tipo_accion === "CHEQUEO_POST_CIERRE" ||
+                                c.tipo_accion === "REACTIVACION_REINCIDENCIA"
+                            );
+                            if (chequeos.length === 0) {
+                              return (
+                                <span className="block mt-1 text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-center">
+                                  ⏳ D15 Pendiente
+                                </span>
+                              );
+                            }
+                            const ultimo = chequeos[chequeos.length - 1];
+                            const sem = ultimo.metadata?.semaforo;
+                            if (sem === "ROJO") {
+                              return (
+                                <span className="block mt-1 text-[9px] font-black text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 text-center">
+                                  🔴 Reincidencia
+                                </span>
+                              );
+                            }
+                            if (sem === "AMARILLO") {
+                              return (
+                                <span className="block mt-1 text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-center">
+                                  🟡 Tensión D{ultimo.metadata?.hito?.replace("DIA_", "")}
+                                </span>
+                              );
+                            }
+                            return (
+                              <span className="block mt-1 text-[9px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 text-center">
+                                🟢 Estable D{ultimo.metadata?.hito?.replace("DIA_", "")}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           <button
@@ -626,6 +1022,113 @@ export default function BandejaReportesDocente() {
                 </div>
               </div>
 
+              {/* Evidencia Adjunta al Reporte (HU-02) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Evidencia adjunta por el reportante:
+                  </label>
+                  {reporteSeleccionado.evidencia_url && (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                      <span>✓</span> 1 archivo adjunto
+                    </span>
+                  )}
+                </div>
+
+                {reporteSeleccionado.evidencia_url ? (
+                  <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-3">
+                    {/* Si es imagen: miniatura + acciones */}
+                    {esImagen(reporteSeleccionado.evidencia_url) ? (
+                      <div className="space-y-3">
+                        <div className="relative group max-h-64 rounded-xl overflow-hidden border border-slate-200 bg-white flex items-center justify-center p-2 shadow-2xs">
+                          <img
+                            src={getEvidenciaUrl(reporteSeleccionado.evidencia_url)}
+                            alt="Evidencia fotográfica adjunta"
+                            className="max-h-56 object-contain rounded-lg transition-transform duration-200 group-hover:scale-[1.02]"
+                          />
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+                          <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                            <span>🔒</span> Archivo anonimizado en servidor
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={getEvidenciaUrl(reporteSeleccionado.evidencia_url)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                              <span>Ver tamaño completo</span>
+                            </a>
+                            <a
+                              href={getEvidenciaUrl(reporteSeleccionado.evidencia_url)}
+                              download
+                              className="px-3 py-1.5 rounded-xl bg-[#1B5E9E] hover:bg-[#154a7d] text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                              </svg>
+                              <span>Descargar</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Si es PDF o documento */
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200">
+                        <div className="flex items-center gap-3">
+                          <span className="w-10 h-10 rounded-xl bg-blue-50 text-[#1B5E9E] flex items-center justify-center text-xl shrink-0">
+                            {esPdf(reporteSeleccionado.evidencia_url) ? "📄" : "📎"}
+                          </span>
+                          <div>
+                            <p className="text-xs font-bold text-slate-800">
+                              {esPdf(reporteSeleccionado.evidencia_url) ? "Documento PDF de Evidencia" : "Archivo de Evidencia Adjunto"}
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              Custodiado bajo código de seguridad SafeVoice
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                          <a
+                            href={getEvidenciaUrl(reporteSeleccionado.evidencia_url)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            <span>Abrir archivo</span>
+                          </a>
+                          <a
+                            href={getEvidenciaUrl(reporteSeleccionado.evidencia_url)}
+                            download
+                            className="px-3 py-1.5 rounded-xl bg-[#1B5E9E] hover:bg-[#154a7d] text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>Descargar</span>
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 text-xs text-slate-400 italic flex items-center gap-2">
+                    <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <span>Sin archivos de evidencia adjuntos en este reporte.</span>
+                  </div>
+                )}
+              </div>
+
               {/* Datos de contacto (si el estudiante decidió identificarse) */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -653,158 +1156,34 @@ export default function BandejaReportesDocente() {
                 )}
               </div>
 
-              {/* PANEL DE SUGERENCIAS DE INTERVENCIÓN (HU-15 - Ley 1620) */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs transition-all">
-                {/* Header del Panel */}
-                <button
-                  type="button"
-                  onClick={() => setMostrarRecomendaciones(!mostrarRecomendaciones)}
-                  className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 hover:bg-slate-100/80 text-left transition-all cursor-pointer"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-7 h-7 rounded-xl bg-[#1B5E9E] text-white flex items-center justify-center text-sm shadow-xs">
-                      🛡️
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-slate-900">
-                          Sugerencias de Intervención y Protocolo
-                        </span>
-                        <span className="text-[10px] bg-blue-100 text-[#1B5E9E] font-bold px-2 py-0.5 rounded-md">
-                          Ley 1620
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-medium">
-                        {recomendaciones
-                          ? `${recomendaciones.tipo_situacion} • Urgencia: ${recomendaciones.urgencia}`
-                          : "Generando sugerencias pedagógicas y ruta de atención..."}
-                      </p>
-                    </div>
-                  </div>
+              {/* ASISTENTE LEGAL Y PROTOCOLO LEY 1620 (CHECKLIST SEGÚN GRAVEDAD) */}
+              <AsistenteLegalLey1620
+                reporte={reporteSeleccionado}
+                recomendaciones={recomendaciones}
+                rutaExternaInfo={rutaExternaInfo}
+                onCopiarNotas={(texto) => {
+                  setFormDataModal((prev) => ({
+                    ...prev,
+                    notas_orientador: prev.notas_orientador
+                      ? `${prev.notas_orientador}\n\n${texto}`
+                      : texto,
+                  }));
+                }}
+                onAbrirRemisionExterna={() => setMostrarRemisionExterna(true)}
+              />
 
-                  <svg
-                    className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
-                      mostrarRecomendaciones ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-
-                {/* Contenido expandible del panel */}
-                {mostrarRecomendaciones && (
-                  <div className="p-4 bg-white space-y-3.5 border-t border-slate-200/80 text-xs animate-fade-in">
-                    {cargandoRecomendaciones ? (
-                      <div className="py-4 text-center text-slate-400 font-medium flex items-center justify-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#1B5E9E] animate-ping" />
-                        Analizando variables de riesgo y cargando protocolo...
-                      </div>
-                    ) : recomendaciones ? (
-                      <>
-                        {/* Protocolo Principal */}
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/70">
-                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
-                            Protocolo Orientador Sugerido
-                          </p>
-                          <p className="font-extrabold text-slate-800 text-xs">
-                            {recomendaciones.protocolo_principal}
-                          </p>
-                        </div>
-
-                        {/* Acciones Clave Recomendadas */}
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-                              Ruta de Acción Paso a Paso
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleCopiarRecomendacion(
-                                  recomendaciones.protocolo_principal,
-                                  recomendaciones.acciones_clave
-                                )
-                              }
-                              className="text-[10px] text-[#1B5E9E] hover:text-[#124270] font-bold flex items-center gap-1 cursor-pointer hover:underline"
-                            >
-                              <span>📋 Copiar a notas</span>
-                            </button>
-                          </div>
-
-                          <ul className="space-y-2">
-                            {recomendaciones.acciones_clave?.map((accion, idx) => (
-                              <li
-                                key={idx}
-                                className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50/70 border border-slate-100 text-slate-700 leading-relaxed text-[11px]"
-                              >
-                                <span className="w-4 h-4 rounded-full bg-[#1B5E9E]/10 text-[#1B5E9E] font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
-                                  {idx + 1}
-                                </span>
-                                <span>{accion}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Medidas Específicas por Tipo de Agresión (si existen) */}
-                        {recomendaciones.recomendaciones_especificas?.length > 0 && (
-                          <div className="space-y-2 pt-1">
-                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-                              Medidas Complementarias por Tipología
-                            </p>
-                            {recomendaciones.recomendaciones_especificas.map((esp, i) => (
-                              <div
-                                key={i}
-                                className="p-2.5 rounded-xl bg-amber-50/50 border border-amber-200/60 text-[11px] text-amber-950"
-                              >
-                                <p className="font-bold flex items-center gap-1.5 mb-1 text-amber-900">
-                                  <span>{esp.icono}</span>
-                                  <span>{esp.titulo}</span>
-                                </p>
-                                <ul className="list-disc pl-4 space-y-1 text-slate-700">
-                                  {esp.pautas?.map((pauta, pIdx) => (
-                                    <li key={pIdx}>{pauta}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Directorio de Líneas de Apoyo */}
-                        {recomendaciones.lineas_ayuda?.length > 0 && (
-                          <div className="pt-2 border-t border-slate-100">
-                            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">
-                              Contactos y Líneas de Asistencia
-                            </p>
-                            <div className="grid grid-cols-2 gap-2">
-                              {recomendaciones.lineas_ayuda.map((linea, lIdx) => (
-                                <div
-                                  key={lIdx}
-                                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-[11px]"
-                                >
-                                  <span className="text-slate-600 font-medium truncate pr-1">
-                                    {linea.nombre}
-                                  </span>
-                                  <span className="font-mono font-black text-[#1B5E9E] shrink-0 bg-white px-1.5 py-0.5 rounded border border-slate-200">
-                                    {linea.contacto}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : null}
-                  </div>
-                )}
-              </div>
+              {/* SEMÁFORO DE CONVIVENCIA Y CHEQUEOS POST-CIERRE (15, 30 Y 60 DÍAS) */}
+              {(normalizarEstado(reporteSeleccionado.estado) === "cerrado" ||
+                (reporteSeleccionado.historial_cambios || []).some(
+                  (c) =>
+                    c.tipo_accion === "CHEQUEO_POST_CIERRE" ||
+                    c.tipo_accion === "REACTIVACION_REINCIDENCIA"
+                )) && (
+                <ModuloSemaforoPostCierre
+                  reporte={reporteSeleccionado}
+                  onChequeoRegistrado={handleChequeoRegistrado}
+                />
+              )}
 
               {/* Alertas de éxito o error */}
               {mensajeExito && (
@@ -1039,26 +1418,68 @@ export default function BandejaReportesDocente() {
               )}
 
               {/* Footer Modal */}
-              <div className="pt-2 flex justify-end gap-3 border-t border-slate-100">
+              <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setReporteSeleccionado(null)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  onClick={() => setMostrarActa(true)}
+                  className="px-3.5 py-2.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-[#1B5E9E] text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+                  title="Generar documento formal con membrete y tipología Ley 1620 para imprimir o guardar como PDF"
                 >
-                  Cancelar
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  <span>Generar Acta Oficial (PDF)</span>
                 </button>
-                <button
-                  type="submit"
-                  disabled={guardando || normalizarEstado(formDataModal.estado) === normalizarEstado(reporteSeleccionado.estado)}
-                  className="px-5 py-2.5 rounded-xl bg-[#2C5F57] hover:bg-[#234b44] text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {guardando ? "Guardando..." : "Guardar Cambios"}
-                </button>
+
+                <div className="flex items-center gap-2.5 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => setReporteSeleccionado(null)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  >
+                    Cerrar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      guardando ||
+                      (normalizarEstado(formDataModal.estado) === normalizarEstado(reporteSeleccionado.estado) &&
+                        !formDataModal.notas_orientador.trim())
+                    }
+                    className="px-5 py-2.5 rounded-xl bg-[#2C5F57] hover:bg-[#234b44] text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {guardando
+                      ? "Guardando..."
+                      : normalizarEstado(formDataModal.estado) !== normalizarEstado(reporteSeleccionado.estado)
+                      ? "Guardar Cambios"
+                      : "Guardar Nota de Seguimiento"}
+                  </button>
+                </div>
               </div>
 
             </form>
           </div>
         </div>
+      )}
+
+      {/* MODAL DE REMISIÓN EXTERNA URGENTE (LEY 1620 - TIPO III) */}
+      {mostrarRemisionExterna && reporteSeleccionado && (
+        <ModalRemisionExterna
+          reporte={reporteSeleccionado}
+          onClose={() => setMostrarRemisionExterna(false)}
+          onConfirmarActivacion={handleConfirmarActivacionRuta}
+        />
+      )}
+
+      {/* MODAL DE ACTA OFICIAL PARA IMPRESIÓN Y PDF */}
+      {mostrarActa && reporteSeleccionado && (
+        <ModalActaOficial
+          reporte={reporteSeleccionado}
+          historial={historial}
+          recomendaciones={recomendaciones}
+          rutaExternaInfo={rutaExternaInfo}
+          onClose={() => setMostrarActa(false)}
+        />
       )}
 
     </div>

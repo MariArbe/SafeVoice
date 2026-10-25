@@ -121,7 +121,7 @@ Registros anónimos creados por estudiantes (Víctimas o Testigos).
 | `id` | `UUID` (PK) | No | Identificador único interno. |
 | `institucion_id` | `INT` (FK) | No | Colegio donde ocurrió el hecho. |
 | `codigo_seguimiento` | `UUID` | No | Clave pública anónima entregada al estudiante para consultar su estado. |
-| `ubicacion` | `VARCHAR(50)` | No | Categoría: `SALON`, `PASILLOS`, `BANOS`, `DESCANSO`, `SALIDA`, `INTERNET`. |
+| `ubicacion` | `VARCHAR(120)` | No | Categoría: `SALON`, `PASILLOS`, `BANOS`, `DESCANSO`, `SALIDA`, `INTERNET`, `OTRO` (`Salón de clases`, `Pasillos o escaleras`, `Baños`, `Descanso / zonas deportivas`, `Salida del colegio`, `Internet / Redes sociales`, `Otro`). |
 | `frecuencia` | `VARCHAR(50)` | No | Categoría: `PRIMERA_VEZ`, `SEMANAS`, `MESES`. |
 | `grado_victima` | `VARCHAR(20)` | Sí | Grado escolar opcional (ej. `"7°"`). |
 | `involucrados_tipo` | `VARCHAR(20)` | Sí | `INDIVIDUAL`, `GRUPO`, `DESCONOCIDO`. |

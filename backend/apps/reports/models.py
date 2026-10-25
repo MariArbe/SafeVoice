@@ -56,7 +56,21 @@ class Reporte(models.Model):
         blank=True
     )
 
-    ubicacion = models.CharField(max_length=100, default="", verbose_name="ubicación")
+    class Ubicacion(models.TextChoices):
+        SALON = "Salón de clases", "Salón de clases"
+        PASILLOS = "Pasillos o escaleras", "Pasillos o escaleras"
+        BANOS = "Baños", "Baños"
+        DESCANSO = "Descanso / zonas deportivas", "Descanso / zonas deportivas"
+        SALIDA = "Salida del colegio", "Salida del colegio"
+        INTERNET = "Internet / Redes sociales", "Internet / Redes sociales"
+        OTRO = "Otro", "Otro"
+
+    ubicacion = models.CharField(
+        max_length=120,
+        default="",
+        verbose_name="ubicación",
+        help_text="Lugar donde ocurrió la agresión (incluye 'Otro').",
+    )
     frecuencia = models.CharField(max_length=100, default="", verbose_name="frecuencia")
     grado_victima = models.CharField(max_length=50, null=True, blank=True, verbose_name="grado de la víctima")
     involucrados_tipo = models.CharField(max_length=50, null=True, blank=True, verbose_name="tipo de involucrados")

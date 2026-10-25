@@ -88,4 +88,6 @@ env/
 # =========================
 scratch/
 *_dump.txt
+backend/media/
+frontend/dist/
 

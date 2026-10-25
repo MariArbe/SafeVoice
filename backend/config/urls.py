@@ -1,13 +1,12 @@
 """
 Configuración de URLs raíz del proyecto SafeVoice.
-
-En esta primera etapa solo se incluyen las rutas de administración y
-el schema de la API. Los routers de cada app se añadirán en etapas
-subsiguientes.
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
 
 urlpatterns = [
     # Panel de administración de Django
@@ -27,4 +26,10 @@ urlpatterns = [
 
     # Rutas de la app resources (recursos de ayuda)
     path("api/v1/resources/", include("apps.resources.urls")),
+]
+
+# Servir archivos estáticos y multimedia de evidencias (compatible tanto en dev como prod)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]

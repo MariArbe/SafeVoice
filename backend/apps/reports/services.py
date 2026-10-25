@@ -251,6 +251,156 @@ class ReporteService:
         )
         return reporte
 
+    def registrar_seguimiento(
+        self,
+        reporte_id: int | str,
+        usuario,
+        comentario: str,
+        tipo_accion: str = "NOTA_SEGUIMIENTO",
+        metadata: dict | None = None,
+    ) -> Reporte:
+        """
+        Registra una intervención, nota pedagógica o activación de Ruta Externa
+        dentro del historial de auditoría del reporte sin requerir forzosamente
+        un cambio de estado.
+        """
+        reporte = self._buscar_reporte(reporte_id)
+        self._validar_acceso_orientador(reporte, usuario)
+
+        texto_comentario = (comentario or "").strip()
+        if not texto_comentario:
+            raise ValueError("El comentario u observación es obligatorio para registrar un seguimiento.")
+
+        nombre_orientador = (
+            usuario.get_full_name().strip()
+            if hasattr(usuario, "get_full_name") and usuario.get_full_name().strip()
+            else (getattr(usuario, "first_name", "") or getattr(usuario, "email", "Orientador"))
+        )
+        estado_actual = normalizar_estado(reporte.estado)
+
+        with transaction.atomic():
+            entrada_historial = {
+                "estado_anterior": estado_actual,
+                "estado_nuevo": estado_actual,
+                "usuario_id": usuario.id,
+                "usuario_nombre": nombre_orientador,
+                "fecha_cambio": timezone.now().isoformat(),
+                "comentario": texto_comentario,
+                "tipo_accion": tipo_accion,
+                "metadata": metadata or {},
+            }
+
+            historial = list(reporte.historial_cambios or [])
+            historial.append(entrada_historial)
+            reporte.historial_cambios = historial
+            reporte.save(update_fields=["historial_cambios", "fecha_actualizacion"])
+
+            try:
+                SeguimientoCaso.objects.create(
+                    reporte=reporte,
+                    orientador=usuario,
+                    estado_anterior=estado_actual,
+                    estado_nuevo=estado_actual,
+                    observaciones=texto_comentario,
+                )
+            except Exception as e:
+                logger.debug("Omitiendo SeguimientoCaso legado: %s", e)
+
+        logger.info(
+            "Seguimiento registrado: reporte_id=%s | tipo_accion=%s | orientador_id=%s",
+            reporte.id,
+            tipo_accion,
+            usuario.id,
+        )
+        return reporte
+
+    def registrar_chequeo_post_cierre(
+        self,
+        reporte_id: int | str,
+        usuario,
+        hito: str,
+        semaforo: str,
+        observaciones: str = "",
+        reactivar_caso: bool = False,
+    ) -> Reporte:
+        """
+        Registra un chequeo de seguimiento longitudinal post-cierre (15, 30 o 60 días)
+        con calificación de semáforo de convivencia (VERDE, AMARILLO, ROJO).
+        Si el semáforo es ROJO y se solicita reactivar, el caso se transiciona
+        de nuevo a 'en_seguimiento' para atención inmediata por reincidencia.
+        """
+        reporte = self._buscar_reporte(reporte_id)
+        self._validar_acceso_orientador(reporte, usuario)
+
+        hito_norm = str(hito).strip().upper()
+        if hito_norm not in ("DIA_15", "DIA_30", "DIA_60"):
+            raise ValueError(f"Hito inválido '{hito}'. Debe ser DIA_15, DIA_30 o DIA_60.")
+
+        semaforo_norm = str(semaforo).strip().upper()
+        if semaforo_norm not in ("VERDE", "AMARILLO", "ROJO"):
+            raise ValueError(f"Semáforo inválido '{semaforo}'. Debe ser VERDE, AMARILLO o ROJO.")
+
+        nombre_orientador = (
+            usuario.get_full_name().strip()
+            if hasattr(usuario, "get_full_name") and usuario.get_full_name().strip()
+            else (getattr(usuario, "first_name", "") or getattr(usuario, "email", "Orientador"))
+        )
+        estado_actual = normalizar_estado(reporte.estado)
+        nuevo_estado = "en_seguimiento" if (reactivar_caso and semaforo_norm == "ROJO") else estado_actual
+        tipo_accion = "REACTIVACION_REINCIDENCIA" if (reactivar_caso and semaforo_norm == "ROJO") else "CHEQUEO_POST_CIERRE"
+
+        desc_semaforo = {
+            "VERDE": "🟢 Convivencia normalizada / Víctima segura",
+            "AMARILLO": "🟡 Tensión residual / Requiere charla informal",
+            "ROJO": "🔴 Reincidencia / Represalias detectadas",
+        }.get(semaforo_norm, semaforo_norm)
+
+        comentario = f"Chequeo {hito_norm.replace('_', ' ')}: {desc_semaforo}. {observaciones}".strip()
+
+        with transaction.atomic():
+            entrada_historial = {
+                "estado_anterior": estado_actual,
+                "estado_nuevo": nuevo_estado,
+                "usuario_id": usuario.id,
+                "usuario_nombre": nombre_orientador,
+                "fecha_cambio": timezone.now().isoformat(),
+                "comentario": comentario,
+                "tipo_accion": tipo_accion,
+                "metadata": {
+                    "hito": hito_norm,
+                    "semaforo": semaforo_norm,
+                    "observaciones": observaciones.strip(),
+                    "reactivado": bool(reactivar_caso and semaforo_norm == "ROJO"),
+                    "fecha_chequeo": timezone.now().isoformat(),
+                },
+            }
+
+            historial = list(reporte.historial_cambios or [])
+            historial.append(entrada_historial)
+            reporte.historial_cambios = historial
+            reporte.estado = nuevo_estado
+            reporte.save(update_fields=["estado", "historial_cambios", "fecha_actualizacion"])
+
+            try:
+                SeguimientoCaso.objects.create(
+                    reporte=reporte,
+                    orientador=usuario,
+                    estado_anterior=estado_actual,
+                    estado_nuevo=nuevo_estado,
+                    observaciones=comentario,
+                )
+            except Exception as e:
+                logger.debug("Omitiendo SeguimientoCaso legado: %s", e)
+
+        logger.info(
+            "Chequeo post-cierre registrado: reporte_id=%s | hito=%s | semaforo=%s | estado_final=%s",
+            reporte.id,
+            hito_norm,
+            semaforo_norm,
+            nuevo_estado,
+        )
+        return reporte
+
     # ── Consulta de historial (HU-08) ──────────────────────────────────────
 
     def obtener_historial(self, reporte_id: int | str, usuario) -> list[dict]:

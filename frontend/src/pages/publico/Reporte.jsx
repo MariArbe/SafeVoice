@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Campo from "../../components/ui/Campo";
 import Boton from "../../components/ui/Boton";
+import NavbarPublico from "../../components/ui/NavbarPublico";
 import reporteService from "../../services/reporteService";
 
 export default function Reporte() {
@@ -26,6 +27,13 @@ export default function Reporte() {
   const [error, setError] = useState(null);
   const [successCode, setSuccessCode] = useState(null);
   const [nivelRiesgo, setNivelRiesgo] = useState(null);
+  const [codigoCopiado, setCodigoCopiado] = useState(false);
+
+  // Estado para la evidencia adjunta (HU-02 / Archivos de Evidencia)
+  const [archivoEvidencia, setArchivoEvidencia] = useState(null);
+  const [previewEvidencia, setPreviewEvidencia] = useState(null);
+  const [archivoError, setArchivoError] = useState(null);
+  const [subiendoArchivo, setSubiendoArchivo] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -38,6 +46,40 @@ export default function Reporte() {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleFileChange = (e) => {
+    setArchivoError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Límite de 10 MB
+    if (file.size > 10 * 1024 * 1024) {
+      setArchivoError("El archivo supera el tamaño máximo permitido de 10 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setArchivoEvidencia(file);
+
+    // Si es imagen, generar vista previa
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setPreviewEvidencia(uploadEvent.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewEvidencia(null);
+    }
+  };
+
+  const handleEliminarEvidencia = () => {
+    setArchivoEvidencia(null);
+    setPreviewEvidencia(null);
+    setArchivoError(null);
+    const inputEl = document.getElementById("evidencia");
+    if (inputEl) inputEl.value = "";
   };
 
   const handleSubmit = async (e) => {
@@ -56,6 +98,28 @@ export default function Reporte() {
 
     setLoading(true);
     try {
+      let evidenciaUrl = null;
+
+      // 1. Si el estudiante adjuntó archivo de evidencia, cargarlo de forma anónima
+      if (archivoEvidencia) {
+        setSubiendoArchivo(true);
+        try {
+          const uploadRes = await reporteService.subirEvidencia(archivoEvidencia);
+          evidenciaUrl = uploadRes.evidencia_url || uploadRes.url;
+        } catch (uploadErr) {
+          console.error("Error al subir archivo de evidencia:", uploadErr);
+          const msg =
+            uploadErr.response?.data?.error ||
+            "No se pudo cargar el archivo de evidencia. Puedes retirarlo o verificar el formato e intentar nuevamente.";
+          setError(typeof msg === "string" ? msg : JSON.stringify(msg));
+          setLoading(false);
+          setSubiendoArchivo(false);
+          return;
+        } finally {
+          setSubiendoArchivo(false);
+        }
+      }
+
       // Map tipos_agresion strings to IDs matching the DB seed
       const agressionMap = {
         'Me pegaron, empujaron o lastimaron (o a mi compañero/a)': 1,
@@ -77,6 +141,7 @@ export default function Reporte() {
         acepta_revelar_identidad: aceptaRevelar,
         nombre_contacto_victima: aceptaRevelar ? formData.nombre_contacto_victima : null,
         medio_contacto_victima: aceptaRevelar ? formData.medio_contacto_victima : null,
+        evidencia_url: evidenciaUrl,
       };
 
       const response = await reporteService.crearReporte(payload);
@@ -87,8 +152,21 @@ export default function Reporte() {
       if (err.message === "Network Error") {
         setError("Error de conexión: El servidor (backend) no parece estar en ejecución.");
       } else if (err.response?.data) {
-        // Mostrar el JSON crudo para ver la estructura exacta del error devuelto por Django
-        setError(`Error del servidor: ${JSON.stringify(err.response.data)}`);
+        const data = err.response.data;
+        if (typeof data === "string") {
+          setError(data);
+        } else if (data.detail) {
+          setError(data.detail);
+        } else if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
+          setError(data.non_field_errors.join(" "));
+        } else if (typeof data === "object") {
+          const mensajes = Object.entries(data)
+            .map(([campo, errs]) => `${campo}: ${Array.isArray(errs) ? errs.join(", ") : errs}`)
+            .join(" | ");
+          setError(`Por favor verifica la información ingresada: ${mensajes}`);
+        } else {
+          setError("Error al procesar el reporte en el servidor. Intenta nuevamente.");
+        }
       } else {
         setError("Error al enviar el reporte. Revisa los datos e intenta de nuevo.");
       }
@@ -97,21 +175,29 @@ export default function Reporte() {
     }
   };
 
+  const handleCopiarCodigo = async () => {
+    if (!successCode) return;
+    try {
+      await navigator.clipboard.writeText(successCode);
+      setCodigoCopiado(true);
+      setTimeout(() => setCodigoCopiado(false), 3000);
+    } catch {
+      // Fallback manual para navegadores restrictivos
+      const textarea = document.createElement("textarea");
+      textarea.value = successCode;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCodigoCopiado(true);
+      setTimeout(() => setCodigoCopiado(false), 3000);
+    }
+  };
+
   if (successCode) {
     return (
       <div className="min-h-screen bg-[#DCEAF7] flex flex-col justify-between font-sans text-slate-800">
-        {/* Header Unificado */}
-        <header className="bg-white/90 backdrop-blur-md px-6 md:px-12 py-4 flex items-center justify-between border-b border-slate-200/80 shadow-2xs sticky top-0 z-20">
-          <Link to="/" className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 rounded-2xl bg-[#DCEAF7] flex items-center justify-center group-hover:scale-105 transition-transform">
-              <svg className="w-6 h-6 text-[#1B5E9E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
-            </div>
-            <span className="text-xl font-extrabold text-[#1B5E9E] tracking-tight">SafeVoice</span>
-          </Link>
-        </header>
+        <NavbarPublico />
 
         <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-12 flex flex-col items-center justify-center text-center">
           <div className="bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-emerald-100 max-w-xl w-full">
@@ -126,29 +212,68 @@ export default function Reporte() {
             </p>
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-6 shadow-xs">
               <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Tu código de seguimiento es:</p>
-              <p className="text-2xl font-mono font-extrabold text-[#1B5E9E] break-all select-all tracking-wider bg-white py-2.5 px-4 rounded-xl border border-slate-200 inline-block shadow-2xs mb-4">
-                {successCode}
-              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 mb-3">
+                <p className="text-lg sm:text-xl font-mono font-extrabold text-[#1B5E9E] break-all select-all tracking-wider bg-white py-2.5 px-4 rounded-xl border border-slate-200 shadow-2xs">
+                  {successCode}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleCopiarCodigo}
+                  className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0 ${
+                    codigoCopiado
+                      ? "bg-emerald-600 text-white"
+                      : "bg-[#1B5E9E] hover:bg-[#154a7d] text-white"
+                  }`}
+                  title="Copiar código al portapapeles"
+                >
+                  {codigoCopiado ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>¡Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                      </svg>
+                      <span>Copiar Código</span>
+                    </>
+                  )}
+                </button>
+              </div>
 
-              {nivelRiesgo && (
-                <div className="mt-2 pt-4 border-t border-slate-200">
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">
-                    Nivel de Riesgo Clasificado por la IA:
-                  </p>
-                  <span className={`inline-block px-5 py-2 rounded-xl text-sm font-extrabold shadow-xs border ${
-                    nivelRiesgo === 'CRITICO' ? 'bg-red-100 text-red-700 border-red-300' :
-                    nivelRiesgo === 'ALTO' ? 'bg-orange-100 text-orange-700 border-orange-300' :
-                    nivelRiesgo === 'MEDIO' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                    'bg-green-100 text-green-700 border-green-300'
-                  }`}>
-                    {nivelRiesgo}
-                  </span>
+              <div className="mt-2 pt-4 border-t border-slate-200 text-left flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-[#2C5F57] flex items-center justify-center shrink-0 mt-0.5">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
                 </div>
-              )}
+                <div>
+                  <p className="text-xs font-extrabold text-[#2C5F57] uppercase tracking-wider">
+                    Ruta de Atención Escolar Activada
+                  </p>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    {aceptaRevelar
+                      ? "Tu caso ya fue priorizado para Orientación Escolar. Como autorizaste compartir tu contacto, un profesional se comunicará contigo de forma privada y segura."
+                      : "Tu caso ya fue priorizado automáticamente para Orientación Escolar. Tu identidad permanece 100% anónima en todo momento."}
+                  </p>
+                </div>
+              </div>
             </div>
             <p className="text-xs text-slate-500 mb-8 max-w-md mx-auto">
-              Guarda este código en un lugar seguro. Con él podrás consultar el estado de tu reporte más adelante sin revelar tu identidad.
+              Guarda este código o toma una captura de pantalla. Con él podrás consultar el estado de tu reporte más adelante sin revelar tu identidad.
             </p>
+            <Boton
+              variant="primary"
+              onClick={() => navigate(`/consultar?codigo=${encodeURIComponent(successCode)}`)}
+              fullWidth
+              className="mb-3 py-3.5 text-base font-bold shadow-md !bg-[#1B5E9E] hover:!bg-[#154a7d] rounded-xl cursor-pointer"
+            >
+              Consultar Estado de mi Reporte
+            </Boton>
             <Boton variant="primary" onClick={() => navigate("/")} fullWidth className="py-3.5 text-base font-bold shadow-md !bg-[#2C5F57] hover:!bg-[#234c45] rounded-xl cursor-pointer">
               Volver al Inicio
             </Boton>
@@ -165,28 +290,7 @@ export default function Reporte() {
 
   return (
     <div className="min-h-screen bg-[#DCEAF7] flex flex-col justify-between font-sans text-slate-800">
-      {/* Header Unificado */}
-      <header className="bg-white/90 backdrop-blur-md px-6 md:px-12 py-4 flex items-center justify-between border-b border-slate-200/80 shadow-2xs sticky top-0 z-20">
-        <Link to="/" className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-10 h-10 rounded-2xl bg-[#DCEAF7] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <svg className="w-6 h-6 text-[#1B5E9E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="m9 12 2 2 4-4" />
-            </svg>
-          </div>
-          <span className="text-xl font-extrabold text-[#1B5E9E] tracking-tight">SafeVoice</span>
-        </Link>
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-xs font-bold text-[#2C5F57] hover:text-[#1B5E9E] bg-slate-100/80 hover:bg-slate-200/80 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
-          title="Volver al inicio"
-        >
-          <span>Inicio</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </button>
-      </header>
+      <NavbarPublico />
       
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8">
         <div className="mb-8 text-center space-y-2">
@@ -277,7 +381,7 @@ export default function Reporte() {
             </div>
             <p className="text-sm text-slate-600">¿Dónde ocurrió la situación?</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {['Salón de clases', 'Pasillos o escaleras', 'Baños', 'Descanso / zonas deportivas', 'Salida del colegio', 'Internet / Redes sociales'].map((lugar) => (
+              {['Salón de clases', 'Pasillos o escaleras', 'Baños', 'Descanso / zonas deportivas', 'Salida del colegio', 'Internet / Redes sociales', 'Otro'].map((lugar) => (
                 <label key={lugar} className={`flex items-center gap-3 cursor-pointer p-3.5 border rounded-2xl transition-all ${formData.ubicacion === lugar ? 'border-[#2C5F57] bg-emerald-50/40 ring-1 ring-[#2C5F57]' : 'border-slate-200 hover:bg-slate-50'}`}>
                   <input type="radio" name="ubicacion" className="w-4 h-4 accent-[#2C5F57]" value={lugar} onChange={handleInputChange} required />
                   <span className="text-sm font-medium text-slate-700">{lugar}</span>
@@ -353,20 +457,81 @@ export default function Reporte() {
               <h2 className="text-lg font-bold text-slate-800">Evidencia (opcional)</h2>
             </div>
             <p className="text-sm text-slate-600">
-              Si tienes capturas de pantalla, mensajes u otra evidencia, puedes adjuntarla o compartirla con el orientador.
+              Si tienes capturas de pantalla, fotos, audios o documentos que demuestren la situación, puedes adjuntarlos. El sistema eliminará automáticamente cualquier metadato personal o nombre de archivo para proteger tu identidad.
             </p>
-            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center hover:bg-slate-50 transition-colors">
-              <input
-                id="evidencia"
-                name="evidencia"
-                type="file"
-                accept="image/*,.pdf,.doc,.docx"
-                className="block w-full text-xs text-slate-500 file:mr-4 file:rounded-xl file:border-0 file:bg-[#1B5E9E] file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-[#154a7d] cursor-pointer"
-              />
-              <p className="mt-2 text-[11px] text-slate-400">
-                Formatos permitidos: imágenes, PDF y documentos de Word.
+
+            {!archivoEvidencia ? (
+              <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center hover:bg-slate-50 hover:border-[#1B5E9E]/40 transition-all cursor-pointer">
+                <input
+                  id="evidencia"
+                  name="evidencia"
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx,.txt,.mp3,.wav,.mp4"
+                  onChange={handleFileChange}
+                  className="block w-full text-xs text-slate-500 file:mr-4 file:rounded-xl file:border-0 file:bg-[#1B5E9E] file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-[#154a7d] cursor-pointer"
+                />
+                <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-slate-400">
+                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span>Formatos: imágenes (JPG, PNG, WebP), PDF, Word o audio (hasta 10 MB). 100% confidencial.</span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#1B5E9E] flex items-center justify-center shrink-0 text-lg">
+                      {archivoEvidencia.type.startsWith("image/") ? "🖼️" : archivoEvidencia.type.includes("pdf") ? "📄" : "📎"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-800 truncate" title={archivoEvidencia.name}>
+                        {archivoEvidencia.name}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {(archivoEvidencia.size / (1024 * 1024)).toFixed(2) > 0.05
+                          ? `${(archivoEvidencia.size / (1024 * 1024)).toFixed(2)} MB`
+                          : `${Math.round(archivoEvidencia.size / 1024)} KB`}
+                        {" • "}
+                        <span className="text-emerald-700 font-semibold">Listo para adjuntar de forma anónima</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleEliminarEvidencia}
+                    className="px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all cursor-pointer shrink-0"
+                  >
+                    Quitar
+                  </button>
+                </div>
+
+                {previewEvidencia && (
+                  <div className="pt-2 border-t border-slate-200/70">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Vista previa de imagen:</p>
+                    <div className="max-h-48 rounded-xl overflow-hidden border border-slate-200 bg-white flex items-center justify-center p-2">
+                      <img
+                        src={previewEvidencia}
+                        alt="Vista previa de evidencia"
+                        className="max-h-44 object-contain rounded-lg"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-white p-2.5 rounded-xl border border-slate-100">
+                  <span className="text-slate-400">🛡️</span>
+                  <span>El nombre original del archivo se reemplazará por un código seguro en el servidor para evitar que tu identidad sea descubierta.</span>
+                </div>
+              </div>
+            )}
+
+            {archivoError && (
+              <p className="text-xs text-rose-600 font-semibold bg-rose-50 p-2.5 rounded-xl border border-rose-200">
+                {archivoError}
               </p>
-            </div>
+            )}
           </section>
 
           {/* I. Revelación Voluntaria */}
@@ -423,7 +588,9 @@ export default function Reporte() {
 
           <div className="pt-2">
             <Boton variant="primary" type="submit" fullWidth disabled={loading} className="py-3.5 text-base font-bold shadow-md !bg-[#2C5F57] hover:!bg-[#234c45] rounded-xl transition-all cursor-pointer">
-              {loading ? "Enviando de forma segura..." : "Enviar Reporte Seguro"}
+              {loading
+                ? (subiendoArchivo ? "Subiendo y anonimizando evidencia..." : "Enviando de forma segura...")
+                : "Enviar Reporte Seguro"}
             </Boton>
           </div>
         </form>
