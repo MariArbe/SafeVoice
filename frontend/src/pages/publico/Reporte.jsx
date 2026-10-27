@@ -178,13 +178,13 @@ export default function Reporte() {
         }
       }
 
-      // Map tipos_agresion strings to IDs matching the DB seed
+      // Mapear opciones del formulario a los códigos canónicos del backend
       const agressionMap = {
-        'Me pegaron, empujaron o lastimaron (o a mi compañero/a)': 1,
-        'Me quitaron, escondieron o dañaron cosas': 2,
-        'Insultos, gritos o apodos ofensivos': 3,
-        'Inventaron chismes, amenazaron o me excluyeron del grupo': 4,
-        'Ciberacoso (Mensajes, fotos sin permiso, redes sociales)': 5
+        'Me pegaron, empujaron o lastimaron (o a mi compañero/a)': 'FISICA',
+        'Me quitaron, escondieron o dañaron cosas': 'MATERIAL',
+        'Insultos, gritos o apodos ofensivos': 'VERBAL',
+        'Inventaron chismes, amenazaron o me excluyeron del grupo': 'EXCLUSION',
+        'Ciberacoso (Mensajes, fotos sin permiso, redes sociales)': 'CIBERBULLYING'
       };
 
       const payload = {

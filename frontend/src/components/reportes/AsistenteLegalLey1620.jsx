@@ -25,6 +25,11 @@ export default function AsistenteLegalLey1620({
   const [checklist, setChecklist] = useState({});
   const [copiadoFeedback, setCopiadoFeedback] = useState(false);
 
+  // Sincronizar automáticamente la pestaña del protocolo cuando el docente cambia el nivel de riesgo
+  useEffect(() => {
+    setTipoSeleccionado(tipoInicial);
+  }, [tipoInicial]);
+
   // Catálogo normativo de la Ley 1620 de 2013 y Decreto 1965 de 2013
   const CONFIG_TIPOS = {
     TIPO_I: {

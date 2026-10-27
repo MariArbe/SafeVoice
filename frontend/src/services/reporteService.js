@@ -49,6 +49,23 @@ const reporteService = {
   },
 
   /**
+   * Confirma o modifica manualmente el nivel de riesgo (gravedad) predicho por la IA
+   * y/o los tipos de agresión asociados al reporte.
+   * @param {number|string} reporteId - ID (PK) o código de seguimiento del reporte
+   * @param {Object} datos - { nivel_riesgo_confirmado, confirmar_ia, tipos_agresion, comentario }
+   * @returns {Promise<Object>} - El reporte actualizado
+   */
+  actualizarClasificacion: async (reporteId, datos) => {
+    try {
+      const response = await api.patch(`/reports/${reporteId}/clasificacion/`, datos);
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar la clasificación del reporte:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Registra una nota de seguimiento, intervención o activación de Ruta Externa
    * sin requerir forzosamente un cambio de estado en el reporte (Ley 1620).
    * @param {number|string} reporteId - ID o código de seguimiento

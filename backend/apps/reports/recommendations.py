@@ -138,6 +138,15 @@ RECOMENDACIONES_POR_TIPO: Dict[str, Dict[str, Any]] = {
             "Verificar que no existan cobros intimidatorios continuos ni exigencias de dinero para ingresar a ciertas áreas del colegio.",
         ],
     },
+    "PSICOLOGICA": {
+        "titulo": "Protocolo ante Intimidación Psicológica y Amenazas",
+        "icono": "🛡️",
+        "pautas": [
+            "Brindar contención emocional inmediata desde Psicorientación para mitigar la ansiedad o temor del estudiante afectado.",
+            "Citar de forma individual a los acudientes para establecer compromisos de cese inmediato de cualquier coacción o chantaje.",
+            "Establecer acompañamiento discreto con un docente enlace de confianza al que el estudiante pueda acudir en cualquier momento.",
+        ],
+    },
 }
 
 
@@ -162,8 +171,10 @@ def _detectar_claves_tipo_agresion(reporte) -> List[str]:
                 claves_encontradas.add("VERBAL")
             if any(k in nombre or k in codigo for k in ["exclus", "social", "chisme", "ignor"]):
                 claves_encontradas.add("SOCIAL")
-            if any(k in nombre or k in codigo for k in ["material", "daño", "roba", "quit", "escond"]):
+            if any(k in nombre or k in codigo for k in ["material", "daño", "roba", "quit", "escond", "pertenencia", "bienes"]):
                 claves_encontradas.add("MATERIAL")
+            if any(k in nombre or k in codigo for k in ["psicol", "intimid", "chantaj"]):
+                claves_encontradas.add("PSICOLOGICA")
     except Exception as e:
         logger.debug("No se pudieron consultar tipos_agresion relacionados: %s", e)
 

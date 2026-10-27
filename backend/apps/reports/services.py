@@ -249,7 +249,7 @@ class ReporteService:
             usuario.id,
             usuario.email,
         )
-        return reporte
+        return _proxy._desencriptar_sensibles(reporte)
 
     def registrar_seguimiento(
         self,
@@ -312,7 +312,7 @@ class ReporteService:
             tipo_accion,
             usuario.id,
         )
-        return reporte
+        return _proxy._desencriptar_sensibles(reporte)
 
     def registrar_chequeo_post_cierre(
         self,
@@ -399,7 +399,117 @@ class ReporteService:
             semaforo_norm,
             nuevo_estado,
         )
-        return reporte
+        return _proxy._desencriptar_sensibles(reporte)
+
+    # ── Confirmación o ajuste manual de Riesgo IA y Tipo de Agresión ──────
+
+    def actualizar_clasificacion(
+        self,
+        reporte_id: int | str,
+        usuario,
+        nivel_riesgo_confirmado: str | None = None,
+        confirmar_ia: bool = False,
+        tipos_agresion: list | None = None,
+        comentario: str = "",
+    ) -> Reporte:
+        """
+        Permite al orientador o directivo confirmar el nivel de riesgo predicho por la IA,
+        modificarlo manualmente (BAJO, MEDIO, ALTO, CRITICO) y/o ajustar los tipos de agresión
+        del reporte, registrando el evento en el historial de auditoría.
+        """
+        from .serializers import resolver_objetos_tipo_agresion
+
+        reporte = self._buscar_reporte(reporte_id)
+        self._validar_acceso_orientador(reporte, usuario)
+
+        riesgo_ia = (reporte.nivel_riesgo_predicho or "MEDIO").upper()
+        riesgo_anterior = reporte.nivel_riesgo_confirmado or riesgo_ia
+
+        nuevo_riesgo = nivel_riesgo_confirmado
+        if not nuevo_riesgo and confirmar_ia:
+            nuevo_riesgo = riesgo_ia
+
+        if nuevo_riesgo:
+            nuevo_riesgo = nuevo_riesgo.strip().upper().replace("Í", "I")
+            if nuevo_riesgo not in ("BAJO", "MEDIO", "ALTO", "CRITICO"):
+                raise ValueError(f"Nivel de riesgo inválido '{nuevo_riesgo}'.")
+
+        nombre_orientador = (
+            usuario.get_full_name().strip()
+            if hasattr(usuario, "get_full_name") and usuario.get_full_name().strip()
+            else (getattr(usuario, "first_name", "") or getattr(usuario, "email", "Docente"))
+        )
+        estado_actual = normalizar_estado(reporte.estado)
+
+        partes_resumen = []
+
+        with transaction.atomic():
+            campos_actualizar = ["historial_cambios", "fecha_actualizacion"]
+
+            if nuevo_riesgo:
+                reporte.nivel_riesgo_confirmado = nuevo_riesgo
+                campos_actualizar.append("nivel_riesgo_confirmado")
+                if nuevo_riesgo == riesgo_ia:
+                    partes_resumen.append(
+                        f"✓ Nivel de riesgo confirmado en {nuevo_riesgo} (coincide con predicción de IA)"
+                    )
+                else:
+                    partes_resumen.append(
+                        f"✏️ Nivel de riesgo ajustado manualmente a {nuevo_riesgo} (IA predijo: {riesgo_ia})"
+                    )
+
+            nombres_tipos = None
+            if tipos_agresion is not None:
+                objetos_tipos = resolver_objetos_tipo_agresion(tipos_agresion)
+                reporte.tipos_agresion.set(objetos_tipos)
+                nombres_tipos = [t.nombre for t in objetos_tipos]
+                texto_tipos = ", ".join(nombres_tipos) if nombres_tipos else "Ninguno seleccionado"
+                partes_resumen.append(f"Tipos de agresión: {texto_tipos}")
+
+            if comentario and comentario.strip():
+                partes_resumen.append(f"Observación: {comentario.strip()}")
+
+            resumen_final = " | ".join(partes_resumen) or "Clasificación del reporte validada por docente."
+
+            entrada_historial = {
+                "estado_anterior": estado_actual,
+                "estado_nuevo": estado_actual,
+                "usuario_id": usuario.id,
+                "usuario_nombre": nombre_orientador,
+                "fecha_cambio": timezone.now().isoformat(),
+                "comentario": resumen_final,
+                "tipo_accion": "CLASIFICACION_DOCENTE",
+                "metadata": {
+                    "riesgo_ia": riesgo_ia,
+                    "riesgo_anterior": riesgo_anterior,
+                    "riesgo_confirmado": reporte.nivel_riesgo_confirmado,
+                    "tipos_agresion": nombres_tipos,
+                },
+            }
+
+            historial = list(reporte.historial_cambios or [])
+            historial.append(entrada_historial)
+            reporte.historial_cambios = historial
+            reporte.save(update_fields=campos_actualizar)
+
+            try:
+                SeguimientoCaso.objects.create(
+                    reporte=reporte,
+                    orientador=usuario,
+                    estado_anterior=estado_actual,
+                    estado_nuevo=estado_actual,
+                    observaciones=resumen_final,
+                )
+            except Exception as e:
+                logger.debug("Omitiendo SeguimientoCaso legado: %s", e)
+
+        logger.info(
+            "Clasificación actualizada: reporte_id=%s | riesgo_confirmado=%s | docente_id=%s",
+            reporte.id,
+            reporte.nivel_riesgo_confirmado,
+            usuario.id,
+        )
+        return _proxy._desencriptar_sensibles(reporte)
 
     # ── Consulta de historial (HU-08) ──────────────────────────────────────
 
@@ -431,6 +541,8 @@ class ReporteService:
                 "fecha_cambio": entrada.get("fecha_cambio"),
                 "fecha": entrada.get("fecha_cambio"),
                 "comentario": entrada.get("comentario", ""),
+                "tipo_accion": entrada.get("tipo_accion", ""),
+                "metadata": entrada.get("metadata", {}),
             })
 
         return resultado
@@ -498,5 +610,6 @@ class ReporteService:
         """
         reporte = self._buscar_reporte(reporte_id)
         self._validar_acceso_orientador(reporte, usuario)
+        reporte = _proxy._desencriptar_sensibles(reporte)
         return generar_recomendaciones_reporte(reporte)
 

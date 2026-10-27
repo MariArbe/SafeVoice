@@ -10,7 +10,152 @@ from datetime import date
 
 from rest_framework import serializers
 
-from .models import Reporte, SeguimientoCaso
+from .models import Reporte, SeguimientoCaso, TipoAgresion
+
+
+CATALOGO_TIPOS_BASE = {
+    "VERBAL": (
+        "Agresión Verbal",
+        "Insultos, apodos denigrantes, burlas ofensivas o amenazas verbales reiteradas.",
+    ),
+    "FISICA": (
+        "Agresión Física",
+        "Golpes, empujones, zancadillas o agresión física directa.",
+    ),
+    "CIBERBULLYING": (
+        "Ciberacoso / Digital",
+        "Hostigamiento en redes sociales, difusión de mensajes o fotos sin permiso.",
+    ),
+    "EXCLUSION": (
+        "Exclusión Social",
+        "Aislamiento deliberado, ley del hielo o propagación de rumores difamatorios.",
+    ),
+    "PSICOLOGICA": (
+        "Intimidación Psicológica",
+        "Chantaje, amenazas veladas, manipulación y hostigamiento emocional.",
+    ),
+    "MATERIAL": (
+        "Daño a Pertenencias",
+        "Quitar, esconder, robar o dañar pertenencias personales o útiles escolares.",
+    ),
+}
+
+ALIAS_TIPOS_AGRESION = {
+    "verbal": "VERBAL",
+    "agresión verbal": "VERBAL",
+    "agresion verbal": "VERBAL",
+    "insultos, gritos o apodos ofensivos": "VERBAL",
+    "fisica": "FISICA",
+    "física": "FISICA",
+    "agresión física": "FISICA",
+    "agresion fisica": "FISICA",
+    "me pegaron, empujaron o lastimaron (o a mi compañero/a)": "FISICA",
+    "ciberbullying": "CIBERBULLYING",
+    "ciberacoso": "CIBERBULLYING",
+    "ciberacoso / digital": "CIBERBULLYING",
+    "ciberacoso / redes": "CIBERBULLYING",
+    "ciberacoso (mensajes, fotos sin permiso, redes sociales)": "CIBERBULLYING",
+    "exclusion": "EXCLUSION",
+    "exclusión": "EXCLUSION",
+    "exclusión social": "EXCLUSION",
+    "exclusion social": "EXCLUSION",
+    "social": "EXCLUSION",
+    "inventaron chismes, amenazaron o me excluyeron del grupo": "EXCLUSION",
+    "psicologica": "PSICOLOGICA",
+    "psicológica": "PSICOLOGICA",
+    "intimidación psicológica": "PSICOLOGICA",
+    "intimidacion psicologica": "PSICOLOGICA",
+    "material": "MATERIAL",
+    "daño a pertenencias": "MATERIAL",
+    "daño a bienes": "MATERIAL",
+    "dano a pertenencias": "MATERIAL",
+    "me quitaron, escondieron o dañaron cosas": "MATERIAL",
+}
+
+
+def resolver_objetos_tipo_agresion(valores) -> list[TipoAgresion]:
+    """
+    Convierte una lista heterogénea de IDs, códigos o nombres de tipos de agresión
+    en instancias válidas de TipoAgresion (creándolas si pertenecen al catálogo base
+    y aún no existen en la base de datos).
+    """
+    if valores is None:
+        return []
+    if isinstance(valores, str):
+        valores = [v.strip() for v in valores.split(",") if v.strip()]
+
+    objetos = []
+    vistos = set()
+
+    for val in valores:
+        if isinstance(val, TipoAgresion):
+            if val.pk not in vistos:
+                objetos.append(val)
+                vistos.add(val.pk)
+            continue
+
+        if isinstance(val, dict):
+            val = val.get("codigo") or val.get("id") or val.get("nombre") or ""
+
+        # Si es ID numérico
+        if isinstance(val, int) or (isinstance(val, str) and val.strip().isdigit()):
+            pk = int(val)
+            existente = TipoAgresion.objects.filter(pk=pk).first()
+            if existente:
+                if existente.pk not in vistos:
+                    objetos.append(existente)
+                    vistos.add(existente.pk)
+                continue
+            # Fallback por orden estándar si el ID aún no estaba sembrado
+            mapa_id_codigo = {
+                1: "VERBAL",
+                2: "FISICA",
+                3: "CIBERBULLYING",
+                4: "EXCLUSION",
+                5: "PSICOLOGICA",
+                6: "MATERIAL",
+            }
+            val = mapa_id_codigo.get(pk, str(pk))
+
+        if isinstance(val, str) and val.strip():
+            limpio = val.strip()
+            codigo_canonico = ALIAS_TIPOS_AGRESION.get(limpio.lower())
+            if not codigo_canonico:
+                # Buscar por nombre o código existente
+                existente = (
+                    TipoAgresion.objects.filter(codigo__iexact=limpio).first()
+                    or TipoAgresion.objects.filter(nombre__iexact=limpio).first()
+                )
+                if existente:
+                    if existente.pk not in vistos:
+                        objetos.append(existente)
+                        vistos.add(existente.pk)
+                    continue
+                codigo_canonico = limpio.upper()[:30]
+
+            existente = TipoAgresion.objects.filter(codigo__iexact=codigo_canonico).first()
+            if not existente:
+                nombre_def, desc_def = CATALOGO_TIPOS_BASE.get(
+                    codigo_canonico, (limpio.title(), "")
+                )
+                existente, _ = TipoAgresion.objects.get_or_create(
+                    codigo=codigo_canonico,
+                    defaults={"nombre": nombre_def, "descripcion": desc_def},
+                )
+            if existente.pk not in vistos:
+                objetos.append(existente)
+                vistos.add(existente.pk)
+
+    return objetos
+
+
+class TipoAgresionSerializer(serializers.ModelSerializer):
+    """Serializer ligero para exponer los tipos de agresión asociados a un reporte."""
+
+    class Meta:
+        model = TipoAgresion
+        fields = ["id", "codigo", "nombre"]
+        read_only_fields = fields
 
 
 class HistorialEstadoSerializer(serializers.ModelSerializer):
@@ -45,6 +190,7 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
     historial_estados = HistorialEstadoSerializer(
         source="seguimientos", many=True, read_only=True,
     )
+    tipos_agresion = TipoAgresionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Reporte
@@ -63,6 +209,7 @@ class ReporteLecturaSerializer(serializers.ModelSerializer):
             "descripcion",
             "evidencia_url",
             "institucion_id",
+            "tipos_agresion",
             "acepta_revelar_identidad",
             "nombre_contacto_victima",
             "medio_contacto_victima",
@@ -117,6 +264,12 @@ class CrearReporteSerializer(serializers.ModelSerializer):
             data["ubicacion"] = data["ubicaciones"]
         if "ubicacion" in data and isinstance(data["ubicacion"], list):
             data["ubicacion"] = ", ".join(str(u).strip() for u in data["ubicacion"] if str(u).strip())
+        if "tipo_agresion" in data and "tipos_agresion" not in data:
+            raw_tipo = data.get("tipo_agresion")
+            data["tipos_agresion"] = raw_tipo if isinstance(raw_tipo, list) else ([raw_tipo] if raw_tipo else [])
+        if "tipos_agresion" in data and data["tipos_agresion"] is not None:
+            objetos = resolver_objetos_tipo_agresion(data["tipos_agresion"])
+            data["tipos_agresion"] = [obj.pk for obj in objetos]
         return super().to_internal_value(data)
 
     class Meta:
@@ -218,6 +371,89 @@ class ActualizarEstadoSerializer(serializers.Serializer):
         return attrs
 
 
+class ActualizarClasificacionSerializer(serializers.Serializer):
+    """
+    Serializer de entrada para PATCH /api/v1/reports/<id>/clasificacion/.
+    Permite a docentes/orientadores/directivos confirmar el nivel de riesgo predicho por IA,
+    modificarlo manualmente (BAJO, MEDIO, ALTO, CRITICO) y/o actualizar los tipos de agresión.
+    """
+
+    NIVELES_VALIDOS = ("BAJO", "MEDIO", "ALTO", "CRITICO")
+
+    nivel_riesgo_confirmado = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Nivel de riesgo confirmado o ajustado por el docente (BAJO, MEDIO, ALTO, CRITICO).",
+    )
+    nivel_riesgo = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Alias de nivel_riesgo_confirmado.",
+    )
+    confirmar_ia = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Si es True y no se envía nivel_riesgo_confirmado, confirma el riesgo predicho por la IA.",
+    )
+    tipos_agresion = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        allow_empty=True,
+        help_text="Lista de códigos, nombres o IDs de tipos de agresión confirmados por el docente.",
+    )
+    comentario = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="Motivo u observación opcional sobre el ajuste o confirmación.",
+    )
+
+    def to_internal_value(self, data):
+        data = data.copy() if hasattr(data, "copy") else dict(data)
+        if "tipos_agresion" in data and isinstance(data["tipos_agresion"], list):
+            normalizados = []
+            for item in data["tipos_agresion"]:
+                if isinstance(item, dict):
+                    val = item.get("codigo") or item.get("id") or item.get("nombre")
+                    if val is not None:
+                        normalizados.append(str(val))
+                elif item is not None:
+                    normalizados.append(str(item))
+            data["tipos_agresion"] = normalizados
+        return super().to_internal_value(data)
+
+    def validate(self, attrs):
+        riesgo_raw = attrs.get("nivel_riesgo_confirmado") or attrs.get("nivel_riesgo")
+        confirmar_ia = bool(attrs.get("confirmar_ia", False))
+        tiene_tipos = "tipos_agresion" in attrs
+
+        if not riesgo_raw and not confirmar_ia and not tiene_tipos:
+            raise serializers.ValidationError(
+                "Debe proporcionar 'nivel_riesgo_confirmado', 'confirmar_ia=true' o 'tipos_agresion'."
+            )
+
+        if riesgo_raw:
+            riesgo_norm = (
+                riesgo_raw.strip()
+                .upper()
+                .replace("Í", "I")
+            )
+            if riesgo_norm not in self.NIVELES_VALIDOS:
+                raise serializers.ValidationError(
+                    {
+                        "nivel_riesgo_confirmado": f"Nivel de riesgo inválido '{riesgo_raw}'. Opciones válidas: {', '.join(self.NIVELES_VALIDOS)}."
+                    }
+                )
+            attrs["nivel_riesgo_confirmado"] = riesgo_norm
+        else:
+            attrs["nivel_riesgo_confirmado"] = None
+
+        attrs["comentario"] = (attrs.get("comentario") or "").strip()
+        return attrs
+
+
 class HistorialEntradaSerializer(serializers.Serializer):
     """
     Serializer de solo lectura para exponer registros de auditoría
@@ -232,6 +468,8 @@ class HistorialEntradaSerializer(serializers.Serializer):
     fecha_cambio = serializers.CharField()
     fecha = serializers.CharField(required=False)
     comentario = serializers.CharField(allow_blank=True, default="")
+    tipo_accion = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    metadata = serializers.DictField(required=False, default=dict)
 
 
 class FiltroFechasSerializer(serializers.Serializer):

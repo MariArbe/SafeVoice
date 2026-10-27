@@ -253,7 +253,7 @@ class ReporteRepositoryProxy:
         aplicando filtros si existen.
         Solo accesible por usuarios autenticados (Directivo/Orientador).
         """
-        qs = Reporte.objects.all().order_by("-fecha_creacion")
+        qs = Reporte.objects.prefetch_related("tipos_agresion").order_by("-fecha_creacion")
 
         if filtros:
             if "institucion_id" in filtros:
@@ -261,7 +261,14 @@ class ReporteRepositoryProxy:
             if "estado" in filtros:
                 qs = qs.filter(estado=filtros["estado"])
             if "nivel_riesgo_predicho" in filtros:
-                qs = qs.filter(nivel_riesgo_predicho=filtros["nivel_riesgo_predicho"])
+                val = filtros["nivel_riesgo_predicho"]
+                qs = qs.filter(
+                    Q(nivel_riesgo_confirmado=val)
+                    | (
+                        (Q(nivel_riesgo_confirmado__isnull=True) | Q(nivel_riesgo_confirmado=""))
+                        & Q(nivel_riesgo_predicho=val)
+                    )
+                )
             if "ubicacion" in filtros:
                 qs = self._filtrar_por_ubicacion(qs, filtros["ubicacion"])
             if "fecha_inicio" in filtros:
@@ -333,10 +340,15 @@ class ReporteRepositoryProxy:
             for p in partes:
                 by_location[p] = by_location.get(p, 0) + fila["total"]
 
+        by_risk_level = {}
+        for fila in qs.values("nivel_riesgo_confirmado", "nivel_riesgo_predicho").annotate(total=Count("id")).order_by():
+            nivel = fila["nivel_riesgo_confirmado"] or fila["nivel_riesgo_predicho"] or "SIN_DATO"
+            by_risk_level[nivel] = by_risk_level.get(nivel, 0) + fila["total"]
+
         return {
             "total_reports": qs.count(),
             "by_status": self._conteo(qs, "estado"),
-            "by_risk_level": self._conteo(qs, "nivel_riesgo_predicho"),
+            "by_risk_level": by_risk_level,
             "by_type": por_tipo,
             "by_location": by_location,
             "by_frequency": self._conteo(qs, "frecuencia"),
@@ -346,10 +358,10 @@ class ReporteRepositoryProxy:
 
     def mapa_calor(self, institucion_id=None, fecha_inicio=None, fecha_fin=None) -> list:
         """Concentración de casos por zona (ubicación dentro de la sede), con
-        desglose por nivel de riesgo."""
+        desglose por nivel de riesgo (priorizando nivel_riesgo_confirmado)."""
         qs = self._qs_filtrado(institucion_id, fecha_inicio, fecha_fin)
         filas = (
-            qs.values("ubicacion", "nivel_riesgo_predicho")
+            qs.values("ubicacion", "nivel_riesgo_confirmado", "nivel_riesgo_predicho")
             .annotate(total=Count("id"))
             .order_by()
         )
@@ -360,6 +372,6 @@ class ReporteRepositoryProxy:
             for zona in partes:
                 datos = zonas.setdefault(zona, {"zone": zona, "count": 0, "by_risk_level": {}})
                 datos["count"] += fila["total"]
-                nivel = fila["nivel_riesgo_predicho"] or "SIN_DATO"
+                nivel = fila["nivel_riesgo_confirmado"] or fila["nivel_riesgo_predicho"] or "SIN_DATO"
                 datos["by_risk_level"][nivel] = datos["by_risk_level"].get(nivel, 0) + fila["total"]
         return sorted(zonas.values(), key=lambda z: z["count"], reverse=True)

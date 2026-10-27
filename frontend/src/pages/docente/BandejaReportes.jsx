@@ -17,6 +17,61 @@ import ModalRemisionExterna from "../../components/reportes/ModalRemisionExterna
 import AsistenteLegalLey1620 from "../../components/reportes/AsistenteLegalLey1620";
 import ModuloSemaforoPostCierre from "../../components/reportes/ModuloSemaforoPostCierre";
 
+const CATALOGO_TIPOS_AGRESION_UI = [
+  { codigo: "VERBAL", nombre: "Agresión Verbal", icono: "🗣️", desc: "Insultos, apodos o burlas" },
+  { codigo: "FISICA", nombre: "Agresión Física", icono: "💥", desc: "Golpes, empujones o daño físico" },
+  { codigo: "CIBERBULLYING", nombre: "Ciberacoso / Digital", icono: "📱", desc: "Redes sociales, fotos o chats" },
+  { codigo: "EXCLUSION", nombre: "Exclusión Social", icono: "👥", desc: "Aislamiento, rumores o chismes" },
+  { codigo: "PSICOLOGICA", nombre: "Intimidación Psicológica", icono: "⚠️", desc: "Amenazas, chantaje o coacción" },
+  { codigo: "MATERIAL", nombre: "Daño a Pertenencias", icono: "🎒", desc: "Quitar, esconder o dañar cosas" },
+];
+
+const NIVELES_RIESGO_UI = [
+  {
+    valor: "BAJO",
+    etiqueta: "Bajo",
+    sub: "Tipo I (Leve)",
+    activoClass: "bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-500/25 shadow-xs",
+    inactivoClass: "bg-emerald-50/70 text-emerald-800 border-emerald-200 hover:bg-emerald-100",
+  },
+  {
+    valor: "MEDIO",
+    etiqueta: "Medio",
+    sub: "Tipo I Reiterado",
+    activoClass: "bg-amber-500 text-white border-amber-500 ring-2 ring-amber-500/25 shadow-xs",
+    inactivoClass: "bg-amber-50/70 text-amber-800 border-amber-200 hover:bg-amber-100",
+  },
+  {
+    valor: "ALTO",
+    etiqueta: "Alto",
+    sub: "Tipo II (Acoso)",
+    activoClass: "bg-orange-600 text-white border-orange-600 ring-2 ring-orange-500/25 shadow-xs",
+    inactivoClass: "bg-orange-50/70 text-orange-800 border-orange-200 hover:bg-orange-100",
+  },
+  {
+    valor: "CRITICO",
+    etiqueta: "Crítico",
+    sub: "Tipo III (Urgente)",
+    activoClass: "bg-rose-600 text-white border-rose-600 ring-2 ring-rose-500/25 shadow-xs",
+    inactivoClass: "bg-rose-50/70 text-rose-800 border-rose-200 hover:bg-rose-100",
+  },
+];
+
+const extraerCodigosTiposAgresion = (tiposRaw) => {
+  if (!Array.isArray(tiposRaw)) return [];
+  const codigos = new Set();
+  for (const t of tiposRaw) {
+    const rawStr = (typeof t === "object" && t !== null ? t.codigo || t.nombre || "" : String(t || "")).toLowerCase();
+    if (rawStr.includes("verbal") || rawStr.includes("insult") || rawStr.includes("apodo")) codigos.add("VERBAL");
+    else if (rawStr.includes("físic") || rawStr.includes("fisic") || rawStr.includes("golp") || rawStr.includes("pegar")) codigos.add("FISICA");
+    else if (rawStr.includes("ciber") || rawStr.includes("digital") || rawStr.includes("redes")) codigos.add("CIBERBULLYING");
+    else if (rawStr.includes("exclus") || rawStr.includes("social") || rawStr.includes("chisme")) codigos.add("EXCLUSION");
+    else if (rawStr.includes("psicol") || rawStr.includes("intimid") || rawStr.includes("chantaj")) codigos.add("PSICOLOGICA");
+    else if (rawStr.includes("material") || rawStr.includes("pertenencia") || rawStr.includes("daño") || rawStr.includes("quitar")) codigos.add("MATERIAL");
+  }
+  return Array.from(codigos);
+};
+
 export default function BandejaReportesDocente() {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState(() => getUser());
@@ -58,6 +113,9 @@ export default function BandejaReportesDocente() {
   // Estado para el Modal de Detalle/Edición
   const [reporteSeleccionado, setReporteSeleccionado] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [guardandoClasificacion, setGuardandoClasificacion] = useState(false);
+  const [riesgoEditable, setRiesgoEditable] = useState("MEDIO");
+  const [tiposAgresionEditables, setTiposAgresionEditables] = useState([]);
   const [formDataModal, setFormDataModal] = useState({
     estado: "",
     notas_orientador: "",
@@ -279,7 +337,11 @@ export default function BandejaReportesDocente() {
     }
 
     // Catálogo de contingencia en frontend alineado con la Ley 1620
-    const nivel = (fallbackItem?.nivel_riesgo_predicho || "MEDIO").toUpperCase();
+    const nivel = (
+      fallbackItem?.nivel_riesgo_confirmado ||
+      fallbackItem?.nivel_riesgo_predicho ||
+      "MEDIO"
+    ).toUpperCase();
     const fallbackMap = {
       CRITICO: {
         nivel_riesgo: "CRITICO",
@@ -409,8 +471,15 @@ export default function BandejaReportesDocente() {
   const handleAbrirModal = (item) => {
     const estadoNorm = normalizarEstado(item.estado);
     const itemNormalizado = { ...item, estado: estadoNorm };
+    const riesgoActual = (
+      itemNormalizado.nivel_riesgo_confirmado ||
+      itemNormalizado.nivel_riesgo_predicho ||
+      "MEDIO"
+    ).toUpperCase();
 
     setReporteSeleccionado(itemNormalizado);
+    setRiesgoEditable(riesgoActual);
+    setTiposAgresionEditables(extraerCodigosTiposAgresion(itemNormalizado.tipos_agresion));
     setFormDataModal({
       estado: estadoNorm,
       notas_orientador: "",
@@ -437,6 +506,85 @@ export default function BandejaReportesDocente() {
 
     cargarRecomendaciones(itemNormalizado.id || itemNormalizado.codigo_seguimiento, itemNormalizado);
     cargarHistorial(itemNormalizado.id || itemNormalizado.codigo_seguimiento, itemNormalizado);
+  };
+
+  // Alternar selección de un tipo de agresión en el modal docente
+  const handleToggleTipoAgresionModal = (codigo) => {
+    setTiposAgresionEditables((prev) =>
+      prev.includes(codigo) ? prev.filter((c) => c !== codigo) : [...prev, codigo]
+    );
+    setErrorGuardar(null);
+  };
+
+  // Confirmar o actualizar manualmente el nivel de riesgo (IA) y los tipos de agresión
+  const handleGuardarClasificacion = async (riesgoOverride = null) => {
+    if (!reporteSeleccionado) return;
+    setErrorGuardar(null);
+    setMensajeExito(null);
+    setGuardandoClasificacion(true);
+
+    const targetId = reporteSeleccionado.id || reporteSeleccionado.codigo_seguimiento;
+    const riesgoFinal = (riesgoOverride || riesgoEditable || "MEDIO").toUpperCase();
+
+    try {
+      let actualizado = null;
+      if (reporteService.actualizarClasificacion) {
+        actualizado = await reporteService.actualizarClasificacion(targetId, {
+          nivel_riesgo_confirmado: riesgoFinal,
+          tipos_agresion: tiposAgresionEditables,
+          comentario: formDataModal.notas_orientador.trim() || "",
+        });
+      }
+
+      const tiposActualizados =
+        actualizado?.tipos_agresion ||
+        tiposAgresionEditables.map((cod) => {
+          const found = CATALOGO_TIPOS_AGRESION_UI.find((t) => t.codigo === cod);
+          return { codigo: cod, nombre: found ? found.nombre : cod };
+        });
+
+      const nuevoItem = {
+        ...reporteSeleccionado,
+        ...(actualizado || {}),
+        estado: normalizarEstado(actualizado?.estado || reporteSeleccionado.estado),
+        nivel_riesgo_confirmado: riesgoFinal,
+        tipos_agresion: tiposActualizados,
+      };
+
+      setReporteSeleccionado(nuevoItem);
+      setRiesgoEditable(riesgoFinal);
+      setTiposAgresionEditables(extraerCodigosTiposAgresion(tiposActualizados));
+
+      setReportes((prev) =>
+        prev.map((r) =>
+          (r.id && r.id === reporteSeleccionado.id) ||
+          r.codigo_seguimiento === reporteSeleccionado.codigo_seguimiento
+            ? { ...r, ...nuevoItem }
+            : r
+        )
+      );
+
+      const esConfirmacionIA =
+        riesgoFinal === (reporteSeleccionado.nivel_riesgo_predicho || "").toUpperCase();
+      setMensajeExito(
+        esConfirmacionIA
+          ? `✓ Clasificación confirmada exitosamente (Riesgo: ${riesgoFinal}).`
+          : `✏️ Gravedad y tipología actualizadas manualmente a nivel ${riesgoFinal}.`
+      );
+      setTimeout(() => setMensajeExito(null), 5000);
+
+      await cargarRecomendaciones(targetId, nuevoItem);
+      await cargarHistorial(targetId, nuevoItem);
+    } catch (err) {
+      console.error("Error al actualizar clasificación:", err);
+      const msg =
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        "No se pudo guardar la clasificación del reporte.";
+      setErrorGuardar(typeof msg === "string" ? msg : JSON.stringify(msg));
+    } finally {
+      setGuardandoClasificacion(false);
+    }
   };
 
   // Confirmar y registrar formalmente la activación de Ruta Externa (Tipo III)
@@ -510,7 +658,7 @@ export default function BandejaReportesDocente() {
     }
   };
 
-  // Guardar cambios del reporte (cambio de estado o notas de seguimiento)
+  // Guardar cambios del reporte (cambio de estado, clasificación o notas de seguimiento)
   const handleGuardarCambios = async (e) => {
     e.preventDefault();
     setErrorGuardar(null);
@@ -520,10 +668,25 @@ export default function BandejaReportesDocente() {
     const nuevoEstado = normalizarEstado(formDataModal.estado);
     const targetId = reporteSeleccionado.id || reporteSeleccionado.codigo_seguimiento;
 
-    // Si el estado es el mismo, pero escribió una nota de seguimiento / mediación
+    const riesgoVigente = (
+      reporteSeleccionado.nivel_riesgo_confirmado ||
+      reporteSeleccionado.nivel_riesgo_predicho ||
+      "MEDIO"
+    ).toUpperCase();
+    const tiposVigentes = extraerCodigosTiposAgresion(reporteSeleccionado.tipos_agresion);
+    const cambioEnClasificacion =
+      riesgoEditable !== riesgoVigente ||
+      !reporteSeleccionado.nivel_riesgo_confirmado ||
+      [...tiposAgresionEditables].sort().join(",") !== [...tiposVigentes].sort().join(",");
+
+    // Si el estado es el mismo
     if (nuevoEstado === estadoActual) {
+      if (cambioEnClasificacion) {
+        await handleGuardarClasificacion();
+        return;
+      }
       if (!formDataModal.notas_orientador.trim()) {
-        setErrorGuardar("Seleccione un estado diferente al actual o ingrese una nota de seguimiento.");
+        setErrorGuardar("Seleccione un estado diferente, ajuste la clasificación o ingrese una nota de seguimiento.");
         return;
       }
 
@@ -553,6 +716,13 @@ export default function BandejaReportesDocente() {
     setGuardando(true);
 
     try {
+      if (cambioEnClasificacion && reporteService.actualizarClasificacion) {
+        await reporteService.actualizarClasificacion(targetId, {
+          nivel_riesgo_confirmado: riesgoEditable,
+          tipos_agresion: tiposAgresionEditables,
+        });
+      }
+
       if (reporteService.actualizarReporte) {
         await reporteService.actualizarReporte(targetId, {
           estado: nuevoEstado,
@@ -560,10 +730,17 @@ export default function BandejaReportesDocente() {
         });
       }
 
+      const tiposActualizados = tiposAgresionEditables.map((cod) => {
+        const found = CATALOGO_TIPOS_AGRESION_UI.find((t) => t.codigo === cod);
+        return { codigo: cod, nombre: found ? found.nombre : cod };
+      });
+
       // Actualizar estado en el modal sin cerrarlo
       setReporteSeleccionado((prev) => ({
         ...prev,
         estado: nuevoEstado,
+        nivel_riesgo_confirmado: riesgoEditable,
+        tipos_agresion: tiposActualizados,
       }));
       setFormDataModal((prev) => ({
         ...prev,
@@ -576,12 +753,17 @@ export default function BandejaReportesDocente() {
         prev.map((r) =>
           (r.id && r.id === reporteSeleccionado.id) ||
           r.codigo_seguimiento === reporteSeleccionado.codigo_seguimiento
-            ? { ...r, estado: nuevoEstado }
+            ? {
+                ...r,
+                estado: nuevoEstado,
+                nivel_riesgo_confirmado: riesgoEditable,
+                tipos_agresion: tiposActualizados,
+              }
             : r
         )
       );
 
-      setMensajeExito("¡Estado del reporte actualizado exitosamente!");
+      setMensajeExito("¡Cambios del reporte guardados exitosamente!");
       setTimeout(() => setMensajeExito(null), 5000);
 
       // Refrescar inmediatamente el historial sin cerrar el modal
@@ -948,11 +1130,63 @@ export default function BandejaReportesDocente() {
                           {new Date(item.fecha_creacion).toLocaleDateString("es-CO")}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${getColorRiesgo(item.nivel_riesgo_predicho)}`}>
-                            {item.nivel_riesgo_predicho}
-                          </span>
+                          {(() => {
+                            const riesgoEfectivo =
+                              item.nivel_riesgo_confirmado || item.nivel_riesgo_predicho || "MEDIO";
+                            const confirmado = !!item.nivel_riesgo_confirmado;
+                            const modificado =
+                              confirmado &&
+                              item.nivel_riesgo_confirmado !== item.nivel_riesgo_predicho;
+                            return (
+                              <div className="space-y-1">
+                                <span
+                                  className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${getColorRiesgo(
+                                    riesgoEfectivo
+                                  )}`}
+                                >
+                                  {riesgoEfectivo}
+                                </span>
+                                {modificado ? (
+                                  <span
+                                    className="block text-[9px] font-bold text-[#1B5E9E]"
+                                    title={`Ajustado manualmente por docente (IA predijo: ${item.nivel_riesgo_predicho})`}
+                                  >
+                                    ✏️ Docente (IA: {item.nivel_riesgo_predicho})
+                                  </span>
+                                ) : confirmado ? (
+                                  <span
+                                    className="block text-[9px] font-bold text-emerald-700"
+                                    title="Predicción de IA confirmada por docente"
+                                  >
+                                    ✓ Confirmado
+                                  </span>
+                                ) : (
+                                  <span
+                                    className="block text-[9px] font-medium text-slate-400"
+                                    title="Predicción automática de IA pendiente de confirmar"
+                                  >
+                                    🤖 Predicho IA
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
-                        <td className="py-3.5 px-4 capitalize text-slate-700">{item.ubicacion}</td>
+                        <td className="py-3.5 px-4 text-slate-700">
+                          <div className="capitalize">{item.ubicacion}</div>
+                          {Array.isArray(item.tipos_agresion) && item.tipos_agresion.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {item.tipos_agresion.map((t, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-block text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded-md"
+                                >
+                                  {typeof t === "object" ? t.nombre : t}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </td>
                         <td className="py-3.5 px-4">
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${getColorEstado(item.estado)}`}>
                             {getNombreEstado(item.estado)}
@@ -1068,10 +1302,34 @@ export default function BandejaReportesDocente() {
                   <p className="font-bold text-slate-800">{reporteSeleccionado.ubicacion}</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 font-bold uppercase text-[10px]">Riesgo predicho por IA</p>
-                  <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${getColorRiesgo(reporteSeleccionado.nivel_riesgo_predicho)}`}>
-                    {reporteSeleccionado.nivel_riesgo_predicho}
-                  </span>
+                  <p className="text-slate-400 font-bold uppercase text-[10px]">Riesgo vigente / IA</p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${getColorRiesgo(
+                        reporteSeleccionado.nivel_riesgo_confirmado ||
+                          reporteSeleccionado.nivel_riesgo_predicho
+                      )}`}
+                    >
+                      {reporteSeleccionado.nivel_riesgo_confirmado ||
+                        reporteSeleccionado.nivel_riesgo_predicho}
+                    </span>
+                    {reporteSeleccionado.nivel_riesgo_confirmado ? (
+                      reporteSeleccionado.nivel_riesgo_confirmado ===
+                      reporteSeleccionado.nivel_riesgo_predicho ? (
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md">
+                          ✓ Confirmado
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-[#1B5E9E] bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-md">
+                          ✏️ Docente (IA: {reporteSeleccionado.nivel_riesgo_predicho})
+                        </span>
+                      )
+                    ) : (
+                      <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md">
+                        🤖 IA (Sin confirmar)
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1082,6 +1340,141 @@ export default function BandejaReportesDocente() {
                 </label>
                 <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs text-slate-700 italic leading-relaxed">
                   "{reporteSeleccionado.descripcion}"
+                </div>
+              </div>
+
+              {/* VALIDACIÓN DOCENTE: CONFIRMAR O CAMBIAR RIESGO IA Y TIPO DE AGRESIÓN */}
+              <div className="bg-slate-50/90 border border-slate-200 rounded-2xl p-4 space-y-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/70 pb-2.5">
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[#1B5E9E] flex items-center gap-1.5">
+                      <span>🛡️</span>
+                      <span>Validación Docente: Gravedad y Tipo de Agresión</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Confirme la predicción automática de la IA o ajuste manualmente la gravedad y tipología del caso.
+                    </p>
+                  </div>
+
+                  {!reporteSeleccionado.nivel_riesgo_confirmado && (
+                    <button
+                      type="button"
+                      disabled={guardandoClasificacion}
+                      onClick={() =>
+                        handleGuardarClasificacion(reporteSeleccionado.nivel_riesgo_predicho)
+                      }
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-2xs transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                      title="Confirmar que el nivel de riesgo predicho por la IA es correcto"
+                    >
+                      ✓ Confirmar Riesgo IA ({reporteSeleccionado.nivel_riesgo_predicho})
+                    </button>
+                  )}
+                </div>
+
+                {/* Selector Manual de Nivel de Riesgo / Gravedad */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px] font-bold text-slate-700">
+                      1. Nivel de Riesgo / Gravedad del Caso:
+                    </label>
+                    <span className="text-[10px] font-semibold text-slate-500">
+                      Predicción IA:{" "}
+                      <strong className="text-slate-700">
+                        {reporteSeleccionado.nivel_riesgo_predicho}
+                      </strong>
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {NIVELES_RIESGO_UI.map((n) => {
+                      const activo = riesgoEditable === n.valor;
+                      return (
+                        <button
+                          key={n.valor}
+                          type="button"
+                          onClick={() => {
+                            setRiesgoEditable(n.valor);
+                            setErrorGuardar(null);
+                          }}
+                          className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                            activo ? n.activoClass : n.inactivoClass
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-extrabold">{n.etiqueta}</span>
+                            {activo && <span className="text-xs font-black">✓</span>}
+                          </div>
+                          <span
+                            className={`block text-[10px] mt-0.5 ${
+                              activo ? "text-white/90 font-semibold" : "opacity-80"
+                            }`}
+                          >
+                            {n.sub}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Selector Múltiple de Tipo de Agresión */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
+                    2. Tipo(s) de Agresión Identificados{" "}
+                    <span className="font-normal text-slate-500">(Puede marcar varios)</span>:
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {CATALOGO_TIPOS_AGRESION_UI.map((tipo) => {
+                      const seleccionado = tiposAgresionEditables.includes(tipo.codigo);
+                      return (
+                        <button
+                          key={tipo.codigo}
+                          type="button"
+                          onClick={() => handleToggleTipoAgresionModal(tipo.codigo)}
+                          className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                            seleccionado
+                              ? "bg-[#1B5E9E]/10 border-[#1B5E9E] text-slate-900 shadow-2xs"
+                              : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100/70"
+                          }`}
+                        >
+                          <span
+                            className={`mt-0.5 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold border shrink-0 ${
+                              seleccionado
+                                ? "bg-[#1B5E9E] border-[#1B5E9E] text-white"
+                                : "border-slate-300 bg-white"
+                            }`}
+                          >
+                            {seleccionado ? "✓" : ""}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold leading-tight flex items-center gap-1">
+                              <span>{tipo.icono}</span>
+                              <span>{tipo.nombre}</span>
+                            </p>
+                            <p className="text-[10px] text-slate-500 leading-snug mt-0.5">
+                              {tipo.desc}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Botón de guardado directo de la clasificación */}
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <span className="text-[10px] text-slate-500 italic">
+                    Los cambios actualizan el protocolo Ley 1620 y las estadísticas institucionales.
+                  </span>
+                  <button
+                    type="button"
+                    disabled={guardandoClasificacion}
+                    onClick={() => handleGuardarClasificacion()}
+                    className="px-3.5 py-2 rounded-xl bg-[#1B5E9E] hover:bg-[#154a7d] text-white text-xs font-bold shadow-2xs transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                  >
+                    {guardandoClasificacion
+                      ? "Guardando..."
+                      : "Confirmar / Guardar Clasificación"}
+                  </button>
                 </div>
               </div>
 
@@ -1443,22 +1836,34 @@ export default function BandejaReportesDocente() {
                             <span className="font-extrabold text-slate-900">
                               {cambio.usuario_nombre || cambio.nombre_orientador || "Orientador"}
                             </span>
-                            <span className="text-slate-500">cambió el estado de</span>
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${getColorEstado(
-                                cambio.estado_anterior
-                              )}`}
-                            >
-                              {getNombreEstado(cambio.estado_anterior)}
-                            </span>
-                            <span className="text-slate-500">a</span>
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${getColorEstado(
-                                cambio.estado_nuevo
-                              )}`}
-                            >
-                              {getNombreEstado(cambio.estado_nuevo)}
-                            </span>
+                            {cambio.tipo_accion === "CLASIFICACION_DOCENTE" ? (
+                              <span className="text-[#1B5E9E] font-bold">
+                                validó / actualizó la clasificación del caso
+                              </span>
+                            ) : cambio.estado_anterior === cambio.estado_nuevo ? (
+                              <span className="text-slate-500">registró seguimiento en estado</span>
+                            ) : (
+                              <>
+                                <span className="text-slate-500">cambió el estado de</span>
+                                <span
+                                  className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${getColorEstado(
+                                    cambio.estado_anterior
+                                  )}`}
+                                >
+                                  {getNombreEstado(cambio.estado_anterior)}
+                                </span>
+                                <span className="text-slate-500">a</span>
+                              </>
+                            )}
+                            {cambio.tipo_accion !== "CLASIFICACION_DOCENTE" && (
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${getColorEstado(
+                                  cambio.estado_nuevo
+                                )}`}
+                              >
+                                {getNombreEstado(cambio.estado_nuevo)}
+                              </span>
+                            )}
                             <span
                               className="text-[11px] text-slate-400 font-medium ml-auto"
                               title={formatearFechaCompleta(cambio.fecha_cambio || cambio.fecha)}
@@ -1507,7 +1912,18 @@ export default function BandejaReportesDocente() {
                     disabled={
                       guardando ||
                       (normalizarEstado(formDataModal.estado) === normalizarEstado(reporteSeleccionado.estado) &&
-                        !formDataModal.notas_orientador.trim())
+                        !formDataModal.notas_orientador.trim() &&
+                        riesgoEditable ===
+                          (
+                            reporteSeleccionado.nivel_riesgo_confirmado ||
+                            reporteSeleccionado.nivel_riesgo_predicho ||
+                            "MEDIO"
+                          ).toUpperCase() &&
+                        Boolean(reporteSeleccionado.nivel_riesgo_confirmado) &&
+                        [...tiposAgresionEditables].sort().join(",") ===
+                          [...extraerCodigosTiposAgresion(reporteSeleccionado.tipos_agresion)]
+                            .sort()
+                            .join(","))
                     }
                     className="px-5 py-2.5 rounded-xl bg-[#2C5F57] hover:bg-[#234b44] text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -1515,7 +1931,9 @@ export default function BandejaReportesDocente() {
                       ? "Guardando..."
                       : normalizarEstado(formDataModal.estado) !== normalizarEstado(reporteSeleccionado.estado)
                       ? "Guardar Cambios"
-                      : "Guardar Nota de Seguimiento"}
+                      : formDataModal.notas_orientador.trim()
+                      ? "Guardar Nota de Seguimiento"
+                      : "Guardar Clasificación"}
                   </button>
                 </div>
               </div>

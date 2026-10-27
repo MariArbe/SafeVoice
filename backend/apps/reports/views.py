@@ -28,6 +28,7 @@ from rest_framework.views import APIView
 from core.permissions import EsDirectivo, EsDirectivoOOrientador, EsOrientador
 
 from .serializers import (
+    ActualizarClasificacionSerializer,
     ActualizarEstadoSerializer,
     ConsultarReporteSerializer,
     CrearReporteSerializer,
@@ -130,6 +131,39 @@ class ActualizarEstadoReporteView(APIView):
 
         respuesta = ReporteLecturaSerializer(reporte)
         return Response(respuesta.data, status=status.HTTP_200_OK)
+
+
+class ActualizarClasificacionReporteView(APIView):
+    """
+    PATCH /api/v1/reports/<id>/clasificacion/
+    Permite al docente (Orientador o Directivo) confirmar el nivel de riesgo predicho
+    por la IA, cambiarlo manualmente (BAJO, MEDIO, ALTO, CRITICO) y/o confirmar o
+    modificar los tipos de agresión asociados al reporte.
+    """
+
+    permission_classes = [EsDirectivoOOrientador]
+
+    def patch(self, request: Request, reporte_id: int | str) -> Response:
+        serializer = ActualizarClasificacionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        datos = serializer.validated_data
+        tipos_agresion = datos["tipos_agresion"] if "tipos_agresion" in datos else None
+
+        reporte = _service.actualizar_clasificacion(
+            reporte_id=reporte_id,
+            usuario=request.user,
+            nivel_riesgo_confirmado=datos.get("nivel_riesgo_confirmado"),
+            confirmar_ia=datos.get("confirmar_ia", False),
+            tipos_agresion=tipos_agresion,
+            comentario=datos.get("comentario", ""),
+        )
+
+        respuesta = ReporteLecturaSerializer(reporte)
+        return Response(respuesta.data, status=status.HTTP_200_OK)
+
+    def post(self, request: Request, reporte_id: int | str) -> Response:
+        return self.patch(request, reporte_id)
 
 
 class HistorialReporteView(APIView):

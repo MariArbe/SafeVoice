@@ -343,3 +343,50 @@ class TestChequeosPostCierreYSemaforo:
         resp = cliente_orientador.post(url, {"hito": "INVALIDO", "semaforo": "VERDE"}, format="json")
         assert resp.status_code == 400
 
+
+@pytest.mark.django_db
+class TestConfirmarYCambiarClasificacionDocente:
+    def test_docente_puede_confirmar_riesgo_predicho_por_ia(self, cliente_orientador, institucion):
+        rep = _crear_reporte(institucion, estado="nuevo", riesgo="ALTO")
+        url = f"/api/v1/reports/{rep.id}/clasificacion/"
+        resp = cliente_orientador.patch(url, {"confirmar_ia": True}, format="json")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["nivel_riesgo_predicho"] == "ALTO"
+        assert data["nivel_riesgo_confirmado"] == "ALTO"
+        assert data["historial_cambios"][-1]["tipo_accion"] == "CLASIFICACION_DOCENTE"
+
+    def test_docente_puede_cambiar_gravedad_y_tipos_agresion_manualmente(
+        self, cliente_orientador, institucion
+    ):
+        rep = _crear_reporte(institucion, ubicacion="Baños", estado="en_revision", riesgo="BAJO")
+        url = f"/api/v1/reports/{rep.id}/clasificacion/"
+        payload = {
+            "nivel_riesgo_confirmado": "CRITICO",
+            "tipos_agresion": ["FISICA", "CIBERBULLYING"],
+            "comentario": "Al entrevistar a la víctima se detectó agresión física grave.",
+        }
+        resp = cliente_orientador.patch(url, payload, format="json")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["nivel_riesgo_predicho"] == "BAJO"
+        assert data["nivel_riesgo_confirmado"] == "CRITICO"
+        codigos = {t["codigo"] for t in data["tipos_agresion"]}
+        assert "FISICA" in codigos
+        assert "CIBERBULLYING" in codigos
+
+        # Verificar que las estadísticas y mapa de calor reflejan el nivel confirmado por el docente
+        stats = cliente_orientador.get(STATISTICS_URL).json()
+        assert stats["by_risk_level"].get("CRITICO") == 1
+        assert stats["by_risk_level"].get("BAJO", 0) == 0
+
+        heatmap = cliente_orientador.get(HEATMAP_URL).json()["points"]
+        assert heatmap[0]["by_risk_level"].get("CRITICO") == 1
+
+    def test_riesgo_invalido_devuelve_400(self, cliente_orientador, institucion):
+        rep = _crear_reporte(institucion, estado="nuevo", riesgo="MEDIO")
+        url = f"/api/v1/reports/{rep.id}/clasificacion/"
+        resp = cliente_orientador.patch(url, {"nivel_riesgo_confirmado": "EXTREMO"}, format="json")
+        assert resp.status_code == 400
+
+
