@@ -127,6 +127,8 @@ Responsables de las decisiones, políticas institucionales y rendición de cuent
 
 La documentación del sistema se encuentra estructurada en las siguientes carpetas:
 
+* **Presentación y Demo Day:**
+  * [docs/DemoDay_Pitch_SafeVoice_15Minutos.md](./DemoDay_Pitch_SafeVoice_15Minutos.md): Guión teatral palabra por palabra, roles del equipo, diapositivas y respuestas al jurado para el Demo Day (15 min).
 * **Análisis y Requisitos:**
   * [docs/Analysis/index.md](./Analysis/index.md): Especificación formal de Requisitos Funcionales (RF-001 a RF-015) y No Funcionales (RNF-001 a RNF-006).
   * [docs/Analysis/Historias_de_Usuario_SafeVoice.md](./Analysis/Historias_de_Usuario_SafeVoice.md): Catálogo de 20 Historias de Usuario organizadas en 5 Sprints.

@@ -168,6 +168,7 @@ SafeVoice/
 ├── README.md                                          ← Usted está aquí
 ├── docs/
 │   ├── index.md                                       ← Visión general, contexto y alcance
+│   ├── DemoDay_Pitch_SafeVoice_15Minutos.md           ← Guión y estrategia del Demo Day (15 min)
 │   ├── Analysis/
 │   │   ├── index.md                                   ← Especificación de Requisitos (RF y RNF)
 │   │   ├── Historias_de_Usuario_SafeVoice.md          ← Catálogo de Historias de Usuario (HU-01 a HU-20)
