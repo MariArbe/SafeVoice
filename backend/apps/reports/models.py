@@ -66,10 +66,10 @@ class Reporte(models.Model):
         OTRO = "Otro", "Otro"
 
     ubicacion = models.CharField(
-        max_length=120,
+        max_length=500,
         default="",
         verbose_name="ubicación",
-        help_text="Lugar donde ocurrió la agresión (incluye 'Otro').",
+        help_text="Lugar o lugares donde ocurrió la agresión (permite múltiples opciones).",
     )
     frecuencia = models.CharField(max_length=100, default="", verbose_name="frecuencia")
     grado_victima = models.CharField(max_length=50, null=True, blank=True, verbose_name="grado de la víctima")

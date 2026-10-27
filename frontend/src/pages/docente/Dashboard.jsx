@@ -367,10 +367,14 @@ export default function DashboardDocente() {
     if (stats === null) return null;
     const acumulado = {};
     for (const [locName, count] of Object.entries(stats.by_location || {})) {
-      const lower = (locName || "").toLowerCase();
-      const zonaMatch = zonasBase.find((z) => z.keywords.some((k) => lower.includes(k)));
-      const etiqueta = zonaMatch ? zonaMatch.filtroUbicacion : locName || "Otro";
-      acumulado[etiqueta] = (acumulado[etiqueta] || 0) + (count || 0);
+      const partes = (locName || "Otro").split(",").map((s) => s.trim()).filter(Boolean);
+      const partesAProcesar = partes.length > 0 ? partes : ["Otro"];
+      for (const parte of partesAProcesar) {
+        const lower = parte.toLowerCase();
+        const zonaMatch = zonasBase.find((z) => z.keywords.some((k) => lower.includes(k)));
+        const etiqueta = zonaMatch ? zonaMatch.filtroUbicacion : parte;
+        acumulado[etiqueta] = (acumulado[etiqueta] || 0) + (count || 0);
+      }
     }
     return Object.entries(acumulado).sort((a, b) => b[1] - a[1]);
   }, [stats]);

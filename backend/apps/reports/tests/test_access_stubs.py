@@ -234,6 +234,38 @@ class TestSubirEvidencia:
         data = response.json()
         assert data["evidencia_url"] == "/media/evidencias/evidencia_12345.png"
 
+    def test_crear_reporte_con_multiples_ubicaciones_array(self, api_client, institucion):
+        payload = {
+            "institucion": institucion.id,
+            "ubicacion": ["Salón de clases", "Baños", "Pasillos o escaleras"],
+            "frecuencia": "SEMANAS",
+            "grado_victima": "9°",
+            "involucrados_tipo": "victima",
+            "descripcion": "Acoso en varios puntos del colegio.",
+            "tipos_agresion": [],
+        }
+        response = api_client.post("/api/v1/reports/", payload, format="json")
+        assert response.status_code == 201
+        data = response.json()
+        assert "Salón de clases" in data["ubicacion"]
+        assert "Baños" in data["ubicacion"]
+        assert "Pasillos o escaleras" in data["ubicacion"]
+
+    def test_crear_reporte_con_multiples_ubicaciones_string(self, api_client, institucion):
+        payload = {
+            "institucion": institucion.id,
+            "ubicacion": "Salón de clases, Baños",
+            "frecuencia": "SEMANAS",
+            "grado_victima": "9°",
+            "involucrados_tipo": "victima",
+            "descripcion": "Acoso en dos lugares.",
+            "tipos_agresion": [],
+        }
+        response = api_client.post("/api/v1/reports/", payload, format="json")
+        assert response.status_code == 201
+        data = response.json()
+        assert data["ubicacion"] == "Salón de clases, Baños"
+
 
 @pytest.mark.django_db
 class TestRegistrarSeguimientoYRutaExterna:

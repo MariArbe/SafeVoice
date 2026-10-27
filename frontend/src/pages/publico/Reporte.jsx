@@ -15,7 +15,7 @@ export default function Reporte() {
     institucion: "",
     rol_reportante: "",
     grado: "",
-    ubicacion: "",
+    ubicacion: [],
     frecuencia: "",
     tipo_agresion: [],
     descripcion: "",
@@ -77,7 +77,13 @@ export default function Reporte() {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    if (type === "checkbox" && name === "tipo_agresion") {
+    if (type === "checkbox" && name === "ubicacion") {
+      setFormData(prev => {
+        const actual = Array.isArray(prev.ubicacion) ? prev.ubicacion : (prev.ubicacion ? [prev.ubicacion] : []);
+        if (checked) return { ...prev, ubicacion: [...actual, value] };
+        return { ...prev, ubicacion: actual.filter(u => u !== value) };
+      });
+    } else if (type === "checkbox" && name === "tipo_agresion") {
       setFormData(prev => {
         if (checked) return { ...prev, tipo_agresion: [...prev.tipo_agresion, value] };
         return { ...prev, tipo_agresion: prev.tipo_agresion.filter(t => t !== value) };
@@ -131,6 +137,14 @@ export default function Reporte() {
       setError("Por favor selecciona tu institución educativa.");
       return;
     }
+    const ubicacionesSeleccionadas = Array.isArray(formData.ubicacion)
+      ? formData.ubicacion
+      : (formData.ubicacion ? [formData.ubicacion] : []);
+
+    if (ubicacionesSeleccionadas.length === 0) {
+      setError("Debes seleccionar al menos un lugar donde ocurrió la situación.");
+      return;
+    }
     if (!formData.descripcion || formData.descripcion.length < 10) {
       setError("La descripción debe tener al menos 10 caracteres.");
       return;
@@ -175,7 +189,7 @@ export default function Reporte() {
 
       const payload = {
         institucion: institucionId,
-        ubicacion: formData.ubicacion,
+        ubicacion: ubicacionesSeleccionadas.join(", "),
         frecuencia: formData.frecuencia,
         grado_victima: formData.grado,
         involucrados_tipo: formData.rol_reportante,
@@ -448,14 +462,43 @@ export default function Reporte() {
               <span className="w-7 h-7 rounded-full bg-[#DCEAF7] text-[#1B5E9E] font-bold text-xs flex items-center justify-center shrink-0">D</span>
               <h2 className="text-lg font-bold text-slate-800">Ubicación</h2>
             </div>
-            <p className="text-sm text-slate-600">¿Dónde ocurrió la situación?</p>
+            <p className="text-sm text-slate-600">
+              ¿Dónde ocurrió la situación? <span className="text-xs text-slate-500 font-medium">(Puedes marcar varias opciones)</span>
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {['Salón de clases', 'Pasillos o escaleras', 'Baños', 'Descanso / zonas deportivas', 'Salida del colegio', 'Internet / Redes sociales', 'Otro'].map((lugar) => (
-                <label key={lugar} className={`flex items-center gap-3 cursor-pointer p-3.5 border rounded-2xl transition-all ${formData.ubicacion === lugar ? 'border-[#2C5F57] bg-emerald-50/40 ring-1 ring-[#2C5F57]' : 'border-slate-200 hover:bg-slate-50'}`}>
-                  <input type="radio" name="ubicacion" className="w-4 h-4 accent-[#2C5F57]" value={lugar} onChange={handleInputChange} required />
-                  <span className="text-sm font-medium text-slate-700">{lugar}</span>
-                </label>
-              ))}
+              {[
+                'Salón de clases',
+                'Pasillos o escaleras',
+                'Baños',
+                'Descanso / zonas deportivas',
+                'Salida del colegio',
+                'Internet / Redes sociales',
+                'Otro'
+              ].map((lugar) => {
+                const isSelected = Array.isArray(formData.ubicacion)
+                  ? formData.ubicacion.includes(lugar)
+                  : formData.ubicacion === lugar;
+                return (
+                  <label
+                    key={lugar}
+                    className={`flex items-center gap-3 cursor-pointer p-3.5 border rounded-2xl transition-all ${
+                      isSelected
+                        ? 'border-[#2C5F57] bg-emerald-50/40 ring-1 ring-[#2C5F57]'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      name="ubicacion"
+                      className="w-4 h-4 accent-[#2C5F57] rounded cursor-pointer"
+                      value={lugar}
+                      checked={isSelected}
+                      onChange={handleInputChange}
+                    />
+                    <span className="text-sm font-medium text-slate-700">{lugar}</span>
+                  </label>
+                );
+              })}
             </div>
           </section>
 

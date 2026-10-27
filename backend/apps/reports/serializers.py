@@ -111,6 +111,14 @@ class CrearReporteSerializer(serializers.ModelSerializer):
     rol_reportante = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     fecha_aproximada = serializers.DateField(required=False, allow_null=True)
 
+    def to_internal_value(self, data):
+        data = data.copy() if hasattr(data, "copy") else dict(data)
+        if "ubicaciones" in data and not data.get("ubicacion"):
+            data["ubicacion"] = data["ubicaciones"]
+        if "ubicacion" in data and isinstance(data["ubicacion"], list):
+            data["ubicacion"] = ", ".join(str(u).strip() for u in data["ubicacion"] if str(u).strip())
+        return super().to_internal_value(data)
+
     class Meta:
         model = Reporte
         fields: list[str] = [

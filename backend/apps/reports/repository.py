@@ -326,12 +326,19 @@ class ReporteRepositoryProxy:
             .order_by("mes")
         }
 
+        by_location = {}
+        for fila in qs.values("ubicacion").annotate(total=Count("id")):
+            raw = fila["ubicacion"] or "SIN_DATO"
+            partes = [p.strip() for p in raw.split(",") if p.strip()] if "," in raw else [raw]
+            for p in partes:
+                by_location[p] = by_location.get(p, 0) + fila["total"]
+
         return {
             "total_reports": qs.count(),
             "by_status": self._conteo(qs, "estado"),
             "by_risk_level": self._conteo(qs, "nivel_riesgo_predicho"),
             "by_type": por_tipo,
-            "by_location": self._conteo(qs, "ubicacion"),
+            "by_location": by_location,
             "by_frequency": self._conteo(qs, "frecuencia"),
             "by_grade": self._conteo(qs, "grado_victima"),
             "by_month": por_mes,
@@ -348,9 +355,11 @@ class ReporteRepositoryProxy:
         )
         zonas: dict = {}
         for fila in filas:
-            zona = fila["ubicacion"] or "SIN_DATO"
-            datos = zonas.setdefault(zona, {"zone": zona, "count": 0, "by_risk_level": {}})
-            datos["count"] += fila["total"]
-            nivel = fila["nivel_riesgo_predicho"] or "SIN_DATO"
-            datos["by_risk_level"][nivel] = fila["total"]
+            raw_zona = fila["ubicacion"] or "SIN_DATO"
+            partes = [p.strip() for p in raw_zona.split(",") if p.strip()] if "," in raw_zona else [raw_zona]
+            for zona in partes:
+                datos = zonas.setdefault(zona, {"zone": zona, "count": 0, "by_risk_level": {}})
+                datos["count"] += fila["total"]
+                nivel = fila["nivel_riesgo_predicho"] or "SIN_DATO"
+                datos["by_risk_level"][nivel] = datos["by_risk_level"].get(nivel, 0) + fila["total"]
         return sorted(zonas.values(), key=lambda z: z["count"], reverse=True)
