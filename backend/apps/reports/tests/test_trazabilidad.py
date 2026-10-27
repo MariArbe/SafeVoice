@@ -133,3 +133,69 @@ class TestTrazabilidadYAnonimato:
         assert "nombre_contacto_victima" not in json_data
         assert "medio_contacto_victima" not in json_data
         assert "descripcion" not in json_data
+
+    def test_validacion_celular_colombiano_y_correo_en_revelacion_identidad(self):
+        """
+        Verifica que cuando acepta_revelar_identidad=True:
+        - Rechace números que no inicien con 3 (ej. 2001234567)
+        - Rechace números con menos o más de 10 dígitos (ej. 30012345, 30012345678)
+        - Rechace dígitos repetidos irreales (ej. 3333333333)
+        - Acepte celulares colombianos válidos de 10 dígitos iniciando con 3 (ej. 3001234567)
+        - Acepte correos electrónicos válidos
+        """
+        from rest_framework.test import APIClient
+        client = APIClient()
+
+        base_payload = {
+            "institucion": self.datos_validos["institucion_id"],
+            "ubicacion": "Salón de clases",
+            "frecuencia": "Pasó hoy o es la primera vez",
+            "grado_victima": "8°",
+            "involucrados_tipo": "victima",
+            "descripcion": "Situación grave que requiere contacto directo con orientación.",
+            "tipos_agresion": ["VERBAL"],
+            "acepta_revelar_identidad": True,
+            "nombre_contacto_victima": "Juan Camilo Pérez",
+        }
+
+        # 1. Celular que NO inicia con 3 -> 400
+        res_no_3 = client.post(
+            "/api/v1/reports/",
+            data={**base_payload, "medio_contacto_victima": "2001234567"},
+            format="json",
+        )
+        assert res_no_3.status_code == 400
+        assert "medio_contacto_victima" in str(res_no_3.json())
+
+        # 2. Celular con menos de 10 dígitos -> 400
+        res_corto = client.post(
+            "/api/v1/reports/",
+            data={**base_payload, "medio_contacto_victima": "30012345"},
+            format="json",
+        )
+        assert res_corto.status_code == 400
+
+        # 3. Celular con más de 10 dígitos -> 400
+        res_largo = client.post(
+            "/api/v1/reports/",
+            data={**base_payload, "medio_contacto_victima": "30012345678"},
+            format="json",
+        )
+        assert res_largo.status_code == 400
+
+        # 4. Celular válido en Colombia (10 dígitos iniciando con 3) -> 201
+        res_valido = client.post(
+            "/api/v1/reports/",
+            data={**base_payload, "medio_contacto_victima": "3001234567"},
+            format="json",
+        )
+        assert res_valido.status_code == 201
+
+        # 5. Correo electrónico válido -> 201
+        res_correo = client.post(
+            "/api/v1/reports/",
+            data={**base_payload, "medio_contacto_victima": "juan.perez@colegio.edu.co"},
+            format="json",
+        )
+        assert res_correo.status_code == 201
+

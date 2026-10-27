@@ -9,6 +9,7 @@ import institucionService from "../../services/institucionService";
 export default function Reporte() {
   const navigate = useNavigate();
   const [aceptaRevelar, setAceptaRevelar] = useState(false);
+  const [tipoContacto, setTipoContacto] = useState("celular"); // "celular" | "correo"
   
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -88,6 +89,10 @@ export default function Reporte() {
         if (checked) return { ...prev, tipo_agresion: [...prev.tipo_agresion, value] };
         return { ...prev, tipo_agresion: prev.tipo_agresion.filter(t => t !== value) };
       });
+    } else if (name === "medio_contacto_victima" && tipoContacto === "celular") {
+      // Filtrar estrictamente dígitos numéricos y limitar a 10 caracteres
+      const soloDigitos = value.replace(/\D/g, "").slice(0, 10);
+      setFormData(prev => ({ ...prev, medio_contacto_victima: soloDigitos }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -154,6 +159,35 @@ export default function Reporte() {
       return;
     }
 
+    // Validación estricta de datos de contacto si el estudiante acepta revelar su identidad
+    if (aceptaRevelar) {
+      const nombreLimpio = (formData.nombre_contacto_victima || "").trim();
+      const medioLimpio = (formData.medio_contacto_victima || "").trim();
+
+      if (nombreLimpio.length < 3) {
+        setError("Si aceptas revelar tu identidad, debes escribir tu nombre completo (mínimo 3 caracteres).");
+        return;
+      }
+
+      if (tipoContacto === "celular") {
+        const soloDigitos = medioLimpio.replace(/\D/g, "");
+        if (!/^3\d{9}$/.test(soloDigitos)) {
+          setError("En Colombia el número de celular debe iniciar con 3 y tener exactamente 10 dígitos (ej. 3001234567).");
+          return;
+        }
+        if (new Set(soloDigitos.slice(1)).size === 1) {
+          setError("Por favor ingresa un número de celular real y válido.");
+          return;
+        }
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        if (!emailRegex.test(medioLimpio)) {
+          setError("Por favor ingresa un correo electrónico válido (ej. estudiante@colegio.edu.co).");
+          return;
+        }
+      }
+    }
+
     setLoading(true);
     try {
       let evidenciaUrl = null;
@@ -213,6 +247,13 @@ export default function Reporte() {
         const data = err.response.data;
         if (typeof data === "string") {
           setError(data);
+        } else if (data.error?.details && typeof data.error.details === "object") {
+          const mensajes = Object.values(data.error.details)
+            .map((errs) => (Array.isArray(errs) ? errs.join(", ") : errs))
+            .join(" | ");
+          setError(mensajes || data.error.message || "Verifica los datos ingresados.");
+        } else if (data.error?.message) {
+          setError(data.error.message);
         } else if (data.detail) {
           setError(data.detail);
         } else if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
@@ -692,21 +733,120 @@ export default function Reporte() {
             </div>
 
             {aceptaRevelar && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-200/60">
-                <Campo 
-                  label="Nombre completo" 
-                  placeholder="Ej. Juan Pérez" 
-                  name="nombre_contacto_victima"
-                  value={formData.nombre_contacto_victima}
-                  onChange={handleInputChange}
-                />
-                <Campo 
-                  label="Medio de contacto" 
-                  placeholder="Correo o número de celular" 
-                  name="medio_contacto_victima"
-                  value={formData.medio_contacto_victima}
-                  onChange={handleInputChange}
-                />
+              <div className="space-y-4 mt-4 pt-4 border-t border-slate-200/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-slate-700">
+                    ¿Por qué medio prefieres que el orientador te contacte?
+                  </span>
+                  <div className="inline-flex rounded-xl bg-white p-1 border border-slate-200 shadow-2xs self-start">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTipoContacto("celular");
+                        setFormData(prev => ({
+                          ...prev,
+                          medio_contacto_victima: (prev.medio_contacto_victima || "").replace(/\D/g, "").slice(0, 10)
+                        }));
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        tipoContacto === "celular"
+                          ? "bg-[#1B5E9E] text-white shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      📱 Celular / WhatsApp
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTipoContacto("correo");
+                        if (/^\d+$/.test(formData.medio_contacto_victima || "")) {
+                          setFormData(prev => ({ ...prev, medio_contacto_victima: "" }));
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        tipoContacto === "correo"
+                          ? "bg-[#1B5E9E] text-white shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      ✉️ Correo Electrónico
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Campo 
+                      label="Nombre completo" 
+                      placeholder="Ej. Juan Camilo Pérez" 
+                      name="nombre_contacto_victima"
+                      value={formData.nombre_contacto_victima}
+                      onChange={handleInputChange}
+                      required={aceptaRevelar}
+                    />
+                    {formData.nombre_contacto_victima.trim().length > 0 && formData.nombre_contacto_victima.trim().length < 3 && (
+                      <p className="text-[11px] text-rose-600 font-medium px-1">
+                        Ingresa al menos 3 caracteres para tu nombre.
+                      </p>
+                    )}
+                  </div>
+
+                  {tipoContacto === "celular" ? (
+                    <div className="space-y-1">
+                      <Campo 
+                        label="Número de celular (Colombia)" 
+                        placeholder="Ej. 3001234567 (10 dígitos)" 
+                        name="medio_contacto_victima"
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        value={formData.medio_contacto_victima}
+                        onChange={handleInputChange}
+                        required={aceptaRevelar}
+                      />
+                      <div className="flex items-center justify-between text-[11px] px-1">
+                        {!formData.medio_contacto_victima ? (
+                          <span className="text-slate-500">Debe iniciar con 3 y tener 10 dígitos.</span>
+                        ) : !formData.medio_contacto_victima.startsWith("3") ? (
+                          <span className="text-rose-600 font-semibold">En Colombia el celular debe iniciar con 3.</span>
+                        ) : formData.medio_contacto_victima.length < 10 ? (
+                          <span className="text-amber-700 font-medium">
+                            Faltan {10 - formData.medio_contacto_victima.length} dígito(s) para completar los 10.
+                          </span>
+                        ) : new Set(formData.medio_contacto_victima.slice(1)).size === 1 ? (
+                          <span className="text-rose-600 font-semibold">Ingresa un número de celular real.</span>
+                        ) : (
+                          <span className="text-emerald-700 font-semibold">✓ Celular colombiano válido</span>
+                        )}
+                        <span className="font-mono text-slate-400">
+                          {formData.medio_contacto_victima.length}/10
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <Campo 
+                        label="Correo electrónico" 
+                        placeholder="Ej. estudiante@colegio.edu.co" 
+                        name="medio_contacto_victima"
+                        type="email"
+                        value={formData.medio_contacto_victima}
+                        onChange={handleInputChange}
+                        required={aceptaRevelar}
+                      />
+                      <div className="text-[11px] px-1">
+                        {!formData.medio_contacto_victima ? (
+                          <span className="text-slate-500">Ingresa un correo activo donde podamos escribirte.</span>
+                        ) : /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.medio_contacto_victima.trim()) ? (
+                          <span className="text-emerald-700 font-semibold">✓ Formato de correo válido</span>
+                        ) : (
+                          <span className="text-amber-700 font-medium">Escribe un correo válido (ej. nombre@correo.com).</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </section>

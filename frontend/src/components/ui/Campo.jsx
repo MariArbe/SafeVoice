@@ -9,6 +9,7 @@ export default function Campo({
   required = false,
   isTextArea = false,
   rows = 4,
+  ...rest
 }) {
   const inputStyles =
     "w-full rounded-lg border border-slate-300 px-3.5 py-2 text-sm text-slate-900 shadow-xs focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 placeholder:text-slate-400";
@@ -31,6 +32,7 @@ export default function Campo({
           placeholder={placeholder}
           required={required}
           className={inputStyles}
+          {...rest}
         />
       ) : (
         <input
@@ -42,6 +44,7 @@ export default function Campo({
           placeholder={placeholder}
           required={required}
           className={inputStyles}
+          {...rest}
         />
       )}
 

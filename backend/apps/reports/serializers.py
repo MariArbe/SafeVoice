@@ -6,6 +6,7 @@ El ReporteRepositoryProxy actúa como segunda capa (lista blanca en BD).
 Ambas capas son independientes para garantizar anonimato en profundidad.
 """
 
+import re
 from datetime import date
 
 from rest_framework import serializers
@@ -291,6 +292,60 @@ class CrearReporteSerializer(serializers.ModelSerializer):
             "rol_reportante",
             "fecha_aproximada",
         ]
+
+    def validate(self, attrs: dict) -> dict:
+        """
+        Valida los datos de contacto cuando el estudiante acepta revelar su identidad:
+        - Nombre de contacto obligatorio (mínimo 3 caracteres).
+        - Medio de contacto obligatorio:
+          * Si es número de celular colombiano: debe iniciar con '3' y tener exactamente 10 dígitos numéricos.
+          * Si es correo electrónico: debe tener formato válido (usuario@dominio.tld).
+        """
+        if attrs.get("acepta_revelar_identidad"):
+            nombre = (attrs.get("nombre_contacto_victima") or "").strip()
+            medio = (attrs.get("medio_contacto_victima") or "").strip()
+
+            errores = {}
+            if not nombre or len(nombre) < 3:
+                errores["nombre_contacto_victima"] = (
+                    "Si aceptas revelar tu identidad, debes ingresar tu nombre (mínimo 3 caracteres)."
+                )
+
+            if not medio:
+                errores["medio_contacto_victima"] = (
+                    "Si aceptas revelar tu identidad, debes ingresar un número de celular colombiano (10 dígitos iniciando con 3) o un correo electrónico válido."
+                )
+            elif "@" in medio:
+                # Validar formato de correo electrónico
+                patron_email = r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$"
+                if not re.match(patron_email, medio):
+                    errores["medio_contacto_victima"] = (
+                        "Por favor ingresa un correo electrónico válido (ejemplo: estudiante@colegio.edu.co)."
+                    )
+            else:
+                # Limpiar espacios o guiones eventuales y validar celular colombiano:
+                # Inicia con 3 y tiene exactamente 10 dígitos numéricos.
+                solo_digitos = re.sub(r"[\s\-()]", "", medio)
+                if solo_digitos.startswith("+57"):
+                    solo_digitos = solo_digitos[3:]
+                if not re.match(r"^3\d{9}$", solo_digitos):
+                    errores["medio_contacto_victima"] = (
+                        "En Colombia el número de celular debe iniciar con 3 y tener exactamente 10 dígitos numéricos (ej. 3001234567)."
+                    )
+                elif len(set(solo_digitos[1:])) == 1:
+                    errores["medio_contacto_victima"] = (
+                        "Por favor ingresa un número de celular real y válido."
+                    )
+                else:
+                    attrs["medio_contacto_victima"] = solo_digitos
+
+            if nombre and "nombre_contacto_victima" not in errores:
+                attrs["nombre_contacto_victima"] = nombre
+
+            if errores:
+                raise serializers.ValidationError(errores)
+
+        return attrs
 
     def create(self, validated_data: dict) -> Reporte:
         """
