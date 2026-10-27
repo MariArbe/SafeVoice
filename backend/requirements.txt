@@ -1,0 +1,3 @@
+# SafeVoice — Dependencias para entorno de desarrollo y ejecución del proyecto
+# Referencia directa al perfil local (que incluye base.txt y herramientas de desarrollo)
+-r requirements/local.txt
