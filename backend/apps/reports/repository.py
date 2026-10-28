@@ -31,7 +31,7 @@ import uuid
 
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
-from django.db.models import Count, Q
+from django.db.models import Case, Count, IntegerField, Q, Value, When
 from django.db.models.functions import TruncMonth
 
 from .exceptions import ReporteCampoNoPermitidoError, ReporteNoEncontradoError
@@ -249,11 +249,41 @@ class ReporteRepositoryProxy:
 
     def listar_todos(self, filtros: dict = None):
         """
-        Retorna todos los reportes ordenados por fecha de creación descendente,
+        Retorna todos los reportes priorizando los casos CRÍTICOS al principio
+        (Ley 1620 - Situación Tipo III) y luego por fecha de creación descendente,
         aplicando filtros si existen.
         Solo accesible por usuarios autenticados (Directivo/Orientador).
         """
-        qs = Reporte.objects.prefetch_related("tipos_agresion").order_by("-fecha_creacion")
+        cond_critico = Q(nivel_riesgo_confirmado="CRITICO") | (
+            (Q(nivel_riesgo_confirmado__isnull=True) | Q(nivel_riesgo_confirmado=""))
+            & Q(nivel_riesgo_predicho="CRITICO")
+        )
+        cond_alto = Q(nivel_riesgo_confirmado="ALTO") | (
+            (Q(nivel_riesgo_confirmado__isnull=True) | Q(nivel_riesgo_confirmado=""))
+            & Q(nivel_riesgo_predicho="ALTO")
+        )
+        cond_medio = Q(nivel_riesgo_confirmado="MEDIO") | (
+            (Q(nivel_riesgo_confirmado__isnull=True) | Q(nivel_riesgo_confirmado=""))
+            & Q(nivel_riesgo_predicho="MEDIO")
+        )
+
+        prioridad_riesgo = Case(
+            When(cond_critico & ~Q(estado="cerrado"), then=Value(1)),
+            When(cond_critico & Q(estado="cerrado"), then=Value(2)),
+            When(cond_alto & ~Q(estado="cerrado"), then=Value(3)),
+            When(cond_alto & Q(estado="cerrado"), then=Value(4)),
+            When(cond_medio & ~Q(estado="cerrado"), then=Value(5)),
+            When(cond_medio & Q(estado="cerrado"), then=Value(6)),
+            When(~Q(estado="cerrado"), then=Value(7)),
+            default=Value(8),
+            output_field=IntegerField(),
+        )
+
+        qs = (
+            Reporte.objects.prefetch_related("tipos_agresion")
+            .annotate(prioridad_riesgo=prioridad_riesgo)
+            .order_by("prioridad_riesgo", "-fecha_creacion")
+        )
 
         if filtros:
             if "institucion_id" in filtros:

@@ -259,25 +259,78 @@ export default function BandejaReportesDocente() {
       });
     }
 
-    if (!busqueda.trim()) return resultado;
-    const q = busqueda.trim().toLowerCase();
-    return resultado.filter((item) => {
-      const cod = String(item.codigo_seguimiento || "").toLowerCase();
-      const desc = String(item.descripcion || "").toLowerCase();
-      const ubi = String(item.ubicacion || "").toLowerCase();
-      const nom = String(item.nombre_contacto_victima || "").toLowerCase();
-      const medio = String(item.medio_contacto_victima || "").toLowerCase();
-      const grado = String(item.grado_victima || "").toLowerCase();
-      return (
-        cod.includes(q) ||
-        desc.includes(q) ||
-        ubi.includes(q) ||
-        nom.includes(q) ||
-        medio.includes(q) ||
-        grado.includes(q)
-      );
+    if (busqueda.trim()) {
+      const q = busqueda.trim().toLowerCase();
+      resultado = resultado.filter((item) => {
+        const cod = String(item.codigo_seguimiento || "").toLowerCase();
+        const desc = String(item.descripcion || "").toLowerCase();
+        const ubi = String(item.ubicacion || "").toLowerCase();
+        const nom = String(item.nombre_contacto_victima || "").toLowerCase();
+        const medio = String(item.medio_contacto_victima || "").toLowerCase();
+        const grado = String(item.grado_victima || "").toLowerCase();
+        return (
+          cod.includes(q) ||
+          desc.includes(q) ||
+          ubi.includes(q) ||
+          nom.includes(q) ||
+          medio.includes(q) ||
+          grado.includes(q)
+        );
+      });
+    }
+
+    // Priorizar casos CRÍTICOS arriba de primeras para atención inmediata del docente
+    return [...resultado].sort((a, b) => {
+      const calcularPeso = (item) => {
+        const riesgo = (
+          item.nivel_riesgo_confirmado ||
+          item.nivel_riesgo_predicho ||
+          "MEDIO"
+        ).toUpperCase();
+        const cerrado = normalizarEstado(item.estado) === "cerrado";
+
+        // 1: Crítico activo (no cerrado) -> Máxima urgencia arriba
+        if (riesgo === "CRITICO" && !cerrado) return 100;
+        // 2: Crítico cerrado
+        if (riesgo === "CRITICO") return 90;
+        // 3: Alto activo
+        if (riesgo === "ALTO" && !cerrado) return 70;
+        // 4: Alto cerrado
+        if (riesgo === "ALTO") return 60;
+        // 5: Medio activo
+        if (riesgo === "MEDIO" && !cerrado) return 40;
+        // 6: Medio cerrado
+        if (riesgo === "MEDIO") return 30;
+        // 7: Bajo activo
+        if (!cerrado) return 20;
+        // 8: Bajo cerrado
+        return 10;
+      };
+
+      const pesoA = calcularPeso(a);
+      const pesoB = calcularPeso(b);
+
+      if (pesoA !== pesoB) {
+        return pesoB - pesoA;
+      }
+
+      const fechaA = new Date(a.fecha_creacion || 0).getTime();
+      const fechaB = new Date(b.fecha_creacion || 0).getTime();
+      return fechaB - fechaA;
     });
   }, [reportes, busqueda, filtroSemaforo]);
+
+  // Conteo de casos críticos activos para banner de atención prioritaria
+  const casosCriticosActivos = useMemo(() => {
+    return reportes.filter((r) => {
+      const riesgo = (
+        r.nivel_riesgo_confirmado ||
+        r.nivel_riesgo_predicho ||
+        ""
+      ).toUpperCase();
+      return riesgo === "CRITICO" && normalizarEstado(r.estado) !== "cerrado";
+    });
+  }, [reportes]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -1060,6 +1113,30 @@ export default function BandejaReportesDocente() {
               </div>
             </div>
 
+            {/* Banner de alerta prioritaria para casos críticos (Ley 1620 - Situación Tipo III) */}
+            {casosCriticosActivos.length > 0 && (
+              <div className="bg-rose-50/90 border-2 border-rose-300 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 text-rose-950 shadow-xs animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-lg shadow-xs shrink-0 animate-pulse">
+                    🚨
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black flex items-center gap-2 text-rose-900">
+                      <span>Prioridad Máxima: {casosCriticosActivos.length} {casosCriticosActivos.length === 1 ? "caso crítico detectado" : "casos críticos detectados"}</span>
+                    </h4>
+                    <p className="text-[11px] text-rose-700 font-medium mt-0.5">
+                      Los casos críticos se posicionan arriba de primeras para garantizar la debida diligencia y el plazo obligatorio de notificación inmediata (&lt; 2 horas) conforme a la Ley 1620.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold bg-rose-600 text-white px-2.5 py-1 rounded-lg shrink-0 shadow-2xs">
+                    ⚡ Urgente
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Tabla de Registros */}
             <div className="overflow-x-auto border border-slate-100 rounded-2xl">
               <table className="w-full text-xs text-left">
@@ -1106,140 +1183,173 @@ export default function BandejaReportesDocente() {
                       </td>
                     </tr>
                   ) : (
-                    reportesFiltrados.map((item) => (
-                      <tr key={item.codigo_seguimiento} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-bold text-[#1B5E9E]">
-                          <div>{item.codigo_seguimiento}</div>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {item.evidencia_url && (
-                              <span
-                                className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-md"
-                                title="Reporte con archivo de evidencia adjunto"
-                              >
-                                📎 Evidencia
-                              </span>
-                            )}
-                            {(item.nombre_contacto_victima || item.medio_contacto_victima) && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md">
-                                👤 Con contacto
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-600">
-                          {new Date(item.fecha_creacion).toLocaleDateString("es-CO")}
-                        </td>
-                        <td className="py-3.5 px-4">
-                          {(() => {
-                            const riesgoEfectivo =
-                              item.nivel_riesgo_confirmado || item.nivel_riesgo_predicho || "MEDIO";
-                            const confirmado = !!item.nivel_riesgo_confirmado;
-                            const modificado =
-                              confirmado &&
-                              item.nivel_riesgo_confirmado !== item.nivel_riesgo_predicho;
-                            return (
-                              <div className="space-y-1">
-                                <span
-                                  className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${getColorRiesgo(
-                                    riesgoEfectivo
-                                  )}`}
-                                >
-                                  {riesgoEfectivo}
+                    reportesFiltrados.map((item) => {
+                      const riesgoEfectivo = (
+                        item.nivel_riesgo_confirmado ||
+                        item.nivel_riesgo_predicho ||
+                        "MEDIO"
+                      ).toUpperCase();
+                      const confirmado = !!item.nivel_riesgo_confirmado;
+                      const modificado =
+                        confirmado &&
+                        item.nivel_riesgo_confirmado !== item.nivel_riesgo_predicho;
+                      const cerrado = normalizarEstado(item.estado) === "cerrado";
+                      const esCritico = riesgoEfectivo === "CRITICO";
+                      const esCriticoActivo = esCritico && !cerrado;
+
+                      return (
+                        <tr
+                          key={item.codigo_seguimiento}
+                          className={`transition-colors ${
+                            esCriticoActivo
+                              ? "bg-rose-50/70 hover:bg-rose-100/70 border-l-4 border-l-rose-600 shadow-2xs"
+                              : esCritico
+                              ? "bg-rose-50/20 hover:bg-rose-50/50 border-l-4 border-l-rose-400"
+                              : "hover:bg-slate-50/80"
+                          }`}
+                        >
+                          <td className="py-3.5 px-4 font-mono font-bold text-[#1B5E9E]">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span>{item.codigo_seguimiento}</span>
+                              {esCriticoActivo && (
+                                <span className="inline-flex items-center gap-1 text-[9px] font-black text-rose-800 bg-rose-100 border border-rose-300 px-1.5 py-0.5 rounded-md animate-pulse">
+                                  🚨 URGENTE
                                 </span>
-                                {modificado ? (
-                                  <span
-                                    className="block text-[9px] font-bold text-[#1B5E9E]"
-                                    title={`Ajustado manualmente por docente (IA predijo: ${item.nivel_riesgo_predicho})`}
-                                  >
-                                    ✏️ Docente (IA: {item.nivel_riesgo_predicho})
-                                  </span>
-                                ) : confirmado ? (
-                                  <span
-                                    className="block text-[9px] font-bold text-emerald-700"
-                                    title="Predicción de IA confirmada por docente"
-                                  >
-                                    ✓ Confirmado
-                                  </span>
-                                ) : (
-                                  <span
-                                    className="block text-[9px] font-medium text-slate-400"
-                                    title="Predicción automática de IA pendiente de confirmar"
-                                  >
-                                    🤖 Predicho IA
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })()}
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-700">
-                          <div className="capitalize">{item.ubicacion}</div>
-                          {Array.isArray(item.tipos_agresion) && item.tipos_agresion.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {item.tipos_agresion.map((t, idx) => (
-                                <span
-                                  key={idx}
-                                  className="inline-block text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded-md"
-                                >
-                                  {typeof t === "object" ? t.nombre : t}
-                                </span>
-                              ))}
+                              )}
                             </div>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${getColorEstado(item.estado)}`}>
-                            {getNombreEstado(item.estado)}
-                          </span>
-                          {/* Mini indicador de semáforo post-cierre si el caso está cerrado */}
-                          {(() => {
-                            if (normalizarEstado(item.estado) !== "cerrado") return null;
-                            const cambios = item.historial_cambios || [];
-                            const chequeos = cambios.filter(
-                              (c) =>
-                                c.tipo_accion === "CHEQUEO_POST_CIERRE" ||
-                                c.tipo_accion === "REACTIVACION_REINCIDENCIA"
-                            );
-                            if (chequeos.length === 0) {
-                              return (
-                                <span className="block mt-1 text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-center">
-                                  ⏳ D15 Pendiente
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {item.evidencia_url && (
+                                <span
+                                  className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-md"
+                                  title="Reporte con archivo de evidencia adjunto"
+                                >
+                                  📎 Evidencia
                                 </span>
-                              );
-                            }
-                            const ultimo = chequeos[chequeos.length - 1];
-                            const sem = ultimo.metadata?.semaforo;
-                            if (sem === "ROJO") {
-                              return (
-                                <span className="block mt-1 text-[9px] font-black text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 text-center">
-                                  🔴 Reincidencia
+                              )}
+                              {(item.nombre_contacto_victima || item.medio_contacto_victima) && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md">
+                                  👤 Con contacto
                                 </span>
-                              );
-                            }
-                            if (sem === "AMARILLO") {
-                              return (
-                                <span className="block mt-1 text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-center">
-                                  🟡 Tensión D{ultimo.metadata?.hito?.replace("DIA_", "")}
-                                </span>
-                              );
-                            }
-                            return (
-                              <span className="block mt-1 text-[9px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 text-center">
-                                🟢 Estable D{ultimo.metadata?.hito?.replace("DIA_", "")}
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-600">
+                            {new Date(item.fecha_creacion).toLocaleDateString("es-CO")}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="space-y-1">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${getColorRiesgo(
+                                  riesgoEfectivo
+                                )}`}
+                              >
+                                {esCritico && <span>⚠️</span>}
+                                <span>{riesgoEfectivo}</span>
                               </span>
-                            );
-                          })()}
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <button
-                            onClick={() => handleAbrirModal(item)}
-                            className="bg-[#1B5E9E] hover:bg-blue-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-2xs transition-all cursor-pointer"
-                          >
-                            Ver / Editar Detalle
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                              {modificado ? (
+                                <span
+                                  className="block text-[9px] font-bold text-[#1B5E9E]"
+                                  title={`Ajustado manualmente por docente (IA predijo: ${item.nivel_riesgo_predicho})`}
+                                >
+                                  ✏️ Docente (IA: {item.nivel_riesgo_predicho})
+                                </span>
+                              ) : confirmado ? (
+                                <span
+                                  className="block text-[9px] font-bold text-emerald-700"
+                                  title="Predicción de IA confirmada por docente"
+                                >
+                                  ✓ Confirmado
+                                </span>
+                              ) : (
+                                <span
+                                  className="block text-[9px] font-medium text-slate-400"
+                                  title="Predicción automática de IA pendiente de confirmar"
+                                >
+                                  🤖 Predicho IA
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-700">
+                            <div className="capitalize">{item.ubicacion}</div>
+                            {Array.isArray(item.tipos_agresion) && item.tipos_agresion.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {item.tipos_agresion.map((t, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-block text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded-md"
+                                  >
+                                    {typeof t === "object" ? t.nombre : t}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${getColorEstado(item.estado)}`}>
+                              {getNombreEstado(item.estado)}
+                            </span>
+                            {/* Mini indicador de semáforo post-cierre si el caso está cerrado */}
+                            {(() => {
+                              if (normalizarEstado(item.estado) !== "cerrado") return null;
+                              const cambios = item.historial_cambios || [];
+                              const chequeos = cambios.filter(
+                                (c) =>
+                                  c.tipo_accion === "CHEQUEO_POST_CIERRE" ||
+                                  c.tipo_accion === "REACTIVACION_REINCIDENCIA"
+                              );
+                              if (chequeos.length === 0) {
+                                return (
+                                  <span className="block mt-1 text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-center">
+                                    ⏳ D15 Pendiente
+                                  </span>
+                                );
+                              }
+                              const ultimo = chequeos[chequeos.length - 1];
+                              const sem = ultimo.metadata?.semaforo;
+                              if (sem === "ROJO") {
+                                return (
+                                  <span className="block mt-1 text-[9px] font-black text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 text-center">
+                                    🔴 Reincidencia
+                                  </span>
+                                );
+                              }
+                              if (sem === "AMARILLO") {
+                                return (
+                                  <span className="block mt-1 text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-center">
+                                    🟡 Tensión D{ultimo.metadata?.hito?.replace("DIA_", "")}
+                                  </span>
+                                );
+                              }
+                              return (
+                                <span className="block mt-1 text-[9px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 text-center">
+                                  🟢 Estable D{ultimo.metadata?.hito?.replace("DIA_", "")}
+                                </span>
+                              );
+                            })()}
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              onClick={() => handleAbrirModal(item)}
+                              className={`text-[11px] px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                                esCriticoActivo
+                                  ? "bg-rose-600 hover:bg-rose-700 text-white font-black shadow-xs flex items-center justify-center gap-1.5 mx-auto"
+                                  : "bg-[#1B5E9E] hover:bg-blue-800 text-white font-bold shadow-2xs"
+                              }`}
+                            >
+                              {esCriticoActivo ? (
+                                <>
+                                  <span>🚨</span>
+                                  <span>Atender Caso Crítico</span>
+                                </>
+                              ) : (
+                                "Ver / Editar Detalle"
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

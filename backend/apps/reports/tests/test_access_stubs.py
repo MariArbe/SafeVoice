@@ -389,4 +389,20 @@ class TestConfirmarYCambiarClasificacionDocente:
         resp = cliente_orientador.patch(url, {"nivel_riesgo_confirmado": "EXTREMO"}, format="json")
         assert resp.status_code == 400
 
+    def test_prioridad_casos_criticos_al_listar(self, cliente_orientador, institucion):
+        # Crear caso bajo
+        r_bajo = _crear_reporte(institucion, ubicacion="Patio", estado="nuevo", riesgo="BAJO")
+        # Crear caso medio
+        r_medio = _crear_reporte(institucion, ubicacion="Baños", estado="nuevo", riesgo="MEDIO")
+        # Crear caso crítico
+        r_critico = _crear_reporte(institucion, ubicacion="Salón", estado="nuevo", riesgo="CRITICO")
+
+        res = cliente_orientador.get("/api/v1/reports/listar/")
+        assert res.status_code == 200
+        data = res.json()
+        results = data.get("results", data)
+        # El caso CRÍTICO debe aparecer de primeras en la lista priorizada
+        assert results[0]["codigo_seguimiento"] == str(r_critico.codigo_seguimiento)
+
+
 
