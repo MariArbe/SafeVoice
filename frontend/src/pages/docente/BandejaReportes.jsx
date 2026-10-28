@@ -16,6 +16,7 @@ import ModalActaOficial from "../../components/reportes/ModalActaOficial";
 import ModalRemisionExterna from "../../components/reportes/ModalRemisionExterna";
 import AsistenteLegalLey1620 from "../../components/reportes/AsistenteLegalLey1620";
 import ModuloSemaforoPostCierre from "../../components/reportes/ModuloSemaforoPostCierre";
+import BadgeSlaLey1620, { RelojSlaLey1620Detalle } from "../../components/reportes/BadgeSlaLey1620";
 
 const CATALOGO_TIPOS_AGRESION_UI = [
   { codigo: "VERBAL", nombre: "Agresión Verbal", icono: "🗣️", desc: "Insultos, apodos o burlas" },
@@ -1143,7 +1144,7 @@ export default function BandejaReportesDocente() {
                 <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-200 uppercase text-[10px] tracking-wider">
                   <tr>
                     <th className="py-3 px-4">Código / Ticket</th>
-                    <th className="py-3 px-4">Fecha</th>
+                    <th className="py-3 px-4">Fecha y Plazo Ley 1620</th>
                     <th className="py-3 px-4">Riesgo IA</th>
                     <th className="py-3 px-4">Ubicación</th>
                     <th className="py-3 px-4">Estado</th>
@@ -1234,7 +1235,22 @@ export default function BandejaReportesDocente() {
                             </div>
                           </td>
                           <td className="py-3.5 px-4 text-slate-600">
-                            {new Date(item.fecha_creacion).toLocaleDateString("es-CO")}
+                            <div className="font-bold text-slate-800 text-[11px] whitespace-nowrap">
+                              {new Date(item.fecha_creacion).toLocaleDateString("es-CO", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono">
+                              {new Date(item.fecha_creacion).toLocaleTimeString("es-CO", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </div>
+                            <div className="mt-1.5">
+                              <BadgeSlaLey1620 reporte={item} modo="compacto" />
+                            </div>
                           </td>
                           <td className="py-3.5 px-4">
                             <div className="space-y-1">
@@ -1442,6 +1458,9 @@ export default function BandejaReportesDocente() {
                   </div>
                 </div>
               </div>
+
+              {/* Reloj de Plazos Legales y Control de Debida Diligencia Ley 1620 */}
+              <RelojSlaLey1620Detalle reporte={reporteSeleccionado} />
 
               {/* Descripción Anónima del Estudiante */}
               <div>
@@ -1714,6 +1733,50 @@ export default function BandejaReportesDocente() {
                         {reporteSeleccionado.medio_contacto_victima || "No indicado"}
                       </p>
                     </div>
+
+                    {/* Botones de acción directa 1-clic */}
+                    {reporteSeleccionado.medio_contacto_victima && (
+                      <div className="col-span-2 pt-2 border-t border-emerald-200/60 flex flex-wrap items-center gap-2">
+                        {(() => {
+                          const digitos = (reporteSeleccionado.medio_contacto_victima || "").replace(/\D/g, "");
+                          const esCelular = /^3\d{9}$/.test(digitos) || (digitos.length === 12 && digitos.startsWith("573"));
+                          const numeroCel = digitos.slice(-10);
+                          const esEmail = (reporteSeleccionado.medio_contacto_victima || "").includes("@");
+
+                          return (
+                            <>
+                              {esCelular && (
+                                <a
+                                  href={`https://wa.me/57${numeroCel}?text=${encodeURIComponent(
+                                    `Hola ${reporteSeleccionado.nombre_contacto_victima ? reporteSeleccionado.nombre_contacto_victima.split(" ")[0] : ""}, te saludamos desde la Orientación Escolar en relación con tu reporte confidencial en SafeVoice (Caso #${reporteSeleccionado.codigo_seguimiento}). Queremos que sepas que estamos aquí para escucharte y apoyarte en un espacio seguro.`
+                                  )}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-2xs transition-all cursor-pointer"
+                                >
+                                  <span>💬</span>
+                                  <span>Contactar por WhatsApp</span>
+                                </a>
+                              )}
+
+                              {esEmail && (
+                                <a
+                                  href={`mailto:${reporteSeleccionado.medio_contacto_victima}?subject=${encodeURIComponent(
+                                    `Orientación Escolar SafeVoice - Caso #${reporteSeleccionado.codigo_seguimiento}`
+                                  )}&body=${encodeURIComponent(
+                                    `Hola ${reporteSeleccionado.nombre_contacto_victima || ""},\n\nTe escribimos desde la Orientación Escolar respecto a tu reporte confidencial registrado en SafeVoice...\n\nAtentamente,\nOrientación Escolar`
+                                  )}`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold shadow-2xs transition-all cursor-pointer"
+                                >
+                                  <span>✉️</span>
+                                  <span>Enviar Correo</span>
+                                </a>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs text-slate-500 italic">
