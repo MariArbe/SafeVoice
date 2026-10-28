@@ -1615,6 +1615,7 @@ export default function BandejaReportesDocente() {
               {/* ASISTENTE LEGAL Y PROTOCOLO LEY 1620 (CHECKLIST SEGÚN GRAVEDAD) */}
               <AsistenteLegalLey1620
                 reporte={reporteSeleccionado}
+                riesgoSeleccionado={riesgoEditable}
                 recomendaciones={recomendaciones}
                 rutaExternaInfo={rutaExternaInfo}
                 onCopiarNotas={(texto) => {

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 
 export default function AsistenteLegalLey1620({
   reporte,
+  riesgoSeleccionado = null,
   recomendaciones,
   onCopiarNotas,
   onAbrirRemisionExterna,
@@ -9,9 +10,18 @@ export default function AsistenteLegalLey1620({
 }) {
   if (!reporte) return null;
 
-  // Detección inicial automática según nivel de riesgo
-  const tipoInicial = useMemo(() => {
+  // Tipo sugerido originalmente por el modelo de IA (inmutable)
+  const tipoSugeridoIA = useMemo(() => {
+    const riesgoIA = (reporte.nivel_riesgo_predicho || "MEDIO").toUpperCase();
+    if (riesgoIA === "CRITICO") return "TIPO_III";
+    if (riesgoIA === "ALTO") return "TIPO_II";
+    return "TIPO_I";
+  }, [reporte.nivel_riesgo_predicho]);
+
+  // Detección automática en tiempo real según nivel de riesgo (editable o confirmado)
+  const tipoSegunRiesgo = useMemo(() => {
     const riesgo = (
+      riesgoSeleccionado ||
       reporte.nivel_riesgo_confirmado ||
       reporte.nivel_riesgo_predicho ||
       "MEDIO"
@@ -19,16 +29,16 @@ export default function AsistenteLegalLey1620({
     if (riesgo === "CRITICO") return "TIPO_III";
     if (riesgo === "ALTO") return "TIPO_II";
     return "TIPO_I";
-  }, [reporte.nivel_riesgo_confirmado, reporte.nivel_riesgo_predicho]);
+  }, [riesgoSeleccionado, reporte.nivel_riesgo_confirmado, reporte.nivel_riesgo_predicho]);
 
-  const [tipoSeleccionado, setTipoSeleccionado] = useState(tipoInicial);
+  const [tipoSeleccionado, setTipoSeleccionado] = useState(tipoSegunRiesgo);
   const [checklist, setChecklist] = useState({});
   const [copiadoFeedback, setCopiadoFeedback] = useState(false);
 
-  // Sincronizar automáticamente la pestaña del protocolo cuando el docente cambia el nivel de riesgo
+  // Sincronizar automáticamente la pestaña del protocolo cuando el docente cambia el nivel de riesgo en vivo
   useEffect(() => {
-    setTipoSeleccionado(tipoInicial);
-  }, [tipoInicial]);
+    setTipoSeleccionado(tipoSegunRiesgo);
+  }, [tipoSegunRiesgo]);
 
   // Catálogo normativo de la Ley 1620 de 2013 y Decreto 1965 de 2013
   const CONFIG_TIPOS = {
@@ -288,17 +298,32 @@ export default function AsistenteLegalLey1620({
             </div>
           </div>
 
-          {/* Badge del tipo sugerido por el modelo */}
-          <span className="text-[10px] font-bold bg-white/20 px-2.5 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1.5">
-            <span>Sugerido por IA:</span>
-            <span className="font-mono font-black text-amber-300">
-              {tipoInicial === "TIPO_III"
-                ? "Tipo III"
-                : tipoInicial === "TIPO_II"
-                ? "Tipo II"
-                : "Tipo I"}
+          {/* Badges de tipología sugerida por IA y ajuste docente */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] font-bold bg-white/20 px-2.5 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1.5">
+              <span>Sugerido por IA:</span>
+              <span className="font-mono font-black text-amber-300">
+                {tipoSugeridoIA === "TIPO_III"
+                  ? "Tipo III"
+                  : tipoSugeridoIA === "TIPO_II"
+                  ? "Tipo II"
+                  : "Tipo I"}
+              </span>
             </span>
-          </span>
+
+            {tipoSegunRiesgo !== tipoSugeridoIA && (
+              <span className="text-[10px] font-bold bg-white/15 text-blue-200 border border-white/20 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                <span>✏️ Docente:</span>
+                <span className="font-mono font-black text-white">
+                  {tipoSegunRiesgo === "TIPO_III"
+                    ? "Tipo III"
+                    : tipoSegunRiesgo === "TIPO_II"
+                    ? "Tipo II"
+                    : "Tipo I"}
+                </span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Selector Conmutable de Gravedad (Tipo I, II, III) */}
