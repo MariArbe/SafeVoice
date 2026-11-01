@@ -3,9 +3,9 @@
 > **Módulo:** Diseño de Arquitectura, Patrones de Seguridad y Protección de Datos  
 > **Normativa de Referencia:** Ley 1581 de 2012 (Habeas Data) y Código de la Infancia y la Adolescencia (Ley 1098 de 2006)  
 > **Archivos Clave:**  
-> • [`backend/apps/reports/repository.py`](file:///c:/Users/danie/.gemini/antigravity/scratch/SafeVoice/backend/apps/reports/repository.py)  
-> • [`backend/apps/reports/services.py`](file:///c:/Users/danie/.gemini/antigravity/scratch/SafeVoice/backend/apps/reports/services.py)  
-> • [`backend/apps/reports/views.py`](file:///c:/Users/danie/.gemini/antigravity/scratch/SafeVoice/backend/apps/reports/views.py)  
+> • [`backend/apps/reports/repository.py`](../../backend/apps/reports/repository.py)  
+> • [`backend/apps/reports/services.py`](../../backend/apps/reports/services.py)  
+> • [`backend/apps/reports/views.py`](../../backend/apps/reports/views.py)  
 
 ---
 

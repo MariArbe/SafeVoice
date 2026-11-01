@@ -3,7 +3,7 @@
 > **Módulo:** Clasificación Automatizada del Nivel de Riesgo en Convivencia Escolar  
 > **Historia de Usuario:** [HU-12 (Clasificación de Riesgo)](../Analysis/Historias_de_Usuario_SafeVoice.md#4-inteligencia-artificial-y-soporte-normativo) y [HU-16 (Human-in-the-Loop)](../Analysis/Historias_de_Usuario_SafeVoice.md#4-inteligencia-artificial-y-soporte-normativo)  
 > **Artefacto Binario:** `model/clasificador_riesgo.joblib`  
-> **Servicio Backend:** [`backend/apps/reports/ml_service.py`](file:///c:/Users/danie/.gemini/antigravity/scratch/SafeVoice/backend/apps/reports/ml_service.py)  
+> **Servicio Backend:** [`backend/apps/reports/ml_service.py`](../../backend/apps/reports/ml_service.py)  
 
 ---
 
@@ -73,7 +73,7 @@ En lugar de arriesgar la inferencia a un único estimador, el sistema combina tr
 
 ## 4. Capa Determinista de Emergencia (*Fail-Safe*)
 
-En convivencia escolar, el costo ético y legal de un falso negativo en situaciones con riesgo de muerte o armas es inadmisible. Por este motivo, el servicio [`backend/apps/reports/ml_service.py`](file:///c:/Users/danie/.gemini/antigravity/scratch/SafeVoice/backend/apps/reports/ml_service.py) ejecuta una revisión determinista en memoria antes de invocar el pipeline:
+En convivencia escolar, el costo ético y legal de un falso negativo en situaciones con riesgo de muerte o armas es inadmisible. Por este motivo, el servicio [`backend/apps/reports/ml_service.py`](../../backend/apps/reports/ml_service.py) ejecuta una revisión determinista en memoria antes de invocar el pipeline:
 
 * **Palabras y Expresiones Gatillo:** `navaja`, `cuchillo`, `pistola`, `arma`, `matar`, `te voy a matar`, `me va a matar`, `suicid`, `viol`, `abuso`, `sangre`, `apuñal`, `estrangular`, `asfixiar`, `herida grave`, `inconsciente`, `hospital`, `urgencias`, `emergencia`.
 * **Comportamiento:** Si alguna de estas expresiones se detecta en la descripción, se omite el clasificador estadístico y se retorna de inmediato **`CRITICO`**.

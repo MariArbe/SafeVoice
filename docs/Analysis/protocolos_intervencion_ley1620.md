@@ -163,4 +163,4 @@ Los protocolos descritos en este documento no son solo una guía estática, sino
 2. **Generación Dinámica:**  
    La función `generar_recomendaciones_reporte()` evalúa en tiempo real el nivel de riesgo predicho por el modelo Random Forest o confirmado por el orientador, combinándolo con las palabras clave y categorías del caso.
 3. **Panel Interactivo en Frontend:**  
-   En la pantalla de gestión del caso ([`BandejaReportes.jsx`](file:///c:/Users/danie/.gemini/antigravity/scratch/SafeVoice/frontend/src/pages/docente/BandejaReportes.jsx)), el orientador dispone del botón **"📋 Copiar a notas"**, permitiendo trasladar las acciones sugeridas directamente a la bitácora oficial de seguimiento con un solo clic.
+   En la pantalla de gestión del caso ([`BandejaReportes.jsx`](../../frontend/src/pages/docente/BandejaReportes.jsx)), el orientador dispone del botón **"📋 Copiar a notas"**, permitiendo trasladar las acciones sugeridas directamente a la bitácora oficial de seguimiento con un solo clic.

@@ -12,9 +12,9 @@ El sistema fortalece los procesos de prevención, detección temprana e interven
 
 | Nombre | Rol Principal | GitHub |
 | :--- | :--- | :--- |
-| **Mariana Arbelaez** | Análisis y Requisitos | [@MariArbe](#) |
-| **Esteban Álvarez**  | Frontend e Interfaz UI | [@EstebanchoAV](#) |
-| **Daniel Lopez**     | Backend, IA y Arquitectura Cloud | [@dani1309](#) |
+| **Mariana Arbeláez** | Frontend, Diseño UI/UX y Requisitos | [@MariArbe](https://github.com/MariArbe) |
+| **Esteban Álvarez**  | Backend, Estructura Base y Gestión de Casos | [@EstebanchoAV](https://github.com/EstebanchoAV) |
+| **Daniel López**     | IA, Backend Full-Stack y Arquitectura Cloud | [@dani1309](https://github.com/dani1309) |
 
 ---
 
@@ -22,8 +22,8 @@ El sistema fortalece los procesos de prevención, detección temprana e interven
 
 | Capa | Tecnologías |
 | :--- | :--- |
-| **Frontend** | React 18, Vite, Tailwind CSS, Lucide React, Axios |
-| **Backend** | Python 3.12+, Django 5.x, Django REST Framework, SimpleJWT, Cryptography (Fernet) |
+| **Frontend** | React 19, Vite, Tailwind CSS v4, React Router v7, Recharts, Axios |
+| **Backend** | Python 3.12+, Django 4.2 LTS, Django REST Framework, SimpleJWT, Cryptography (Fernet) |
 | **Inteligencia Artificial** | Scikit-Learn (TF-IDF + Soft Voting Ensemble: Random Forest, Logistic Regression, SGDClassifier), Joblib, Pandas |
 | **Bases de Datos** | **Microsoft SQL Server** (Producción en la nube) / **SQLite** (Pruebas automatizadas en memoria) |
 | **Infraestructura Cloud** | Oracle Cloud Infrastructure (Ubuntu Linux 24.04 LTS, servicios `systemd`, IP `157.137.205.82`) |
@@ -136,7 +136,7 @@ python model/train.py
 
 ## 🧪 Ejecución de Pruebas Automatizadas
 
-El proyecto cuenta con una batería completa de más de **128 pruebas unitarias y de integración** continuas (cubriendo servicios de IA, anonimato con patrón proxy, cifrado Fernet, endpoints REST y autenticación):
+El proyecto cuenta con una batería completa de **130 pruebas unitarias y de integración (100% passing)** continuas (cubriendo servicios de IA, anonimato con patrón proxy, cifrado Fernet, endpoints REST y autenticación):
 
 ```bash
 cd backend

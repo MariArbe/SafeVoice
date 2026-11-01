@@ -149,4 +149,4 @@ El estudiante puede ingresar a la plataforma pública en cualquier momento, digi
 ## 5. Esquema de Persistencia Relacionado (SQL Server)
 
 Para la especificación detallada de tablas, índices, llaves foráneas y scripts DDL en Microsoft SQL Server, consultar el documento oficial de arquitectura de datos en:
-👉 [docs/design/database.md](file:///c:/Users/danie/.gemini/antigravity/scratch/SafeVoice/docs/design/database.md).
+👉 [docs/design/database.md](../design/database.md).

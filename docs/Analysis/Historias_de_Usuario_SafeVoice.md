@@ -84,7 +84,7 @@ Debe tener:
 Como orientador escolar, quiero actualizar el estado de un reporte, para mantener actualizada la información sobre su proceso de atención.
 Debe tener: 
 - Endpoint PATCH /api/v1/reports/:id/estado/
-  Requerimientos: Validar transiciones de estado permitidas (`nuevo` -> `en_proceso` -> `atendido` -> `cerrado` -> `reabierto`); registrar obligatoriamente nota de seguimiento y usuario responsable.
+  Requerimientos: Validar transiciones de estado permitidas (`nuevo` -> `en_revision` -> `en_seguimiento` -> `cerrado`); registrar obligatoriamente nota de seguimiento y usuario responsable.
 - Definición formal de estados y ciclo de vida
   Requerimientos: Documentar estados y reglas de negocio para transiciones válidas.
 - Historial de cambios de estado (Auditoría JSON)
@@ -136,7 +136,7 @@ Debe tener:
 - Definición de niveles de riesgo (Bajo, Medio, Alto, Crítico)
   Requerimientos: Rúbrica con criterios pedagógicos y legales según Decreto 1965/2013.
 - Pipeline de Machine Learning (TF-IDF + Random Forest)
-  Requerimientos: Vectorización de texto con TF-IDF sobre el corpus en español, clasificador Random Forest optimizado serializado en formato `.pkl`.
+  Requerimientos: Vectorización de texto con TF-IDF sobre el corpus en español, clasificador Random Forest optimizado e integrado en ensamble VotingClassifier serializado en formato `.joblib` (`model/clasificador_riesgo.joblib`).
 - Sistema Híbrido con Reglas Críticas Deterministas
   Requerimientos: Inferencia en `ml_service.py` que combina la probabilidad estadística del modelo con palabras clave deterministas de alto riesgo (armas, muerte, violación, suicidio) para garantizar que situaciones extremas se clasifiquen inmediatamente como `critico`.
 - Visualización del nivel de riesgo en la bandeja
@@ -191,7 +191,7 @@ Debe tener:
 - Endpoint POST /api/v1/reports/:id/chequeo-post-cierre/
   Requerimientos: Registrar hito de seguimiento (día 15, 30 o 60), estado de convivencia verificado (Favorable / Alerta / Crítico) y nota de evaluación.
 - Reactivación automática por reincidencia
-  Requerimientos: Si en un chequeo post-cierre se detecta persistencia o represalias, el sistema debe cambiar automáticamente el estado del reporte de `cerrado` a `reabierto`, alertando a la coordinación de convivencia.
+  Requerimientos: Si en un chequeo post-cierre se detecta persistencia o represalias, el sistema debe cambiar automáticamente el estado del reporte de `cerrado` a `en_seguimiento`, alertando a la coordinación de convivencia.
 - Semáforo visual en el detalle del caso
   Requerimientos: Indicadores cromáticos interactivos en el panel del orientador que muestran el estado de cumplimiento de los 3 hitos longitudinales post-cierre.
 
@@ -263,6 +263,6 @@ Debe tener:
 
 ### Cierre y Entrega
 - Integración integral Frontend-Backend
-- Suite de pruebas unitarias y de integración (128 tests passing)
+- Suite de pruebas unitarias y de integración (130 tests passing)
 - Despliegue en la nube (Oracle Cloud Ubuntu + Microsoft SQL Server)
 - Puesta en producción y documentación técnica final
